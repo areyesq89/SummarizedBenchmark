@@ -98,10 +98,6 @@ addPerformanceFunction <- function( object, evalMetric, assay, FUN ){
   if( !all( c("query", "truth") %in% formalArgs( FUN ) ) ){
     stop("All performance functions need to have both a `query` and a `truth` argument")
   }
-  vecArgs <- formalArgs(FUN)[!formalArgs(FUN) %in% c("query", "truth")]
-  if( length( vecArgs ) > 0 ){
-    FUN <- Vectorize( FUN, vectorize.args=vecArgs )
-  }
   object@performanceFunctions[[assay]][[evalMetric]] <- FUN
   validObject( object )
   object
@@ -128,8 +124,13 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, asList=FALS
   allDotArgs <- as.list( match.call( expand.dots=FALSE ) )[["..."]]
   assayData <- assays(object)[[assay]]
   assayTruth <- rowData(object)[,assay]
-  res <- lapply( allFunctions, function( f ){
-    sapply( seq_len( ncol( assayData ) ), function( i ){
+  res <- lapply( names( allFunctions ), function( nf ){
+    f <- allFunctions[[nf]]
+    vecArgs <- formalArgs( f )[ !formalArgs( f ) %in% c("query", "truth") ]
+    if( length( vecArgs ) > 0 ){
+      f <- Vectorize( f, vectorize.args=vecArgs )
+    }
+    indRes <- sapply( seq_len( ncol( assayData ) ), function( i ){
       passArgs <- list( query=assayData[,i], truth=assayTruth )
       extraArgs <- allDotArgs[names(allDotArgs) %in% formalArgs(f)]
       if( length( extraArgs ) > 0 ){
@@ -137,7 +138,15 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, asList=FALS
       }
       do.call( f, passArgs )
     } )
+#    if( length( extraArgs ) > 0 ){
+#      resNRows <- max( sapply( extraArgs, length ) )
+#    }else{
+#      resNRows <- 1
+#    }
+#    indRes <- matrix( indRes, nrow=resNRows )
+    indRes
   } )
+  names( res ) <- names( allFunctions )
   if( asList ){
     return(res)
   }else{
@@ -198,10 +207,6 @@ sb <- addPerformanceFunction(
     }
 )
 
-parent.frame()
-
-environment(sb@performanceFunctions[["qval"]][["TPR"]])[["FUN"]]
-
 sb <- addPerformanceFunction(
   object=sb,
   evalMetric="jaccardIndex",
@@ -225,9 +230,9 @@ sb <- addPerformanceFunction(
 ## add option `tidy=TRUE` for estimateMetrics*
 ## Vectorize alpha (or any parameter).
 
-estimateMetricsForAssay( sb, assay="qval", alpha=c(0.1, 0.2, 0.5), asList=TRUE )
+estimateMetricsForAssay( sb, assay="qval", alpha=c(0.1, 0.2, 0.3) )
 
-colData(estimateMetricsForAssay( sb, assay="qval", alpha=0.2, asList=FALSE, addColData=TRUE))
+estimateMetricsForAssay( sb, assay="qval", evalMetric="TPR", alpha=0.2, asList=TRUE )
 
 estimateMetricsForAssay(
   sb3,
