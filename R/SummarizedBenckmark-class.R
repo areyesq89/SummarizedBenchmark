@@ -86,7 +86,7 @@ SummarizedBenchmark <- function( assays, colData, ftData=NULL, groundTruth=NULL,
       performanceFunctions[[i]] <- list()
     }
   }
-  elementMetadata( colData ) <- DataFrame( colType="parameter" )
+  elementMetadata( colData ) <- DataFrame( colType="methodInformation" )
   se <- as( SummarizedExperiment( assays, colData=colData, ... ),
           "RangedSummarizedExperiment")
   rowData(se) <- rData
@@ -98,12 +98,18 @@ addPerformanceFunction <- function( object, evalMetric, assay, FUN ){
   if( !all( c("query", "truth") %in% formalArgs( FUN ) ) ){
     stop("All performance functions need to have both a `query` and a `truth` argument")
   }
+  if( is.null( evalMetric ) ){
+    stop("Please specify a name for the new evaluation metric (parameter evalMetric).")
+  }
+  if( is.null( assay ) ){
+    stop("Please specify an assay for the new evaluation metric (parameter assay).")
+  }
   object@performanceFunctions[[assay]][[evalMetric]] <- FUN
   validObject( object )
   object
 }
 
-estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, asList=FALSE, addColData=FALSE, evalFunction=NULL, ...){
+estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=FALSE, evalFunction=NULL, ...){
   stopifnot( is( object, "SummarizedBenchmark" ) )
   stopifnot( all( assay %in% names( assays( object ) ) ) )
   if( !is.null(evalFunction) ){
@@ -127,33 +133,40 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, asList=FALS
   res <- lapply( names( allFunctions ), function( nf ){
     f <- allFunctions[[nf]]
     vecArgs <- formalArgs( f )[ !formalArgs( f ) %in% c("query", "truth") ]
+    passArgs <- list(truth=assayTruth)
+    eleMD <- DataFrame( colType="performanceMetric", assay=assay, performanceMetric=nf )
     if( length( vecArgs ) > 0 ){
-      f <- Vectorize( f, vectorize.args=vecArgs )
+      vf <- Vectorize( f, vectorize.args=vecArgs )
+      defaultArgs <- formals(f)[vecArgs[!vecArgs %in% names( passArgs )]]
+      extraDotArgs <- allDotArgs[names(allDotArgs) %in% formalArgs(f)]
+      if( length( extraDotArgs ) > 0 ){
+        for( i in names( extraDotArgs ) ){
+          defaultArgs[[i]] <- eval( extraDotArgs[[i]] )
+        }
+      }
+      passArgs <- c( passArgs, defaultArgs )
+      resNRow <- max( sapply( passArgs[vecArgs], length ) )
+      eleMD <- cbind( eleMD, DataFrame( as.data.frame( passArgs[vecArgs] ) ) )
+    }else{
+      vf <- f
+      resNRow <- 1
     }
     indRes <- sapply( seq_len( ncol( assayData ) ), function( i ){
-      passArgs <- list( query=assayData[,i], truth=assayTruth )
-      extraArgs <- allDotArgs[names(allDotArgs) %in% formalArgs(f)]
-      if( length( extraArgs ) > 0 ){
-        passArgs <- c( passArgs, extraArgs )
-      }
-      do.call( f, passArgs )
+      assayRes <- do.call( vf, c( list(query=assayData[,i]), passArgs ) )
+      assayRes
     } )
-#    if( length( extraArgs ) > 0 ){
-#      resNRows <- max( sapply( extraArgs, length ) )
-#    }else{
-#      resNRows <- 1
-#    }
-#    indRes <- matrix( indRes, nrow=resNRows )
-    indRes
+    resDF <- DataFrame( t( matrix( indRes, nrow=resNRow ) ) )
+    elementMetadata( resDF ) <- eleMD
+    if( resNRow > 1 ){
+      colnames( resDF ) <- paste( nf, seq_len( ncol( resDF ) ), sep=".")
+    }else{
+      colnames( resDF ) <- nf
+    }
+    resDF
   } )
   names( res ) <- names( allFunctions )
-  if( asList ){
-    return(res)
-  }else{
-    res <- as( res, "DataFrame" )
-    elementMetadata(res) <- DataFrame( colType="performanceMetric", assay=assay )
-    res <- cbind( colData(object), as( res, "DataFrame" ) )
-  }
+  res <- Reduce( cbind, res )
+  res <- cbind( colData( object ), res )
   if( addColData ){
     colData( object ) <- res
     return( object )
@@ -162,16 +175,34 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, asList=FALS
   }
 }
 
-estimatePerformanceMetrics <- function( object, ... ){
+estimatePerformanceMetrics <- function( object, addColData=FALSE, ... ){
   stopifnot( is( object, "SummarizedBenchmark" ) )
   assayNames <- names( assays( object ) )
-  allRes <- sapply( assayNames, function(x){
+  allRes <- lapply( assayNames, function(x){
     if( length( object@performanceFunctions[[x]] ) > 0 ){
-      as.data.frame( estimateMetricsForAssay( object, assay=x, asList=FALSE, ... ) )
+      estimateMetricsForAssay( object, assay=x, ... )
+    }else{
+      NULL
     }
   } )
   allRes <- allRes[!sapply(allRes, is.null)]
-  DataFrame( Reduce( merge, allRes ) )
+  if( length( allRes ) > 0 ){
+    allRes <- 
+      lapply( allRes, 
+        function(x){ 
+          x[,elementMetadata( x )$colType == "performanceMetric",drop=FALSE]
+        } )
+    allRes <- Reduce( cbind, allRes )
+  }else{
+    stop("Metric functions not found for any assay. Check `?addPerformanceFunction`. to include these." )
+  }
+  allRes <- cbind( colData(object), allRes )
+  if( addColData ){
+    colData(object) <- allRes
+    return( object )
+  }else{
+    return( allRes )
+  }
 }
 
 
@@ -197,6 +228,8 @@ sb <- SummarizedBenchmark(
   assays=assays, colData=colData,
   groundTruth=groundTruth, ftData=ftData )
 
+estimatePerformanceMetrics(sb)
+
 sb <- addPerformanceFunction(
   object=sb,
   assay="qval",
@@ -217,6 +250,8 @@ sb <- addPerformanceFunction(
   }
 )
 
+estimatePerformanceMetrics( sb, alpha=c(0.1, 0.2, 0.3) )
+
 sb <- addPerformanceFunction(
   object=sb,
   evalMetric="EucledianDist",
@@ -226,21 +261,26 @@ sb <- addPerformanceFunction(
   }
 )
 
-## store parameters of the performance function in elementMetadata or something like that
 ## add option `tidy=TRUE` for estimateMetrics*
-## Vectorize alpha (or any parameter).
 
-estimateMetricsForAssay( sb, assay="qval", alpha=c(0.1, 0.2, 0.3) )
+colData( estimateMetricsForAssay( sb, evalMetric="TPR", assay="qval", alpha=c( 0.1, 0.2, 0.3, 0.4 ), addColData=TRUE ) )
 
-estimateMetricsForAssay( sb, assay="qval", evalMetric="TPR", alpha=0.2, asList=TRUE )
+estimateMetricsForAssay( sb, evalMetric="TPR", assay="qval", alpha=0.1 )
+
+
+t( matrix(estimateMetricsForAssay( sb, assay="qval", alpha=0.1)[[1]], nrow=1 ) )
+
+estimateMetricsForAssay( sb, assay="logFC" )
 
 estimateMetricsForAssay(
-  sb3,
-  assay="qval",
+  sb,
+  assay="qvalue",
   evalMetric="rejections",
-  evalFunction=function(query, truth, FDR=0.1){
-    sum( query < FDR )
-  }
-)
+  evalFunction=function(query, truth, alpha=0.1){
+    sum( query < alpha )
+  } )
 
-estimatePerformanceMetrics( sb3 )
+
+elementMetadata( estimatePerformanceMetrics( sb, alpha=c(0.1, 0.2, 0.3) ) )
+
+estimateMetricsForAssay( sb, assay="logFC" )[,2,drop=FALSE]
