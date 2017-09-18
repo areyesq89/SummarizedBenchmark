@@ -1,0 +1,3 @@
+* Write accessor functions 'groundTruths' and 'performanceFunctions'
+* Write default functions (TPR, TNR, FPR, FNR) in case an assay is "qvalue"
+* Write plotROC plotOverlap methods

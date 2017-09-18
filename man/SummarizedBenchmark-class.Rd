@@ -10,13 +10,13 @@ store the output of different methods intended for the same purpose
 in a given dataset. For example, a differential expression analysis could be
 done using \pkg{limma}-voom, \pkg{edgeR} and \pkg{DESeq2}. The
 SummarizedBenchmark class provides a framework that is useful to store
-and compare the results from these different software.
+and compare the results from the three different software
 }
 \section{Slots}{
 
 \describe{
-\item{\code{evaluationFunctions}}{A \code{\link{SimpleList}} of the same length
-as the number of \code{\link{assays}} containing evaluation
+\item{\code{performanceFunctions}}{A \code{\link{SimpleList}} of the same length
+as the number of \code{\link{assays}} containing performance
 functions to be compared with the ground truths.}
 }}
 
