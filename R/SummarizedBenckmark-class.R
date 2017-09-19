@@ -5,8 +5,8 @@
 #' store the output of different methods intended for the same purpose
 #' in a given dataset. For example, a differential expression analysis could be
 #' done using \pkg{limma}-voom, \pkg{edgeR} and \pkg{DESeq2}. The
-#' SummarizedBenchmark class provides a framework that is useful to store
-#' and compare the results from the three different software
+#' SummarizedBenchmark class provides a framework that is useful to store, benckmark and
+#' compare results.
 #' @slot performanceFunctions A \code{\link{SimpleList}} of the same length
 #' as the number of \code{\link{assays}} containing performance
 #' functions to be compared with the ground truths.
@@ -63,7 +63,7 @@ setValidity( "SummarizedBenchmark", function( object ) {
 #' data.frame of n x m, n being the number of features tested
 #' (e.g. genes) and m being the number of methods in the benchmark.
 #' Each element of the list must contain a single assay
-#' (the outputs of the methods to be benchmarked). For example,
+#' (the outputs of the methods). For example,
 #' for a benchmark of differential expression methods, one assay could contain
 #' the q-values from the different methods and another assay could be the
 #' estimated log fold changes.

@@ -13,7 +13,7 @@ benchmark. Each element of the list must contain a matrix or
 data.frame of n x m, n being the number of features tested
 (e.g. genes) and m being the number of methods in the benchmark.
 Each element of the list must contain a single assay
-(the outputs of the methods to be benchmarked). For example,
+(the outputs of the methods). For example,
 for a benchmark of differential expression methods, one assay could contain
 the q-values from the different methods and another assay could be the
 estimated log fold changes.}

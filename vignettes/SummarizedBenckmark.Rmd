@@ -4,9 +4,9 @@ author: "Alejandro Reyes"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
 abstract: >
-  DESeq2 package version: `r packageVersion("SummarizedBenchmark")`
+  SummarizedExperiment package version: `r packageVersion("SummarizedBenchmark")`
 output: 
-  BiocStyle::html_document2
+  BiocStyle::html_document
 #  bibliography: library.bib
 vignette: >
   %\VignetteIndexEntry{Comparing methods using the SummarizedBenchmarks package}
@@ -19,25 +19,26 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Constructing a __SummarizedBenchmark__ object
+# Constructing a __SummarizedBenchmark__ object
 
 This vignette uses data from the `r BiocStyle::Biocpkg("iCOBRA")` package [see @Soneson_2016] to 
 demonstrate the __SummarizedBenchmark__ package. This dataset contains differential 
 expression results of three different methods (`r BiocStyle::Biocpkg("limma")`, `r BiocStyle::Biocpkg("edgeR")` 
 and `r BiocStyle::Biocpkg("DESeq2")`) applied to a simulated RNA-seq dataset.
 
-```{r cobraData}
+```{r cobraData, message=FALSE, warning=FALSE}
 library(SummarizedBenchmark)
 library(iCOBRA)
 data(cobradata_example)
 ```
 
-The process of constructing a __SummarizedBenchmark__ object is almost the same as the one 
+The process of constructing a __SummarizedBenchmark__ object is similar to the one 
 used to construct a __SummarizedExperiment__ object. In the __SummarizedBenchmark__ object, 
-each output variable is considered a different *assay*. For example, using the differential
-expression dataset example, we can define two assays, the qvalues and the estimated logFC.
+each output of the methods is considered a different *assay*. For example, using the differential
+expression dataset example, we can define two assays, q-values and estimated log fold changes.
 For each *assay*, we arrange the output of the different methods as a matrix where each
 column corresponds to a method and each row corresponds to each feature (in this case, genes).
+We will need a list, where each element of the list corresponds to an assay.
 
 
 ```{r arrangeLists}
@@ -48,8 +49,7 @@ assays[["qvalue"]]$DESeq2 <- p.adjust(cobradata_example@pval$DESeq2, method="BH"
 head( assays[["qvalue"]], 3)
 ```
 
-Since these are simulated data, we know the ground truths for both assays. If these is not 
-available, the ground truths will be set to *NA* in the __SummarizedBenchmark__ object.
+Since these are simulated data, we know the ground truths for both assays. 
 
 ```{r groundTruths}
 library(S4Vectors)
@@ -60,18 +60,22 @@ groundTruth <- groundTruth[rownames(assays[[1]]),]
 head( groundTruth )
 ```
 
-We will also need to specify the annotation of the columns of the 
-assays. In this case, we prepare a __DataFrame__ that contains one row
-for each column of the assays. For this example, we only add there the
-software name, but here would be an ideal place to store software version
-and parameters used to run each software.
+In cases where ground truths are not available, these values will be set to *NA* in 
+the __SummarizedBenchmark__ object.
 
+We will also need to specify the annotation of the 
+assays. To do this, we need to prepare a __DataFrame__ that contains one row
+for each column of the assays. For our example, we create a _DataFrame_ where
+the column *method* contains the names of the different methods. 
 
 ```{r buildColData}
-
 colData <- DataFrame( method=colnames(assays[[1]]) )
 colData
 ```
+
+For this example, we only have software names. However,
+additional columns could contain, for example, the software versions or the parameters
+used to run them.
 
 Now have all the minimal things to construct a __SummarizedBenchmark__ object.
 
@@ -82,22 +86,27 @@ sb <- SummarizedBenchmark(
 sb
 ```
 
-Notice that the __SummarizedBenchmark__ object looks very similar to a __SummarizedExperiment__ object.
-However, it contains an columns in _rowData_ that specify the ground truths and an additional slot
-containing _performanceMetrics_. 
+Notice that the __SummarizedBenchmark__ object is similar to a __SummarizedExperiment__ 
+object. However, it contains additional information in the _rowData_ for ground truth values 
+and an additional slot containing functions that define performance metrics.
 
-## Defining performance metrics
+```{r}
+sb@performanceFunctions
+```
 
-Since different benchmarks might focus on different metrics to evaluate the performance of each methods, 
-the __SummarizedBenchmark__ object provides a flexible way to define evaluation metrics. We can define
-a performance metric by providing a __SummarizedBenchmark__ object, a name of the metric, an *assay* 
-corresponding to the performance metric, and the function that defines it. Importantly, the function 
-must contain the following arguments: query (refering to a vector of values being evaluated, i.e. the output of 
-one method) and truth (refering to the vector of ground truths). If further arguments are provided to the
-performance function, these must contain default values. 
+# Defining performance metrics
 
-Below, we define the performance metric *TPR* (True Positive Rate) calculates the fraction of true positives
-recovered given an *alpha* value.
+Since different benchmarks might use different metrics to evaluate the performance of a method, 
+the __SummarizedBenchmark__ class provides a flexible way to define performance metrics. We can define
+a new performance metric using the function *addPerformanceMetric* by providing a __SummarizedBenchmark__ 
+object, a name of the metric, an *assay* corresponding to the performance metric, and the function that 
+defines it. Importantly, the function must contain the following two arguments: query (refering to a 
+vector of values being evaluated, i.e. the output of one method) and truth (refering to the vector of 
+ground truths). If further arguments are provided to the performance function, these must contain 
+default values. 
+
+For our example, we define the performance metric *TPR* (True Positive Rate) that calculates the fraction of 
+true positives recovered given an *alpha* value.
 
 ```{r addPerformanceFunction}
 sb <- addPerformanceFunction(
@@ -111,9 +120,9 @@ sb <- addPerformanceFunction(
 )
 ```
 
-Similarly, the code below includes two additional metrics, the jaccard index using the
-*qvalue* assay and the euclidean distance between the estimated log fold changes and 
-the true fold changes (the *logFC* assay). 
+Similarly, the code below includes two additional metrics, the jaccard index, which uses 
+the *qvalue* assay, and the euclidean distance between the estimated log fold changes and 
+the true fold changes, which uses the *logFC* assay. 
 
 ```{r morePerformanceFunctions}
 sb <- addPerformanceFunction(

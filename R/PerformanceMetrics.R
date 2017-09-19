@@ -10,7 +10,7 @@
 #' given as input to this performance metric.
 #' @param evalFunction A function that calculates a performance metric. It should
 #' contain at least two arguments, query and truth, where query is the output vector
-#' of a method and truth is the vector of ground true values. If additional parameters
+#' of a method and truth is the vector of true values. If additional parameters
 #' are specified, they must contain default values.
 #'
 #' @examples
