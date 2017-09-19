@@ -7,7 +7,7 @@ abstract: >
   SummarizedExperiment package version: `r packageVersion("SummarizedBenchmark")`
 output: 
   BiocStyle::html_document
-#  bibliography: library.bib
+bibliography: library.bib
 vignette: >
   %\VignetteIndexEntry{Comparing methods using the SummarizedBenchmarks package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Constructing a __SummarizedBenchmark__ object
 
-This vignette uses data from the `r BiocStyle::Biocpkg("iCOBRA")` package [see @Soneson_2016] to 
+This vignette uses data from the `r BiocStyle::Biocpkg("iCOBRA")` package [@Soneson_2016] to 
 demonstrate the __SummarizedBenchmark__ package. This dataset contains differential 
 expression results of three different methods (`r BiocStyle::Biocpkg("limma")`, `r BiocStyle::Biocpkg("edgeR")` 
 and `r BiocStyle::Biocpkg("DESeq2")`) applied to a simulated RNA-seq dataset.
@@ -38,7 +38,7 @@ each output of the methods is considered a different *assay*. For example, using
 expression dataset example, we can define two assays, q-values and estimated log fold changes.
 For each *assay*, we arrange the output of the different methods as a matrix where each
 column corresponds to a method and each row corresponds to each feature (in this case, genes).
-We will need a list, where each element of the list corresponds to an assay.
+We will need a list in which each of it's element corresponds to an assay.
 
 
 ```{r arrangeLists}
@@ -47,9 +47,12 @@ assays <- list(
   logFC=cobradata_example@score )
 assays[["qvalue"]]$DESeq2 <- p.adjust(cobradata_example@pval$DESeq2, method="BH")
 head( assays[["qvalue"]], 3)
+head( assays[["logFC"]], 3)
 ```
 
-Since these are simulated data, we know the ground truths for both assays. 
+Since these are simulated data, we know the ground truths for both assays.
+We can format these as a _DataFrame_ where each column corresponds to an assay
+and each row corresponds to a feature.
 
 ```{r groundTruths}
 library(S4Vectors)
@@ -77,7 +80,7 @@ For this example, we only have software names. However,
 additional columns could contain, for example, the software versions or the parameters
 used to run them.
 
-Now have all the minimal things to construct a __SummarizedBenchmark__ object.
+Now we can construct a __SummarizedBenchmark__ object.
 
 ```{r buildSB}
 sb <- SummarizedBenchmark(
@@ -87,10 +90,12 @@ sb
 ```
 
 Notice that the __SummarizedBenchmark__ object is similar to a __SummarizedExperiment__ 
-object. However, it contains additional information in the _rowData_ for ground truth values 
-and an additional slot containing functions that define performance metrics.
+object. The main differences are that the __SummarizedBenchmark__ object contains ground 
+truth values in the _rowData_ and an additional slot containing functions that define 
+performance metrics.
 
 ```{r}
+head( rowData(sb) )
 sb@performanceFunctions
 ```
 
@@ -146,3 +151,4 @@ sb <- addPerformanceFunction(
 )
 ```
 
+# References
