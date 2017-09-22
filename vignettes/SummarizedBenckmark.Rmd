@@ -101,17 +101,19 @@ sb@performanceFunctions
 
 # Defining performance metrics
 
-Since different benchmarks might use different metrics to evaluate the performance of a method, 
-the __SummarizedBenchmark__ class provides a flexible way to define performance metrics. We can define
-a new performance metric using the function *addPerformanceMetric* by providing a __SummarizedBenchmark__ 
-object, a name of the metric, an *assay* corresponding to the performance metric, and the function that 
-defines it. Importantly, the function must contain the following two arguments: query (refering to a 
-vector of values being evaluated, i.e. the output of one method) and truth (refering to the vector of 
-ground truths). If further arguments are provided to the performance function, these must contain 
-default values. 
+Since different benchmarks might use different metrics to evaluate the 
+performance of a method, the __SummarizedBenchmark__ class provides a 
+flexible way to define performance metrics. We can define a new performance 
+metric using the function *addPerformanceMetric* by providing a __SummarizedBenchmark__ 
+object, a name of the metric, an *assay* corresponding to the performance 
+metric, and the function that defines it. Importantly, the function must 
+contain the following two arguments: query (refering to a vector of values 
+being evaluated, i.e. the output of one method) and truth (refering to the vector of 
+ground truths). If further arguments are provided to the performance 
+function, these must contain default values. 
 
-For our example, we define the performance metric *TPR* (True Positive Rate) that calculates the fraction of 
-true positives recovered given an *alpha* value.
+For our example, we define the performance metric *TPR* (True Positive Rate) 
+that calculates the fraction of true positives recovered given an *alpha* value.
 
 ```{r addPerformanceFunction}
 sb <- addPerformanceFunction(
@@ -149,6 +151,55 @@ sb <- addPerformanceFunction(
     sqrt( sum( (query - truth)^2 ) )
   }
 )
+```
+
+# Estimating the performance metrics
+
+Once having defined all the performance metrics, there are
+several ways to calculate these. 
+
+An option is to call the function _estimatePerformanceMetrics_ 
+to calculate these for each performance metrics defined 
+__SummarizedBenchmark__ object. Several parameters for the
+performance functions could be passed here. In this case,
+we want the performance functions to be estimated with 
+several _alpha_ values.
+
+```{r}
+resWide <- estimatePerformanceMetrics( sb, alpha=c(0.05, 0.1, 0.2) )
+resWide
+```
+
+By default, this function will return a _DataFrame_, where the
+parameters of the performance function are stored in its
+_elementMetadata_
+
+```{r elWide}
+elementMetadata(resWide)
+```
+
+However, we could also specify the parameter _addColData_ for these
+results to be stored in the _colData_ of the __SummarizedBenchmark__
+object
+
+```{r}
+sb <- estimatePerformanceMetrics( sb, alpha=c(0.05, 0.1, 0.2), addColData=TRUE)
+colData( sb )
+```
+
+If the user prefers tidier formats, by setting the parameter `tidy=TRUE` 
+the function will return a long-formated version of the results. 
+
+```{r}
+estimatePerformanceMetrics( sb, tidy=TRUE )
+```
+
+As an alternative to get the same _data.frame_ the previous chunk, 
+we can call the function _tidyUpMetrics_ on the saved results from
+a __SummarizedBenchmark__ object
+
+```{r}
+tidyUpMetrics(sb)
 ```
 
 # References
