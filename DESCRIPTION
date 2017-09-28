@@ -11,17 +11,15 @@ Description: This package defines the SummarizedBenchmarck class, which extends
     versions as well as ground truths (in case these are available) and evaluation 
     metrics. It also provides an flexible way to define and evaluate new
     performance metrics.
-<<<<<<< HEAD
-Depends: tidyr, SummarizedExperiment, S4Vectors, methods
-Suggests: iCOBRA, BiocStyle, knitr
-=======
 Depends: tidyr,
          SummarizedExperiment,
          S4Vectors,
+         methods,
          rlang,
          stringr
-Suggests: iCOBRA, BiocStyle
->>>>>>> Add first pass at BenchDesign framework
+Suggests: iCOBRA,
+          BiocStyle,
+          knitr
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
