@@ -19,7 +19,7 @@ given as input to this performance metric.}
 \item{evalMetric}{A string with the name of the evaluation metric.}
 
 \item{addColData}{Logical (default: FALSE). If TRUE, the results are added to the
-\code{\link{colData}} slot of the \code{\link{SummarizedExperiments}} object and
+\code{\link{colData}} slot of the \code{\link{SummarizedExperiment}} object and
 the object is returned. If FALSE, only a \code{\link{DataFrame}} with the results
 is returned.}
 
@@ -41,7 +41,7 @@ a \code{\link{data.frame}}.
 }
 \description{
 These functions estimate the performance metrics, either passed as arguments or
-added previously with the \code{\link{addPerformanceFunction}} function. The function
+added previously with the \code{\link{addPerformanceMetric}} function. The function
 will estimate the performance metric for each method.
 }
 \section{Functions}{
@@ -54,7 +54,7 @@ will estimate the performance metric for each method.
 \examples{
 
 data( sb )
-sb <- addPerformanceFunction(
+sb <- addPerformanceMetric(
    object=sb,
    assay="qvalue",
    evalMetric="TPR",

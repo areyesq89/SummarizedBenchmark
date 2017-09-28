@@ -86,7 +86,6 @@ Now we can construct a __SummarizedBenchmark__ object.
 sb <- SummarizedBenchmark(
   assays=assays, colData=colData,
   groundTruth=groundTruth )
-sb
 ```
 
 Notice that the __SummarizedBenchmark__ object is similar to a __SummarizedExperiment__ 
@@ -96,7 +95,7 @@ performance metrics.
 
 ```{r}
 head( rowData(sb) )
-sb@performanceFunctions
+sb@performanceMetrics
 ```
 
 # Defining performance metrics
@@ -115,8 +114,8 @@ function, these must contain default values.
 For our example, we define the performance metric *TPR* (True Positive Rate) 
 that calculates the fraction of true positives recovered given an *alpha* value.
 
-```{r addPerformanceFunction}
-sb <- addPerformanceFunction(
+```{r addPerformanceMetric}
+sb <- addPerformanceMetric(
   object=sb,
   assay="qvalue",
   evalMetric="TPR",
@@ -132,7 +131,7 @@ the *qvalue* assay, and the euclidean distance between the estimated log fold ch
 the true fold changes, which uses the *logFC* assay. 
 
 ```{r morePerformanceFunctions}
-sb <- addPerformanceFunction(
+sb <- addPerformanceMetric(
   object=sb,
   evalMetric="jaccardIndex",
   assay="qvalue",
@@ -143,7 +142,7 @@ sb <- addPerformanceFunction(
 )
 
 
-sb <- addPerformanceFunction(
+sb <- addPerformanceMetric(
   object=sb,
   evalMetric="EucledianDist",
   assay="logFC",
@@ -153,24 +152,39 @@ sb <- addPerformanceFunction(
 )
 ```
 
+# Default (predefined) performance metrics
+
+The function `addDefaultMetrics` inputs a __SummarizedBenchmark__ 
+object and, depending on the names of the assays, it will add
+predefined performance metrics. For example, if an assay of the
+__SummarizedBenchmark__ object is called "qvalue", it will add
+the metric _rejections_ by default. Check the help page for 
+the list of predefined performance metrics for each assay (`?addDefaultMetrics`).
+
+```{r}
+sb <- addDefaultMetrics( sb )
+names( sb@performanceMetrics[["qvalue"]] )
+```
+
+
 # Estimating the performance metrics
 
 Once having defined all the performance metrics, there are
-several ways to calculate these. 
+several ways to calculate these for each method. 
 
-An option is to call the function _estimatePerformanceMetrics_ 
+One option is to call the function _estimatePerformanceMetrics_ 
 to calculate these for each performance metrics defined 
-__SummarizedBenchmark__ object. Several parameters for the
-performance functions could be passed here. In this case,
-we want the performance functions to be estimated with 
-several _alpha_ values.
+__SummarizedBenchmark__ object for each method. The parameters
+for the performance functions can be passed here. For example, 
+in the case below, we are specifying the performance functions 
+to be estimated for several _alpha_ values.
 
 ```{r}
 resWide <- estimatePerformanceMetrics( sb, alpha=c(0.05, 0.1, 0.2) )
 resWide
 ```
 
-By default, this function will return a _DataFrame_, where the
+By default, the function above returns a _DataFrame_, where the
 parameters of the performance function are stored in its
 _elementMetadata_
 
@@ -188,10 +202,10 @@ colData( sb )
 ```
 
 If the user prefers tidier formats, by setting the parameter `tidy=TRUE` 
-the function will return a long-formated version of the results. 
+the function returns a long-formated version of the results. 
 
 ```{r}
-estimatePerformanceMetrics( sb, tidy=TRUE )
+head( estimatePerformanceMetrics( sb, tidy=TRUE ) )
 ```
 
 As an alternative to get the same _data.frame_ the previous chunk, 
@@ -199,7 +213,7 @@ we can call the function _tidyUpMetrics_ on the saved results from
 a __SummarizedBenchmark__ object
 
 ```{r}
-tidyUpMetrics(sb)
+head( tidyUpMetrics(sb) )
 ```
 
 # References

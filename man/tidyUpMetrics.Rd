@@ -21,7 +21,7 @@ data( "sb", package="SummarizedBenchmark" )
 sb <- estimateMetricsForAssay( sb, assay="qvalue", evalMetric="rejections",
     evalFunction=function( query, truth, alpha=0.1 ){
         sum( query < alpha )
-    }
+    },
     addColData=TRUE )
 tidyUpMetrics( sb )
 

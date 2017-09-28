@@ -7,32 +7,34 @@
 #' done using \pkg{limma}-voom, \pkg{edgeR} and \pkg{DESeq2}. The
 #' SummarizedBenchmark class provides a framework that is useful to store, benckmark and
 #' compare results.
-#' @slot performanceFunctions A \code{\link{SimpleList}} of the same length
+#' @slot performanceMetrics A \code{\link{SimpleList}} of the same length
 #' as the number of \code{\link{assays}} containing performance
 #' functions to be compared with the ground truths.
 #' @aliases SummarizedBenchmark-class
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
+#' @importFrom methods as formalArgs is new validObject
+#' @import S4Vectors SummarizedExperiment
 #' @export
 #' @exportClass SummarizedBenchmark
 setClass( "SummarizedBenchmark",
          contains = "RangedSummarizedExperiment",
-         representation = representation( performanceFunctions = "SimpleList" ) )
+         representation = representation( performanceMetrics = "SimpleList" ) )
 
 setValidity( "SummarizedBenchmark", function( object ) {
-  if( ! length( object@performanceFunctions ) == length( assays( object ) ) ){
+  if( ! length( object@performanceMetrics ) == length( assays( object ) ) ){
     stop("The number of elements of the slot 'performanceFunction' has
          be of the same length as the number of assays.")
   }
-  if( !all( names( assays( object ) ) %in% colnames( rowData( object ) ) ) ){
+  if( !all( assayNames( object ) %in% colnames( rowData( object ) ) ) ){
     stop("Not all assays have a corresponding ground truth column in rowData")
   }
-  if( !all( names( object@performanceFunctions ) %in% names( assays( object ) ) ) ){
-    stop("The names of the performanceFunctions list must match the names of the assays")
+  if( !all( names( object@performanceMetrics ) %in% assayNames( object  ) ) ){
+    stop("The names of the performanceMetrics list must match the names of the assays")
   }
-  if( !all( sapply( object@performanceFunctions, "class" ) == "list" ) ){
-    stop("In the slot 'performanceFunctions', each element of the list must contain a list of functions")
+  if( !all( sapply( object@performanceMetrics, "class" ) == "list" ) ){
+    stop("In the slot 'performanceMetrics', each element of the list must contain a list of functions")
   }
-  permFunc <- object@performanceFunctions
+  permFunc <- object@performanceMetrics
   for( i in names( permFunc ) ){
     funcAssay <- permFunc[[i]]
     for(j in names(funcAssay) ){
@@ -76,7 +78,7 @@ setValidity( "SummarizedBenchmark", function( object ) {
 #' If provided, the number of columns must be the same as the number of assays
 #' (NA's are accepted).
 #' The names of the columns should have the same names as the assays.
-#' @param performanceFunctions A \code{\link{SimpleList}} of the same
+#' @param performanceMetrics A \code{\link{SimpleList}} of the same
 #' length as the number of assays. Each element of the list must be a list
 #' of functions. Each function must contain the parameters 'query' and
 #' 'truth'.
@@ -101,7 +103,7 @@ setValidity( "SummarizedBenchmark", function( object ) {
 #' ## constructing a SummarizedBenchmark object
 #' sb <- SummarizedBenchmark(
 #'     assays=assays, colData=colData,
-#'     groundTruth=groundTruth, ftData=ftData )
+#'     groundTruth=groundTruth )
 #'
 #' @return A \code{\link{SummarizedBenchmark}} object.
 #' @importFrom tidyr gather
@@ -109,7 +111,7 @@ setValidity( "SummarizedBenchmark", function( object ) {
 #' @export
 #'
 SummarizedBenchmark <- function( assays, colData, ftData=NULL,
-                                 groundTruth=NULL, performanceFunctions=NULL, ... ){
+                                 groundTruth=NULL, performanceMetrics=NULL, ... ){
   if( is( colData, "data.frame" ) ){
     colData <- DataFrame( colData )
   }
@@ -138,18 +140,83 @@ SummarizedBenchmark <- function( assays, colData, ftData=NULL,
   if( length( unique( sapply( assays, ncol ) ) ) > 1 ){
     stop("All assays must contain the same number of columns")
   }
-  if( is.null(performanceFunctions)){
-    performanceFunctions <- vector("list", 2 )
-    performanceFunctions <- as( performanceFunctions, "SimpleList" )
-    names( performanceFunctions ) <- names(assays)
-    for( i in seq_along( performanceFunctions ) ){
-      performanceFunctions[[i]] <- list()
+  if( is.null(performanceMetrics)){
+    performanceMetrics <- vector("list", 2 )
+    performanceMetrics <- as( performanceMetrics, "SimpleList" )
+    names( performanceMetrics ) <- names(assays)
+    for( i in seq_along( performanceMetrics ) ){
+      performanceMetrics[[i]] <- list()
     }
   }
   elementMetadata( colData ) <- DataFrame( colType="methodInformation" )
   se <- as( SummarizedExperiment( assays, colData=colData, ... ),
             "RangedSummarizedExperiment")
   rowData(se) <- rData
-  sb <- new( "SummarizedBenchmark", se, performanceFunctions=performanceFunctions )
+  sb <- new( "SummarizedBenchmark", se, performanceMetrics=performanceMetrics )
   sb
 }
+
+#' @rdname performanceMetrics
+#' @export
+setGeneric("performanceMetrics", function( object, ... ) standardGeneric("performanceMetrics"))
+
+performanceMetricsSB <- function( object, assay=NULL ){
+  validObject( object )
+  if( is.null( assay ) ){
+    return( object@performanceMetrics )
+  }else{
+    inAssay <- assay %in% assayNames( object )
+    if( !all( inAssay ) ){
+      stop( sprintf( "Performance metric(s) '%s' not found.", assay[!inAssay] ) )
+    }
+    return( object@performanceMetrics[assay] )
+  }
+}
+
+#' Accessor for the 'performanceMetrics' slot of a SummarizedBenchmark object.
+#'
+#' @docType methods
+#' @name performanceMetrics
+#' @rdname performanceMetrics
+#' @aliases performanceMetrics performanceMetrics,SummarizedBenchmark-method performanceMetrics<-,SummarizedBenchmark,SimpleList-method
+#'
+#' @param object a \code{SummarizedBenchmark} object.
+#' @param assay A character string indicating an assay name
+#' @param value A SimpleList of the same length as the number of assays
+#' @param ... Futher arguments, perhaps used by methods
+#' @seealso \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}
+#'
+#' @examples
+#'
+#' data( sb )
+#' performanceMetrics( sb )
+#' performanceMetrics( sb, assay="qvalue" )
+#' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+#'
+#' @export
+setMethod( "performanceMetrics",
+  signature( object = "SummarizedBenchmark" ), performanceMetricsSB )
+
+#' @rdname performanceMetrics
+#' @export
+setGeneric( "performanceMetrics<-",
+  function( object, ..., value ) standardGeneric( "performanceMetrics<-" ) )
+
+
+#' @name performanceMetrics
+#' @rdname performanceMetrics
+#' @exportMethod "performanceMetrics<-"
+setReplaceMethod( "performanceMetrics",
+                  signature(object="SummarizedBenchmark", value="SimpleList"),
+                 function( object, value ) {
+                   object@performanceMetrics <- value
+                   validObject(object)
+                   object
+                 } )
+
+#' This is data to be included in my package
+#'
+#' @name sb
+#' @docType data
+#' @keywords data SummarizedBenchmark
+NULL

@@ -1,8 +1,8 @@
 #' @title Add a performance metric definition to a \code{\link{SummarizedBenchmark}} object.
-#' @aliases addPerformanceFunction
+#' @aliases addPerformanceMetric
 #' @description
 #' This is a function to define performance metrics for benchmarking methods.
-#' The function is saved into the \code{performanceFunctions} slot.
+#' The function is saved into the \code{performanceMetrics} slot.
 #'
 #' @param object A \code{\link{SummarizedBenchmark}} object.
 #' @param evalMetric A string with the name of the evaluation metric.
@@ -16,7 +16,7 @@
 #' @examples
 #'
 #' data( sb )
-#' sb <- addPerformanceFunction(
+#' sb <- addPerformanceMetric(
 #'    object=sb,
 #'    assay="qvalue",
 #'    evalMetric="TPR",
@@ -30,7 +30,7 @@
 #' @importFrom tidyr gather
 #' @export
 #'
-addPerformanceFunction <- function( object, evalMetric, assay, evalFunction ){
+addPerformanceMetric <- function( object, evalMetric, assay, evalFunction ){
   validObject( object )
   if( is.null( evalMetric ) ){
     stop("Please specify a name for the new evaluation metric (parameter evalMetric).")
@@ -38,7 +38,7 @@ addPerformanceFunction <- function( object, evalMetric, assay, evalFunction ){
   if( is.null( assay ) ){
     stop("Please specify an assay for the new evaluation metric (parameter assay).")
   }
-  if( !assay %in% names(object@performanceFunctions) ){
+  if( !assay %in% names(object@performanceMetrics) ){
     stop(sprintf( "Assay '%s' not found in this object", assay) )
   }
   if( !length( assay ) == 1 ){
@@ -47,7 +47,7 @@ addPerformanceFunction <- function( object, evalMetric, assay, evalFunction ){
   if( !length( evalMetric ) == 1 ){
     stop("The 'evalMetric' parameter must be of length 1")
   }
-  object@performanceFunctions[[assay]][[evalMetric]] <- evalFunction
+  object@performanceMetrics[[assay]][[evalMetric]] <- evalFunction
   validObject( object )
   object
 }
@@ -58,7 +58,7 @@ addPerformanceFunction <- function( object, evalMetric, assay, evalFunction ){
 #' @aliases estimateMetricsForAssay
 #' @description
 #' These functions estimate the performance metrics, either passed as arguments or
-#' added previously with the \code{\link{addPerformanceFunction}} function. The function
+#' added previously with the \code{\link{addPerformanceMetric}} function. The function
 #' will estimate the performance metric for each method.
 #'
 #' @param object A \code{\link{SummarizedBenchmark}} object.
@@ -72,7 +72,7 @@ addPerformanceFunction <- function( object, evalMetric, assay, evalFunction ){
 #' the metrics in the object are ignored and only this evaluation metric
 #' is estimated.
 #' @param addColData Logical (default: FALSE). If TRUE, the results are added to the
-#' \code{\link{colData}} slot of the \code{\link{SummarizedExperiments}} object and
+#' \code{\link{colData}} slot of the \code{\link{SummarizedExperiment}} object and
 #' the object is returned. If FALSE, only a \code{\link{DataFrame}} with the results
 #' is returned.
 #' @param tidy Logical (default: FALSE). If TRUE, a long formated \code{\link{data.frame}}
@@ -82,7 +82,7 @@ addPerformanceFunction <- function( object, evalMetric, assay, evalFunction ){
 #' @examples
 #'
 #' data( sb )
-#' sb <- addPerformanceFunction(
+#' sb <- addPerformanceMetric(
 #'    object=sb,
 #'    assay="qvalue",
 #'    evalMetric="TPR",
@@ -108,12 +108,12 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=
     stop(sprintf("Assay '%s' not found in SummarizedBenchmark", assay))
   }
   if( !is.null(evalFunction) ){
-    object <- addPerformanceFunction( object, evalMetric, assay, evalFunction )
+    object <- addPerformanceMetric( object, evalMetric, assay, evalFunction )
 
   }
-  allFunctions <- object@performanceFunctions[[assay]]
+  allFunctions <- object@performanceMetrics[[assay]]
   if( length(allFunctions) == 0 ){
-    stop(sprintf( "Metric functions not specified for assay(s): %s. Check `?addPerformanceFunction`.", assay ) )
+    stop(sprintf( "Metric functions not specified for assay(s): %s. Check `?addPerformanceMetric`.", assay ) )
   }
   if( !is.null( evalMetric ) ){
     if( !all(evalMetric %in% names(allFunctions)) ){
@@ -180,9 +180,9 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=
 estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ... ){
   stopifnot( is( object, "SummarizedBenchmark" ) )
   validObject( object )
-  assayNames <- names( assays( object ) )
+  assayNames <- assayNames( object )
   allRes <- lapply( assayNames, function(x){
-    if( length( object@performanceFunctions[[x]] ) > 0 ){
+    if( length( object@performanceMetrics[[x]] ) > 0 ){
       estimateMetricsForAssay( object, assay=x, ... )
     }else{
       NULL
@@ -197,7 +197,7 @@ estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ..
               } )
     allRes <- Reduce( cbind, allRes )
   }else{
-    stop("Metric functions not found for any assay. Check `?addPerformanceFunction`. to include these." )
+    stop("Metric functions not found for any assay. Check `?addPerformanceMetric`. to include these." )
   }
   allRes <- cbind( colData(object), allRes )
   if( addColData | tidy ){
@@ -224,7 +224,7 @@ estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ..
 #' sb <- estimateMetricsForAssay( sb, assay="qvalue", evalMetric="rejections",
 #'     evalFunction=function( query, truth, alpha=0.1 ){
 #'         sum( query < alpha )
-#'     }
+#'     },
 #'     addColData=TRUE )
 #' tidyUpMetrics( sb )
 #'

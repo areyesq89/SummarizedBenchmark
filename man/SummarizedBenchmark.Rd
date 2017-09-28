@@ -5,7 +5,7 @@
 \title{Constructor function for SummarizedBenchmark objects.}
 \usage{
 SummarizedBenchmark(assays, colData, ftData = NULL, groundTruth = NULL,
-  performanceFunctions = NULL, ...)
+  performanceMetrics = NULL, ...)
 }
 \arguments{
 \item{assays}{A list containing outputs of the methods to be
@@ -30,7 +30,7 @@ If provided, the number of columns must be the same as the number of assays
 (NA's are accepted).
 The names of the columns should have the same names as the assays.}
 
-\item{performanceFunctions}{A \code{\link{SimpleList}} of the same
+\item{performanceMetrics}{A \code{\link{SimpleList}} of the same
 length as the number of assays. Each element of the list must be a list
 of functions. Each function must contain the parameters 'query' and
 'truth'.}
@@ -62,6 +62,6 @@ groundTruth <- groundTruth[rownames(assays[[1]]),]
 ## constructing a SummarizedBenchmark object
 sb <- SummarizedBenchmark(
     assays=assays, colData=colData,
-    groundTruth=groundTruth, ftData=ftData )
+    groundTruth=groundTruth )
 
 }

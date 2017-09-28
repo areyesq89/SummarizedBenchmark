@@ -15,7 +15,7 @@ compare results.
 \section{Slots}{
 
 \describe{
-\item{\code{performanceFunctions}}{A \code{\link{SimpleList}} of the same length
+\item{\code{performanceMetrics}}{A \code{\link{SimpleList}} of the same length
 as the number of \code{\link{assays}} containing performance
 functions to be compared with the ground truths.}
 }}
