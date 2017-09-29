@@ -40,6 +40,8 @@ rejections <- function( query, truth, alpha=0.1 ){
 #' positive rate), "TNR" (true negative rate), "FPR" (false positive rate) and
 #' "FNR" (false negative rate) will be added.
 #'
+#' @author Alejandro Reyes
+#'
 #' @export
 #'
 addDefaultMetrics <- function( object ){

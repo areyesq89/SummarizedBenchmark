@@ -10,6 +10,9 @@
 #' @slot performanceMetrics A \code{\link{SimpleList}} of the same length
 #' as the number of \code{\link{assays}} containing performance
 #' functions to be compared with the ground truths.
+#'
+#' @author Alejandro Reyes
+#'
 #' @aliases SummarizedBenchmark-class
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
 #' @importFrom methods as formalArgs is new validObject
@@ -83,6 +86,8 @@ setValidity( "SummarizedBenchmark", function( object ) {
 #' of functions. Each function must contain the parameters 'query' and
 #' 'truth'.
 #' @param ... Additional parameters passed to \code{\link{SummarizedExperiment}}.
+#'
+#' @author Alejandro Reyes
 #'
 #' @examples
 #'
@@ -192,6 +197,8 @@ performanceMetricsSB <- function( object, assay=NULL ){
 #' performanceMetrics( sb )
 #' performanceMetrics( sb, assay="qvalue" )
 #' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+#'
+#' @author Alejandro Reyes
 #'
 #' @export
 setMethod( "performanceMetrics",
