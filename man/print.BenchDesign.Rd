@@ -12,3 +12,7 @@
 \description{
 Pretty print BenchDesign
 }
+\author{
+Patrick Kimes
+}
+\keyword{internal}

@@ -2,19 +2,19 @@
 % Please edit documentation in R/BenchDesign.R
 \name{BenchDesign}
 \alias{BenchDesign}
-\title{create a new BenchDesign}
+\title{Create a new BenchDesign}
 \usage{
 BenchDesign(bdata = NULL)
 }
 \arguments{
-\item{bdata}{data to be used for benchmarking methods
-(default = NULL)}
+\item{bdata}{data.frame or other list object to be used for the
+benchmark (default = NULL)}
 }
 \value{
 a BenchDesign object
 }
 \description{
-Initializes a new BenchDesign object.
+Initializes a new BenchDesign object for benchmarking methods.
 }
 \author{
 Patrick Kimes

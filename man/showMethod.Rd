@@ -3,7 +3,7 @@
 \name{showMethod}
 \alias{showMethod}
 \alias{showMethods}
-\title{Pretty print a single method}
+\title{Pretty print a single method in a BenchDesign}
 \usage{
 showMethod(b, n)
 
@@ -24,7 +24,7 @@ Easy method for printing out details about a method included in
 the BenchDesign. The \code{showMethods} function is just a wrapper
 to call \code{showMethod} on all methods for in the BenchDesign
 
-Pretty print all method
+Pretty print all methods in a BenchDesign
 }
 \author{
 Patrick Kimes

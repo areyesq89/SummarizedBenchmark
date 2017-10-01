@@ -2,10 +2,10 @@
 % Please edit documentation in R/buildBench.R
 \name{eval_defaults}
 \alias{eval_defaults}
-\title{helper function to evaluate all the things}
+\title{helper function to evaluate all quosures with data}
 \usage{
 eval_defaults(b)
 }
 \description{
-helper function to evaluate all the things
+helper function to evaluate all quosures with data
 }

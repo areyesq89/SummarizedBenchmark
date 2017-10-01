@@ -1,4 +1,4 @@
-#' Pretty print a single method
+#' Pretty print a single method in a BenchDesign
 #'
 #' Easy method for printing out details about a method included in
 #' the BenchDesign. The `showMethods` function is just a wrapper
@@ -19,28 +19,21 @@ showMethod <- function(b, n) {
     cat(stringr::str_pad(paste0(n, " "), 60, "right", pad = "-"), "\n")
 
     m <- b$methods[[n]]
-    cat("core:\n")
+    cat("bfunc:\n")
     cat("    ", quo_text(m$func), "\n")
 
-    cat("post-processing:\n")
+    cat("bpost:\n")
     cat("    ", quo_text(m$post), "\n")
 
     dn <- names(m$dparams)
     d <- sapply(m$dparams, quo_name)
-    cat("baseline:\n")
+    cat("parameters:\n")
     for (i in seq(dn))
         cat("    ", dn[i], ":", d[i], "\n")
-
-    pn <- names(m$params)
-    p <- sapply(m$params, quo_name)
-    cat("variable:\n")
-    for (i in seq(pn))
-        cat("    ", pn[i], ":", p[i], "\n")
-
 }
 
 
-#' Pretty print all method
+#' Pretty print all methods in a BenchDesign
 #'
 #' @param b BenchDesign object
 #'

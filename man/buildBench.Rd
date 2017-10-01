@@ -2,7 +2,7 @@
 % Please edit documentation in R/buildBench.R
 \name{buildBench}
 \alias{buildBench}
-\title{Make benchmark results}
+\title{Make SummarizedBenchmark from BenchDesign}
 \usage{
 buildBench(b)
 }
@@ -10,11 +10,11 @@ buildBench(b)
 \item{b}{BenchDesign object}
 }
 \value{
-a SummarizedBenchmark with one assay.
+SummarizedBenchmark with one assay
 }
 \description{
-Function to evaluate BenchDesign to generate a
-SummarizedBenchmark.
+Function to evaluate BenchDesign methods on supplied
+data set to generate a SummarizedBenchmark.
 }
 \author{
 Patrick Kimes

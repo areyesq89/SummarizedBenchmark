@@ -2,24 +2,26 @@
 % Please edit documentation in R/addMethod.R
 \name{addMethod}
 \alias{addMethod}
-\title{Add a new method to a BenchDesign}
+\title{Add new method to BenchDesign object}
 \usage{
 addMethod(b, blabel, bfunc, bpost = NULL, ...)
 }
 \arguments{
 \item{b}{BenchDesign object}
 
-\item{blabel}{name for the method}
+\item{blabel}{character name for the method}
 
-\item{bfunc}{function to be benchmarked}
+\item{bfunc}{primary function to be benchmarked}
 
-\item{bpost}{optional post-processing function that takes output of func,
-e.g. a getter method, ignored if NULL (default = NULL)}
+\item{bpost}{optional post-processing function that takes output of
+\code{bfunc} e.g. a getter method, ignored if NULL
+(default = NULL)}
 
-\item{...}{named parameter, value pairs to be used with func}
+\item{...}{named \code{parameter = value} pairs to be passed to
+\code{func}}
 }
 \description{
-Add a new method to a BenchDesign
+Add new method to BenchDesign object
 }
 \author{
 Patrick Kimes

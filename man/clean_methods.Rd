@@ -2,10 +2,10 @@
 % Please edit documentation in R/buildBench.R
 \name{clean_methods}
 \alias{clean_methods}
-\title{helper function to make method info easier to read}
+\title{helper function to convert method info to character for colData}
 \usage{
 clean_methods(b)
 }
 \description{
-helper function to make method info easier to read
+helper function to convert method info to character for colData
 }

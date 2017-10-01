@@ -12,4 +12,7 @@ is.BenchDesign(x)
 \description{
 Reports whether x is a BenchDesign object
 }
+\author{
+Patrick Kimes
+}
 \keyword{internal}

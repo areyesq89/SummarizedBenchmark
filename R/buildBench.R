@@ -1,12 +1,12 @@
-#' Make benchmark results
+#' Make SummarizedBenchmark from BenchDesign
 #'
-#' Function to evaluate BenchDesign to generate a
-#' SummarizedBenchmark.
+#' Function to evaluate BenchDesign methods on supplied
+#' data set to generate a SummarizedBenchmark.
 #' 
 #' @param b BenchDesign object
 #' 
 #' @return
-#' a SummarizedBenchmark with one assay.
+#' SummarizedBenchmark with one assay
 #'
 #' @export
 #' @author Patrick Kimes
@@ -20,15 +20,15 @@ buildBench <- function(b) {
     ## colData: method information
     df <- clean_methods(b)
     
-    ## performanceFunctions: empty
+    ## performanceMetrics: empty
     pf <- SimpleList(list("bench" = list()))
 
     SummarizedBenchmark(assays = a,
                         colData = df,
-                        performanceFunctions = pf)
+                        performanceMetrics = pf)
 }
 
-#' helper function to evaluate all the things
+#' helper function to evaluate all quosures with data
 eval_defaults <- function(b) {
         lapply(b$methods,
                function(x) {
@@ -40,18 +40,18 @@ eval_defaults <- function(b) {
                })
 }
 
-#' helper function to make method info easier to read
+#' helper function to convert method info to character for colData
 clean_methods <- function(b) {
-    DataFrame(label = names(b$methods),
-              func = sapply(b$methods,
-                            function(x) { quo_name(x$func) }),
-              params = sapply(b$methods,
-                              function(x) {
-                                  paste(names(x$dparams), "=",
-                                        sapply(x$dparams, quo_text),
-                                        collapse=", ") }),
-              post = sapply(b$methods,
-                            function(x)
-                                ifelse(is.function(eval_tidy(x$post, b$bdata)),
-                                       quo_text(x$post), "NULL")))
+    DataFrame(blabel = names(b$methods),
+              bfunc = sapply(b$methods,
+                             function(x) { quo_name(x$func) }),
+              bparams = sapply(b$methods,
+                               function(x) {
+                                   paste(names(x$dparams), "=",
+                                         sapply(x$dparams, quo_text),
+                                         collapse=", ") }),
+              bpost = sapply(b$methods,
+                             function(x)
+                                 ifelse(is.function(eval_tidy(x$post, b$bdata)),
+                                        quo_text(x$post), "NULL")))
 }
