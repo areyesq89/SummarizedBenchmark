@@ -4,10 +4,12 @@
 \alias{print.BenchDesign}
 \title{Pretty print BenchDesign}
 \usage{
-\method{print}{BenchDesign}(x)
+\method{print}{BenchDesign}(x, ...)
 }
 \arguments{
 \item{x}{a BenchDesign}
+
+\item{...}{other parameters}
 }
 \description{
 Pretty print BenchDesign

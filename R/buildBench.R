@@ -28,7 +28,7 @@ buildBench <- function(b) {
                         performanceMetrics = pf)
 }
 
-#' helper function to evaluate all quosures with data
+## helper function to evaluate all quosures with data
 eval_defaults <- function(b) {
         lapply(b$methods,
                function(x) {
@@ -40,7 +40,7 @@ eval_defaults <- function(b) {
                })
 }
 
-#' helper function to convert method info to character for colData
+## helper function to convert method info to character for colData
 clean_methods <- function(b) {
     DataFrame(blabel = names(b$methods),
               bfunc = sapply(b$methods,

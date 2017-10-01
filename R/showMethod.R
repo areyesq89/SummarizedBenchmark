@@ -1,4 +1,4 @@
-#' Pretty print a single method in a BenchDesign
+#' Pretty print methods in a BenchDesign
 #'
 #' Easy method for printing out details about a method included in
 #' the BenchDesign. The `showMethods` function is just a wrapper
@@ -33,10 +33,6 @@ showMethod <- function(b, n) {
 }
 
 
-#' Pretty print all methods in a BenchDesign
-#'
-#' @param b BenchDesign object
-#'
 #' @rdname showMethod
 #' @export
 #' @author Patrick Kimes

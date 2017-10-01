@@ -34,12 +34,13 @@ is.BenchDesign <- function(x) {
 #' Pretty print BenchDesign
 #' 
 #' @param x a BenchDesign
+#' @param ... other parameters
 #'
 #' @keywords internal
 #' @importFrom stringr str_pad
 #' @export
 #' @author Patrick Kimes
-print.BenchDesign <- function(x) {
+print.BenchDesign <- function(x, ...) {
     cat(stringr::str_pad("BenchDesign object ", 60, "right", "-"), "\n")
     cat("\n")
     cat("benchmark data:\n")
@@ -55,10 +56,10 @@ print.BenchDesign <- function(x) {
         cat("    none\n")
     } else { 
         m1 <- max(nchar(names(head(x$methods))))
-        m2 <- max(nchar(sapply(head(b$methods), function(x) { quo_text(x$func) })))
+        m2 <- max(nchar(sapply(head(x$methods), function(x) { quo_text(x$func) })))
         for (n in names(head(x$methods))) {
             p1 <- stringr::str_pad(n, m1 + 1, "left", " ")
-            p2 <- stringr::str_pad(quo_text(b$methods[[n]]$func), m2 + 1, "left", " ")
+            p2 <- stringr::str_pad(quo_text(x$methods[[n]]$func), m2 + 1, "left", " ")
             cat("    method: ", p1, "; func: ", p2, "\n", sep="")
         }
     }
