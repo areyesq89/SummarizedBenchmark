@@ -28,16 +28,16 @@ library("magrittr")
 
 # Simple Case Study
 
-For this example, we will use the `ttest_dat` data set included with this package. 
+For this example, we will use the `tdat` data set included with this package. 
 
 ```{r}
-data(ttest_dat)
+data(tdat)
 ```
 
 The data set is a data.frame containing the results of 50 two-sample t-tests. Each of the 50 tests was performed using an independently simulated set of 20 observations drawn from a single standard Normal distribution (when `H = 0`) or two mean-shifted Normal distributions (when `H = 1`).
 
 ```{r}
-head(dat)
+head(tdat)
 ```
 
 To control the total number of false discoveries among a collection of tests, several approaches have been proposed and implemented to compute *adjusted p-values*. In this example, we compare four different methods:
@@ -51,18 +51,18 @@ To control the total number of false discoveries among a collection of tests, se
 
 First, consider how benchmarking the four methods might look without the `benchmakr` framework.  
 
-To compare methods, each is applied to `dat` and the results are stored in separate variables. 
+To compare methods, each is applied to `tdat` and the results are stored in separate variables. 
 
 ```{r}
-adjp_bonf <- p.adjust(p = dat$pval, method = "bonferroni")
+adjp_bonf <- p.adjust(p = tdat$pval, method = "bonferroni")
 
-adjp_bh <- p.adjust(p = dat$pval, method = "BH")
+adjp_bh <- p.adjust(p = tdat$pval, method = "BH")
 
-qv <- qvalue::qvalue(p = dat$pval)
+qv <- qvalue::qvalue(p = tdat$pval)
 adjp_qv <- qv$qvalues
 
-adjp_ihw <- IHW::ihw(pvalues = dat$pval,
-                     covariates = IHW::groups_by_filter(dat$ind_covariate, 5),
+adjp_ihw <- IHW::ihw(pvalues = tdat$pval,
+                     covariates = IHW::groups_by_filter(tdat$ind_covariate, 5),
                      alpha =  0.1)
 adjp_ihw <- IHW::adj_pvalues(adjp_ihw) 
 ```
@@ -84,7 +84,7 @@ While this approach can work for smaller comparisons, it can quickly become over
 In the `BenchDesign` framework implemented in the `SummarizedBenchmark` package, a `BenchDesign` is first constructed with the data as the sole input. 
 
 ```{r}
-b <- BenchDesign(dat)
+b <- BenchDesign(tdat)
 ```
 
 Then, each method of interest is added to the `BenchDesign` using `addMethod()`. 
@@ -99,7 +99,7 @@ At a minimum, `addMethod()` requires specifying three parameters:
 2. `blabel`: a character name for the method, and
 3. `bfunc`: the function to call.
 
-After the three parameters are specified, any parameters needed by the method, e.g. `p.adjust`, should be passed as named variables, e.g. `p = pval, method = "bonferroni"`. Notice that `pval` **does not** need to be called as `dat$pval`.  
+After the three parameters are specified, any parameters needed by the method, e.g. `p.adjust`, should be passed as named variables, e.g. `p = pval, method = "bonferroni"`. Notice that `pval` **does not** need to be called as `tdat$pval`.  
 
 The process of adding methods can be written more concisely using the pipe operators of the `magrittr` package.
 
@@ -139,7 +139,7 @@ sb
 head(assay(sb, 1))
 ```
 
-The function call is nicely stored in the `colData` of the same object.
+The functions and parameters are stored in the `colData` of the same object.
 
 ```{r}
 colData(sb)
