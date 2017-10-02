@@ -4,10 +4,12 @@
 \alias{buildBench}
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
-buildBench(b)
+buildBench(b, data = NULL)
 }
 \arguments{
 \item{b}{BenchDesign object}
+
+\item{data}{dataset (default = NULL)}
 }
 \value{
 SummarizedBenchmark with one assay

@@ -4,13 +4,23 @@
 #' data set to generate a SummarizedBenchmark.
 #' 
 #' @param b BenchDesign object
+#' @param data dataset (default = NULL)
 #' 
 #' @return
 #' SummarizedBenchmark with one assay
 #'
 #' @export
 #' @author Patrick Kimes
-buildBench <- function(b) {
+buildBench <- function(b, data = NULL) {
+
+    if (!is.null(data)) {
+        b$bdata <- data
+    }
+    
+    ## make sure data is actually specified
+    if (is.null(b$bdata)) {
+        stop("data in BenchDesign is NULL.\nPlease specify a non-NULL dataset to build SummarizedBenchmark.")
+    }
     
     ## assay: evaluate all functions
     a <- eval_defaults(b)
