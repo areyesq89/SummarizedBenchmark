@@ -4,12 +4,18 @@
 \alias{buildBench}
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
-buildBench(b, data = NULL)
+buildBench(b, data = NULL, truthCol = NULL)
 }
 \arguments{
 \item{b}{BenchDesign object}
 
-\item{data}{dataset (default = NULL)}
+\item{data}{data set to be used in place of `bdata` for benchmarking;
+ignored if NULL (default = NULL)}
+
+\item{truthCol}{character name of column in data set corresponding to ground
+truth values. If specified, column will be added to `groundTruth`
+DataFrame of returned SummarizedBenchmark object, and same name
+will be used for assay (default = NULL)}
 }
 \value{
 SummarizedBenchmark with one assay
