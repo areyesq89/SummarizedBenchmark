@@ -41,7 +41,7 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ptabular = TRUE) {
     a <- list("bench" = a)
     
     ## colData: method information
-    df <- clean_methods(b, tidy)
+    df <- clean_methods(b, ptabular)
     
     ## performanceMetrics: empty
     pf <- SimpleList(list("bench" = list()))
