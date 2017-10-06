@@ -2,11 +2,21 @@
 #'
 #' Initializes a new BenchDesign object for benchmarking methods.
 #'
-#' @param bdata data.frame or other list object to be used for the
-#'        benchmark (default = NULL)
+#' @param bdata optional data.frame or other list object to be
+#'        used in the benchmark. (default = NULL)
 #'
 #' @return
 #' a BenchDesign object
+#'
+#' @examples
+#' \dontrun{
+#' ## with no input
+#' bd <- BenchDesign()
+#'
+#' ## with toy data.frame
+#' sim_df <- as.data.frame(matrix(rnorm(20), 10, 2))
+#' bd <- BenchDesign(sim_df)
+#' }
 #'
 #' @import rlang
 #' @export
@@ -33,8 +43,8 @@ is.BenchDesign <- function(x) {
 
 #' Pretty print BenchDesign
 #' 
-#' @param x a BenchDesign
-#' @param ... other parameters
+#' @param x BenchDesign object.
+#' @param ... other parameters.
 #'
 #' @keywords internal
 #' @importFrom stringr str_pad str_trunc

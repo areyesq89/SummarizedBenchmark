@@ -1,19 +1,25 @@
 #' Pretty print methods in a BenchDesign
 #'
-#' Easy method for printing out details about a method included in
-#' the BenchDesign. The `showMethods` function is just a wrapper
-#' to call `showMethod` on all methods for in the BenchDesign 
+#' Print out details about a method included in
+#' the BenchDesign. The `showBMethods` function is just a wrapper
+#' to call `showBMethod` on all methods in the BenchDesign.
 #' 
-#' @param b BenchDesign object
-#' @param n name of a method in the BenchDesign
+#' @param b BenchDesign object.
+#' @param n name of a method in the BenchDesign to show.
 #'
 #' @return
 #' Brief description is returned to console.
+#'
+#' @examples
+#' \dontrun{
+#' bd <- BenchDesign()
+#' showBMethods(bd)
+#' }
 #' 
 #' @md
 #' @export
 #' @author Patrick Kimes
-showMethod <- function(b, n) {
+showBMethod <- function(b, n) {
     stopifnot(n %in% names(b$methods))
 
     cat(stringr::str_pad(paste0(n, " "), 60, "right", pad = "-"), "\n")
@@ -33,11 +39,11 @@ showMethod <- function(b, n) {
 }
 
 
-#' @rdname showMethod
+#' @rdname showBMethod
 #' @export
 #' @author Patrick Kimes
-showMethods <- function(b) {
+showBMethods <- function(b) {
     for (n in names(b$methods)) {
-        showMethod(b, n)
+        showBMethod(b, n)
     }
 }

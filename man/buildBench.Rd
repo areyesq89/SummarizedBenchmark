@@ -7,20 +7,24 @@
 buildBench(b, data = NULL, truthCol = NULL, ptabular = TRUE)
 }
 \arguments{
-\item{b}{BenchDesign object}
+\item{b}{BenchDesign object.}
 
-\item{data}{data set to be used in place of `bdata` for benchmarking;
-ignored if NULL (default = NULL)}
+\item{data}{Data set to be used for benchmarking, will take priority over
+data set originally specified to BenchDesign object.
+Ignored if NULL. (default = NULL)}
 
-\item{truthCol}{character name of column in data set corresponding to ground
-truth values. If specified, column will be added to `groundTruth`
-DataFrame of returned SummarizedBenchmark object, and same name
-will be used for assay (default = NULL)}
+\item{truthCol}{Character name of column in data set corresponding to ground
+truth values. If specified, column will be added to \code{groundTruth}
+DataFrame for the returned SummarizedBenchmark object, and same name
+will be used for assay. (default = NULL)}
 
-\item{ptabular}{whether to return parameters in tabular form (defualt = TRUE)}
+\item{ptabular}{Whether to return method parameters with each parameter in a
+separate column of the \code{colData} for the returned SummarizedBenchmark
+object, i.e. in tabular form. If FALSE, method parameters are returned
+as a single column with comma-delimited "key=value" pairs. (default = TRUE)}
 }
 \value{
-SummarizedBenchmark with one assay
+\code{SummarizedBenchmark} object with single assay
 }
 \description{
 Function to evaluate BenchDesign methods on supplied

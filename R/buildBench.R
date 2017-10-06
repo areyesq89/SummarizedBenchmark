@@ -3,19 +3,25 @@
 #' Function to evaluate BenchDesign methods on supplied
 #' data set to generate a SummarizedBenchmark.
 #' 
-#' @param b BenchDesign object
-#' @param data data set to be used in place of `bdata` for benchmarking;
-#'        ignored if NULL (default = NULL)
-#' @param truthCol character name of column in data set corresponding to ground
+#' @param b BenchDesign object.
+#' @param data Data set to be used for benchmarking, will take priority over
+#'        data set originally specified to BenchDesign object. 
+#'        Ignored if NULL. (default = NULL)
+#' @param truthCol Character name of column in data set corresponding to ground
 #'        truth values. If specified, column will be added to `groundTruth`
-#'        DataFrame of returned SummarizedBenchmark object, and same name
-#'        will be used for assay (default = NULL)
-#' @param ptabular whether to return parameters in tabular form (defualt = TRUE)
+#'        DataFrame for the returned SummarizedBenchmark object, and same name
+#'        will be used for assay. (default = NULL)
+#' @param ptabular Whether to return method parameters with each parameter in a
+#'        separate column of the `colData` for the returned SummarizedBenchmark
+#'        object, i.e. in tabular form. If FALSE, method parameters are returned
+#'        as a single column with comma-delimited "key=value" pairs. (default = TRUE)
 #' 
 #' @return
-#' SummarizedBenchmark with one assay
+#' `SummarizedBenchmark` object with single assay
 #'
+#' @md
 #' @importFrom data.table rbindlist
+#' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes
 buildBench <- function(b, data = NULL, truthCol = NULL, ptabular = TRUE) {
