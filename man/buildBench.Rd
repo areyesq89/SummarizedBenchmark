@@ -4,7 +4,7 @@
 \alias{buildBench}
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
-buildBench(b, data = NULL, truthCol = NULL)
+buildBench(b, data = NULL, truthCol = NULL, ptabular = TRUE)
 }
 \arguments{
 \item{b}{BenchDesign object}
@@ -16,6 +16,8 @@ ignored if NULL (default = NULL)}
 truth values. If specified, column will be added to `groundTruth`
 DataFrame of returned SummarizedBenchmark object, and same name
 will be used for assay (default = NULL)}
+
+\item{ptabular}{whether to return parameters in tabular form (defualt = TRUE)}
 }
 \value{
 SummarizedBenchmark with one assay

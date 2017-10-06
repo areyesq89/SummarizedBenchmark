@@ -10,13 +10,15 @@
 #'        truth values. If specified, column will be added to `groundTruth`
 #'        DataFrame of returned SummarizedBenchmark object, and same name
 #'        will be used for assay (default = NULL)
+#' @param ptabular whether to return parameters in tabular form (defualt = TRUE)
 #' 
 #' @return
 #' SummarizedBenchmark with one assay
 #'
+#' @importFrom data.table rbindlist
 #' @export
 #' @author Patrick Kimes
-buildBench <- function(b, data = NULL, truthCol = NULL) {
+buildBench <- function(b, data = NULL, truthCol = NULL, ptabular = TRUE) {
 
     if (!is.null(data)) {
         b$bdata <- data
@@ -39,7 +41,7 @@ buildBench <- function(b, data = NULL, truthCol = NULL) {
     a <- list("bench" = a)
     
     ## colData: method information
-    df <- clean_methods(b)
+    df <- clean_methods(b, tidy)
     
     ## performanceMetrics: empty
     pf <- SimpleList(list("bench" = list()))
@@ -77,14 +79,14 @@ eval_defaults <- function(b) {
 
 
 ## helper function to convert method info to character for colData
-clean_methods <- function(b) {
-    df <- lapply(b$methods, clean_method, bdata = b$bdata)
-    df <- do.call(rbind, df)
+clean_methods <- function(b, ptabular) {
+    df <- lapply(b$methods, clean_method, bdata = b$bdata, ptabular = ptabular)
+    df <- data.table::rbindlist(df, fill=TRUE)
     df$blabel <- names(b$methods)
     df
 }
 
-clean_method <- function(m, bdata) {
+clean_method <- function(m, bdata, ptabular) {
     ## parse package/version information
     bmeta <- func_meta(eval_tidy(m$func))
 
@@ -96,10 +98,17 @@ clean_method <- function(m, bdata) {
     }
 
     ## parse method parameters
-    bparams <- paste(names(m$dparams), "=",
-                     sapply(m$dparams, quo_text),
-                     collapse=", ")
-
+    if (ptabular) {
+        bparams <- sapply(m$dparams, quo_text)
+        names(bparams) <- paste0("param.", names(bparams))
+        bparams <- data.frame(t(bparams))
+    } else {
+        bparams <- paste(names(m$dparams), "=",
+                         sapply(m$dparams, quo_text),
+                         collapse=", ")
+        bparams <- data.frame(bparams)
+    }
+    
     ## parse postprocessing method
     has_post <- is.function(eval_tidy(m$post, bdata))
     if (has_post) {
@@ -108,7 +117,7 @@ clean_method <- function(m, bdata) {
         bpost <- NA_character_
     }
 
-    cbind(DataFrame(bfunc, bparams, bpost), bmeta)
+    cbind(data.frame(bfunc, bpost), bparams, bmeta)
 }
 
 
@@ -126,7 +135,7 @@ func_meta <- function(f) {
         pkg_vers <- as(packageVersion(pkg_name), "character")
     }
     
-    DataFrame(is_anon = pkg_anon, pkg_name = pkg_name, pkg_vers = pkg_vers)
+    data.frame(is_anon = pkg_anon, pkg_name = pkg_name, pkg_vers = pkg_vers)
 }
 
 
