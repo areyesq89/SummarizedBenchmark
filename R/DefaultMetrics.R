@@ -3,15 +3,15 @@ TPR <- function( query, truth, alpha=0.1 ){
 }
 
 TNR <- function( query, truth, alpha=0.1 ){
-  sum( ( !query < 0.1 ) & truth == 0 ) / sum( truth == 0 )
+  sum( ( !query < alpha ) & truth == 0 ) / sum( truth == 0 )
 }
 
 FPR <- function( query, truth, alpha=0.1 ){
-  sum( query < 0.1 & truth == 0 ) / sum( query < 0.1 )
+  sum( query < alpha & truth == 0 ) / sum( query < alpha )
 }
 
 FNR <- function( query, truth, alpha=0.1 ){
-  sum( !(query < 0.1) & truth == 1 ) / sum( !( query < 0.1 ) )
+  sum( !(query < alpha) & truth == 1 ) / sum( !( query < alpha ) )
 }
 
 rejections <- function( query, truth, alpha=0.1 ){
@@ -39,6 +39,8 @@ rejections <- function( query, truth, alpha=0.1 ){
 #' information about the ground truths in the rowData, the metrics TPR (true
 #' positive rate), "TNR" (true negative rate), "FPR" (false positive rate) and
 #' "FNR" (false negative rate) will be added.
+#'
+#' @author Alejandro Reyes
 #'
 #' @export
 #'
