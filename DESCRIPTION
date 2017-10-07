@@ -16,7 +16,9 @@ Depends: tidyr,
          S4Vectors,
          methods,
          rlang,
-         stringr
+         stringr,
+         data.table,
+         utils
 Suggests: iCOBRA,
           BiocStyle,
           knitr,

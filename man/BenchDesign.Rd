@@ -7,14 +7,25 @@
 BenchDesign(bdata = NULL)
 }
 \arguments{
-\item{bdata}{data.frame or other list object to be used for the
-benchmark (default = NULL)}
+\item{bdata}{optional data.frame or other list object to be
+used in the benchmark. (default = NULL)}
 }
 \value{
 a BenchDesign object
 }
 \description{
 Initializes a new BenchDesign object for benchmarking methods.
+}
+\examples{
+\dontrun{
+## with no input
+bd <- BenchDesign()
+
+## with toy data.frame
+sim_df <- as.data.frame(matrix(rnorm(20), 10, 2))
+bd <- BenchDesign(sim_df)
+}
+
 }
 \author{
 Patrick Kimes

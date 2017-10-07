@@ -87,13 +87,13 @@ In the `BenchDesign` framework implemented in the `SummarizedBenchmark` package,
 b <- BenchDesign(tdat)
 ```
 
-Then, each method of interest is added to the `BenchDesign` using `addMethod()`. 
+Then, each method of interest is added to the `BenchDesign` using `addBMethod()`. 
 ```{r}
-b <- addMethod(b, blabel = "bonf", bfunc = p.adjust,
+b <- addBMethod(b, blabel = "bonf", bfunc = p.adjust,
                p = pval, method = "bonferroni")
 ```
 
-At a minimum, `addMethod()` requires specifying three parameters:
+At a minimum, `addBMethod()` requires specifying three parameters:
 
 1. `b`: a `bench` object to modify,
 2. `blabel`: a character name for the method, and
@@ -104,28 +104,28 @@ After the three parameters are specified, any parameters needed by the method, e
 The process of adding methods can be written more concisely using the pipe operators of the `magrittr` package.
 
 ```{r}
-b %<>% addMethod(blabel = "BH", bfunc = p.adjust,
+b %<>% addBMethod(blabel = "BH", bfunc = p.adjust,
                  p = pval, method = "BH")
 ```
 
 For some methods, such as the q-value and IHW approaches above, it may be necessary to call a "post-processing" function on the primary method call. This should be specified using the `bpost` parameter. 
 
 ```{r}
-b %<>% addMethod("qv", qvalue::qvalue,
+b %<>% addBMethod("qv", qvalue::qvalue,
                   p = pval,
                   bpost = function(x) { x$qvalues })
 
-b %<>% addMethod("ihw", IHW::ihw,
+b %<>% addBMethod("ihw", IHW::ihw,
                   pvalues = pval,
                   covariates = IHW::groups_by_filter(ind_covariate, 5),
                   alpha = 0.1,
                   bpost = IHW::adj_pvalues)
 ```
 
-Now, the `BenchDesign` object contains four methods. This can be verified using the `showMethods()` function.
+Now, the `BenchDesign` object contains four methods. This can be verified using the `showBMethods()` function.
 
 ```{r}
-showMethods(b)
+showBMethods(b)
 ```
 
 While the bench now includes all the information necessary for performing the benchmarking study, the actual adjusted p-values have not yet been calculated. To do this, we simply need to call `buildBench()`. This will return a `SummarizedBenchmark` object with a single "assay" containing the table of adjusted p-values.

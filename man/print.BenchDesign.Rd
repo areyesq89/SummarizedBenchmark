@@ -7,9 +7,9 @@
 \method{print}{BenchDesign}(x, ...)
 }
 \arguments{
-\item{x}{a BenchDesign}
+\item{x}{BenchDesign object.}
 
-\item{...}{other parameters}
+\item{...}{other parameters.}
 }
 \description{
 Pretty print BenchDesign
