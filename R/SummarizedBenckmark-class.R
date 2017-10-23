@@ -10,6 +10,9 @@
 #' @slot performanceMetrics A \code{\link{SimpleList}} of the same length
 #' as the number of \code{\link{assays}} containing performance
 #' functions to be compared with the ground truths.
+#'
+#' @author Alejandro Reyes
+#'
 #' @aliases SummarizedBenchmark-class
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
 #' @importFrom methods as formalArgs is new validObject
@@ -83,6 +86,8 @@ setValidity( "SummarizedBenchmark", function( object ) {
 #' of functions. Each function must contain the parameters 'query' and
 #' 'truth'.
 #' @param ... Additional parameters passed to \code{\link{SummarizedExperiment}}.
+#'
+#' @author Alejandro Reyes
 #'
 #' @examples
 #'
@@ -193,6 +198,8 @@ performanceMetricsSB <- function( object, assay=NULL ){
 #' performanceMetrics( sb, assay="qvalue" )
 #' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
 #'
+#' @author Alejandro Reyes
+#'
 #' @export
 setMethod( "performanceMetrics",
   signature( object = "SummarizedBenchmark" ), performanceMetricsSB )
@@ -201,7 +208,6 @@ setMethod( "performanceMetrics",
 #' @export
 setGeneric( "performanceMetrics<-",
   function( object, ..., value ) standardGeneric( "performanceMetrics<-" ) )
-
 
 #' @name performanceMetrics
 #' @rdname performanceMetrics
@@ -214,7 +220,40 @@ setReplaceMethod( "performanceMetrics",
                    object
                  } )
 
-#' This is data to be included in my package
+#' Accessor and replacement of the assay names of a SummarizedBenchmark object.
+#'
+#' @docType methods
+#' @name assayNames
+#' @aliases assayNames assayNames,SummarizedBenchmark-method assayNames<-,SummarizedBenchmark,character-method
+#'
+#' @param x a \code{SummarizedBenchmark} object.
+#' @param value A character vector
+#' @param ... Futher arguments, perhaps used by methods
+#' @seealso \code{\link{performanceMetrics}}
+#'
+#' @examples
+#'
+#' data( sb )
+#' assayNames( sb )[2] <- "log2FC"
+#'
+#' @author Alejandro Reyes
+#' @importMethodsFrom SummarizedExperiment assayNames
+#' @export
+setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
+                  function(x, ..., value)
+                 {
+                   oldNames <- names( assays( x, withDimnames=FALSE ) )
+                   names( assays( x, withDimnames=FALSE ) ) <- value
+                   newNames <- names( assays( x, withDimnames=FALSE ) )
+                   mm <- match( names( x@performanceMetrics ),  oldNames )
+                   names( x@performanceMetrics)[mm] <- newNames
+                   truthCol <- elementMetadata( rowData( x ) )$colType == "groundTruth"
+                   mm <- match( colnames( rowData( x ) )[truthCol], oldNames )
+                   colnames(rowData( x ))[truthCol][mm] <- newNames
+                   x
+                 } )
+
+#' SummarizedBenchmark example
 #'
 #' @name sb
 #' @docType data

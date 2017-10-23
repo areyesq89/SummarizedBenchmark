@@ -42,3 +42,6 @@ performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
 \seealso{
 \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}
 }
+\author{
+Alejandro Reyes
+}

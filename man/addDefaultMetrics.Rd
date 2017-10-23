@@ -31,3 +31,6 @@ data( sb )
 sb <- addDefaultMetrics( sb )
 
 }
+\author{
+Alejandro Reyes
+}
