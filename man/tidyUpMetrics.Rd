@@ -26,3 +26,6 @@ sb <- estimateMetricsForAssay( sb, assay="qvalue", evalMetric="rejections",
 tidyUpMetrics( sb )
 
 }
+\author{
+Alejandro Reyes
+}

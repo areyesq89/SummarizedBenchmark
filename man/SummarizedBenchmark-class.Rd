@@ -20,3 +20,6 @@ as the number of \code{\link{assays}} containing performance
 functions to be compared with the ground truths.}
 }}
 
+\author{
+Alejandro Reyes
+}
