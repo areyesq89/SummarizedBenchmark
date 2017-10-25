@@ -28,9 +28,9 @@ setValidity( "SummarizedBenchmark", function( object ) {
     stop("The number of elements of the slot 'performanceFunction' has
          be of the same length as the number of assays.")
   }
-  if( !all( assayNames( object ) %in% colnames( rowData( object ) ) ) ){
-    stop("Not all assays have a corresponding ground truth column in rowData")
-  }
+#  if( ncol( rowData( object ) ) > 0 & !all( assayNames( object ) %in% colnames( rowData( object ) ) ) ){
+#    stop("Not all assays have a corresponding ground truth column in rowData")
+#  }
   if( !all( names( object@performanceMetrics ) %in% assayNames( object  ) ) ){
     stop("The names of the performanceMetrics list must match the names of the assays")
   }
@@ -248,10 +248,12 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
                    mm <- match( names( x@performanceMetrics ),  oldNames )
                    names( x@performanceMetrics)[mm] <- newNames
                    truthCol <- elementMetadata( rowData( x ) )$colType == "groundTruth"
-                   mm <- match( colnames( rowData( x ) )[truthCol], oldNames )
-                   colnames(rowData( x ))[truthCol][mm] <- newNames
+                   if( any( truthCol ) ){
+                    mm <- match( colnames( rowData( x ) )[truthCol], oldNames )
+                    colnames(rowData( x ))[truthCol][mm] <- newNames
+                   }
                    x
-                 } )
+                  } )
 
 #' SummarizedBenchmark example
 #'
