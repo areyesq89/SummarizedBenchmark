@@ -51,27 +51,29 @@ addDefaultMetrics <- function( object ){
       assay="qvalue",
       evalMetric="rejections",
       evalFunction = rejections )
-    if( all(!is.na( rowData( object )[["qvalue"]] )) ){
-      object <- addPerformanceMetric(
-        object=object,
-        assay="qvalue",
-        evalMetric="TPR",
-        evalFunction = TPR )
-      object <- addPerformanceMetric(
-        object=object,
-        assay="qvalue",
-        evalMetric="TNR",
-        evalFunction = TNR )
-      object <- addPerformanceMetric(
-        object=object,
-        assay="qvalue",
-        evalMetric="FPR",
-        evalFunction=FPR )
-      object <- addPerformanceMetric(
-        object=object,
-        assay="qvalue",
-        evalMetric="FNR",
-        evalFunction=FNR )
+    if( !is.null( rowData(object)[["qvalue"]] ) ){
+      if( all(!is.na( rowData( object )[["qvalue"]] )) ){
+        object <- addPerformanceMetric(
+          object=object,
+          assay="qvalue",
+          evalMetric="TPR",
+          evalFunction = TPR )
+        object <- addPerformanceMetric(
+          object=object,
+          assay="qvalue",
+          evalMetric="TNR",
+          evalFunction = TNR )
+        object <- addPerformanceMetric(
+          object=object,
+          assay="qvalue",
+          evalMetric="FPR",
+          evalFunction=FPR )
+        object <- addPerformanceMetric(
+          object=object,
+          assay="qvalue",
+          evalMetric="FNR",
+          evalFunction=FNR )
+      }
     }
   }
   object

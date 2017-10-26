@@ -40,3 +40,6 @@ sb <- addPerformanceMetric(
 )
 
 }
+\author{
+Alejandro Reyes
+}

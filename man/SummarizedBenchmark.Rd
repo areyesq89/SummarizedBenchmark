@@ -65,3 +65,6 @@ sb <- SummarizedBenchmark(
     groundTruth=groundTruth )
 
 }
+\author{
+Alejandro Reyes
+}

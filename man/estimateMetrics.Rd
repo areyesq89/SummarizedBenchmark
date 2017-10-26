@@ -69,3 +69,6 @@ allMetrics <- estimatePerformanceMetrics( sb )
 allMetricsTidy <- estimatePerformanceMetrics( sb, tidy=TRUE )
 
 }
+\author{
+Alejandro Reyes
+}

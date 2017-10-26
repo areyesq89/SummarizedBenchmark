@@ -3,9 +3,9 @@
 \docType{data}
 \name{sb}
 \alias{sb}
-\title{This is data to be included in my package}
+\title{SummarizedBenchmark example}
 \description{
-This is data to be included in my package
+SummarizedBenchmark example
 }
 \keyword{SummarizedBenchmark}
 \keyword{data}

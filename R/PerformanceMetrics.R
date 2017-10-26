@@ -12,6 +12,8 @@
 #' contain at least two arguments, query and truth, where query is the output vector
 #' of a method and truth is the vector of true values. If additional parameters
 #' are specified, they must contain default values.
+#' 
+#' @author Alejandro Reyes
 #'
 #' @examples
 #'
@@ -78,6 +80,8 @@ addPerformanceMetric <- function( object, evalMetric, assay, evalFunction ){
 #' @param tidy Logical (default: FALSE). If TRUE, a long formated \code{\link{data.frame}}
 #' is returned.
 #' @param ... Additional parameters passed to the performance functions.
+#' 
+#' @author Alejandro Reyes
 #'
 #' @examples
 #'
@@ -227,6 +231,8 @@ estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ..
 #'     },
 #'     addColData=TRUE )
 #' tidyUpMetrics( sb )
+#'
+#' @author Alejandro Reyes
 #'
 #' @return A tidy \code{data.frame}
 #' @importFrom tidyr gather
