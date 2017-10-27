@@ -73,14 +73,25 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ptabular = TRUE) {
 
 ## helper function to evaluate all quosures with data
 eval_defaults <- function(b) {
-        lapply(b$methods,
-               function(x) {
-                   expr <- quo(UQ(x$func)(!!! x$dparams))
-                   if (is.function(eval_tidy(x$post, b$bdata))) {
-                       expr <- quo(UQ(x$post)(!! expr))
-                   }
-                   eval_tidy(expr, b$bdata)
-               })
+    al <- lapply(seq(b$methods),
+                 function(i) {
+                     x <- b$methods[[i]]
+                     expr <- quo(UQ(x$func)(!!! x$dparams))
+                     if (is.function(eval_tidy(x$post, b$bdata))) {
+                         expr <- quo(UQ(x$post)(!! expr))
+                     }
+                     tryCatch(
+                         eval_tidy(expr, b$bdata),
+                         error = function(e) {
+                             message("!! error caught in buildBench !!\n",
+                                     "!! error in method: ", names(b$methods)[i], "\n",
+                                     "!!  original message: \n",
+                                     "!!  ", e)
+                             return(NA)
+                         })
+                 })
+    names(al) <- names(b$methods)
+    al
 }
 
 
