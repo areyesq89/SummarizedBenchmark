@@ -11,6 +11,9 @@
 #'        truth values. If specified, column will be added to \code{groundTruth}
 #'        DataFrame for the returned SummarizedBenchmark object, and same name
 #'        will be used for assay. (default = NULL)
+#' @param ftCols Vector of character names of columns in data set that should be
+#'        included as feature data (row data) in the returned SummarizedBenchmark
+#'        object. (default = NULL)
 #' @param ptabular Whether to return method parameters with each parameter in a
 #'        separate column of the \code{colData} for the returned SummarizedBenchmark
 #'        object, i.e. in tabular form. If FALSE, method parameters are returned
@@ -36,8 +39,8 @@
 #' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes
-buildBench <- function(b, data = NULL, truthCol = NULL, ptabular = TRUE,
-                       parallel = FALSE, BPPARAM = bpparam()) {
+buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
+                       ptabular = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
     if (!is.null(data)) {
         b$bdata <- data
@@ -53,6 +56,11 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ptabular = TRUE,
     if (!is.null(truthCol)) {
         stopifnot(truthCol %in% names(b$bdata))
         stopifnot(dim(b$bdata$truthCol) == 1)
+    }
+
+    ## check if ftCols are in bdata
+    if (!is.null(ftCols)) {
+        stopifnot(ftCols %in% names(b$bdata))
     }
 
     stopifnot((length(ptabular) == 1) && is.logical(ptabular))
@@ -73,22 +81,26 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ptabular = TRUE,
     ## performanceMetrics: empty
     pf <- SimpleList(list("bench" = list()))
 
-    ## groundTruth
+
+    ## list of initialization parameters
+    sbParams <- list(assays = a,
+                     colData = df,
+                     performanceMetrics = pf)
+
+    ## rename assay to match groundTruth column is specified
     if (!is.null(truthCol)) {
-        gt <- DataFrame(V1 = b$bdata[[truthCol]])
-        names(a) <- truthCol
-        names(pf) <- truthCol
-        names(gt) <- truthCol
-    
-        SummarizedBenchmark(assays = a,
-                            colData = df,
-                            performanceMetrics = pf,
-                            groundTruth = gt)
-    } else {
-        SummarizedBenchmark(assays = a,
-                            colData = df,
-                            performanceMetrics = pf)
+        names(sbParams[["assays"]]) <- truthCol
+        names(sbParams[["performanceMetrics"]]) <- truthCol
+
+        sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCol])
     }
+
+    ## add feature columns if specified
+    if (!is.null(ftCols)) {
+        sbParams[["ftData"]] <- DataFrame(b$bdata[ftCols])
+    }
+
+    do.call(SummarizedBenchmark, sbParams)
 }
 
 

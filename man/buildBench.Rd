@@ -4,8 +4,8 @@
 \alias{buildBench}
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
-buildBench(b, data = NULL, truthCol = NULL, ptabular = TRUE,
-  parallel = FALSE, BPPARAM = bpparam())
+buildBench(b, data = NULL, truthCol = NULL, ftCols = NULL,
+  ptabular = TRUE, parallel = FALSE, BPPARAM = bpparam())
 }
 \arguments{
 \item{b}{\code{BenchDesign} object.}
@@ -18,6 +18,10 @@ Ignored if NULL. (default = NULL)}
 truth values. If specified, column will be added to \code{groundTruth}
 DataFrame for the returned SummarizedBenchmark object, and same name
 will be used for assay. (default = NULL)}
+
+\item{ftCols}{Vector of character names of columns in data set that should be
+included as feature data (row data) in the returned SummarizedBenchmark
+object. (default = NULL)}
 
 \item{ptabular}{Whether to return method parameters with each parameter in a
 separate column of the \code{colData} for the returned SummarizedBenchmark
