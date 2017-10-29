@@ -4,13 +4,14 @@
 \alias{buildBench}
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
-buildBench(b, data = NULL, truthCol = NULL, ptabular = TRUE)
+buildBench(b, data = NULL, truthCol = NULL, ftCols = NULL,
+  ptabular = TRUE, parallel = FALSE, BPPARAM = bpparam())
 }
 \arguments{
-\item{b}{BenchDesign object.}
+\item{b}{\code{BenchDesign} object.}
 
 \item{data}{Data set to be used for benchmarking, will take priority over
-data set originally specified to BenchDesign object.
+data set originally specified to BenchDesign object. 
 Ignored if NULL. (default = NULL)}
 
 \item{truthCol}{Character name of column in data set corresponding to ground
@@ -18,17 +19,35 @@ truth values. If specified, column will be added to \code{groundTruth}
 DataFrame for the returned SummarizedBenchmark object, and same name
 will be used for assay. (default = NULL)}
 
+\item{ftCols}{Vector of character names of columns in data set that should be
+included as feature data (row data) in the returned SummarizedBenchmark
+object. (default = NULL)}
+
 \item{ptabular}{Whether to return method parameters with each parameter in a
 separate column of the \code{colData} for the returned SummarizedBenchmark
 object, i.e. in tabular form. If FALSE, method parameters are returned
 as a single column with comma-delimited "key=value" pairs. (default = TRUE)}
+
+\item{parallel}{Whether to use parallelization for evaluating each method.
+Parallel execution is performed using \code{BiocParallel}. Parameters for
+parallelization should be specified with \code{BiocParallel::register} or
+through the \code{BPPARAM} parameter. (default = FALSE)}
+
+\item{BPPARAM}{Optional \code{BiocParallelParam} instance to be used when
+\code{parallel} is TRUE. If not specified, the default instance from the
+parameter registry is used.}
 }
 \value{
 \code{SummarizedBenchmark} object with single assay
 }
 \description{
-Function to evaluate BenchDesign methods on supplied
-data set to generate a SummarizedBenchmark.
+Function to evaluate \code{BenchDesign} methods on supplied
+data set to generate a \code{SummarizedBenchmark}.
+}
+\details{
+Parallelization is performed across methods. Therefore, there is no benefit to
+specifying more cores than the total number of methods in the \code{BenchDesign}
+object.
 }
 \author{
 Patrick Kimes
