@@ -81,34 +81,35 @@ While this approach can work for smaller comparisons, it can quickly become over
 
 ## BenchDesign Approach 
 
-In the `BenchDesign` framework implemented in the `SummarizedBenchmark` package, a `BenchDesign` is first constructed with the data as the sole input. 
+In the `BenchDesign` framework implemented in the `SummarizedBenchmark` package, a `BenchDesign` is first constructed with the data as the sole input. (Alternatively, the `BenchDesign` can be constructed without any data input.)
 
 ```{r}
 b <- BenchDesign(tdat)
 ```
 
 Then, each method of interest is added to the `BenchDesign` using `addBMethod()`. 
+
 ```{r}
 b <- addBMethod(b, blabel = "bonf", bfunc = p.adjust,
-               p = pval, method = "bonferroni")
+                p = pval, method = "bonferroni")
 ```
 
 At a minimum, `addBMethod()` requires specifying three parameters:
 
-1. `b`: a `bench` object to modify,
+1. `b`: a `BenchDesign` object to modify,
 2. `blabel`: a character name for the method, and
-3. `bfunc`: the function to call.
+3. `bfunc`: the function to be called.
 
-After the three parameters are specified, any parameters needed by the method, e.g. `p.adjust`, should be passed as named variables, e.g. `p = pval, method = "bonferroni"`. Notice that `pval` **does not** need to be called as `tdat$pval`.  
+After the minimum parameters are specified, any parameters needed by the method specified in `bfunc` should be passed as named variables, e.g. `p = pval, method = "bonferroni"`. Notice that `pval` **does not** need to be called as `tdat$pval`.  
 
 The process of adding methods can be written more concisely using the pipe operators of the `magrittr` package.
 
 ```{r}
 b %<>% addBMethod(blabel = "BH", bfunc = p.adjust,
-                 p = pval, method = "BH")
+                  p = pval, method = "BH")
 ```
 
-For some methods, such as the q-value and IHW approaches above, it may be necessary to call a "post-processing" function on the primary method call. This should be specified using the `bpost` parameter. 
+For some methods, such as the q-value and IHW approaches above, it may be necessary to call a "post-processing" function on the primary method call. This should be specified using the optional `bpost` parameter. 
 
 ```{r}
 b %<>% addBMethod("qv", qvalue::qvalue,
@@ -131,12 +132,12 @@ showBMethods(b)
 While the bench now includes all the information necessary for performing the benchmarking study, the actual adjusted p-values have not yet been calculated. To do this, we simply need to call `buildBench()`. This will return a `SummarizedBenchmark` object with a single "assay" containing the table of adjusted p-values.
 
 ```{r}
-sb <- b %>% buildBench
+sb <- buildBench(b)
 sb
 ```
 
 ```{r}
-head(assay(sb, 1))
+head(assay(sb))
 ```
 
 The functions and parameters are stored in the `colData` of the same object.
@@ -146,4 +147,24 @@ colData(sb)
 ```
 
 The resulting object can now be saved to disk with the method information tied directly to the resulting output. Additionally, comparison of the adjusted p-values can now be carried out using downstream methods using the `SummarizedBenchmark` framework.
+
+## Parallelization with BiocParallel
+
+The simple example considered in this vignette was constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial on a single machine is often undesirable. Since constructing a `BenchDesign` object requires no computation, the bottleneck only appears at the `buildBench` step of the benchmarking process. Parallelization of this step is enabled using the `BiocParallel` package.  
+
+By default, parallel evaluation is disabled, but can easily be enabled by setting `parallel = TRUE` and optionally specifying the `BPPARAM` parameter. If `BPPARAM` is not specified, the default back-end will be used. The default `BiocParallelParam` can be checked with `bpparam()`.
+
+```{r}
+bpparam()
+sbp <- buildBench(b, parallel = TRUE)
+sbp
+```
+
+The results, as expected, are the same as when `buildBench` was called without parallelization.
+
+```{r}
+all(assay(sbp) == assay(sb))
+```
+
+Details on how to specify the parallelization back-end can be found in the _Introduction to BiocParallel_ vignette for the [`BiocParallel`](http://bioconductor.org/packages/release/bioc/html/BiocParallel.html) package. Parallelization of `buildBench` is carried out across the set of methods specified with `addBMethod`. There is no benefit to specifying more cores than the number of methods.
 
