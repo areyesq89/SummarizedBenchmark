@@ -19,7 +19,8 @@ Depends: tidyr,
          rlang,
          stringr,
          data.table,
-         utils
+         utils,
+         BiocParallel
 Suggests: iCOBRA,
           BiocStyle,
           knitr,
