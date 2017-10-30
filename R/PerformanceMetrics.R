@@ -12,7 +12,7 @@
 #' contain at least two arguments, query and truth, where query is the output vector
 #' of a method and truth is the vector of true values. If additional parameters
 #' are specified, they must contain default values.
-#' 
+#'
 #' @author Alejandro Reyes
 #'
 #' @examples
@@ -80,7 +80,7 @@ addPerformanceMetric <- function( object, evalMetric, assay, evalFunction ){
 #' @param tidy Logical (default: FALSE). If TRUE, a long formated \code{\link{data.frame}}
 #' is returned.
 #' @param ... Additional parameters passed to the performance functions.
-#' 
+#'
 #' @author Alejandro Reyes
 #'
 #' @examples
@@ -165,6 +165,7 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=
   } )
   names( res ) <- names( allFunctions )
   res <- Reduce( cbind, res )
+  object <- cleanPerformanceMetrics( object )
   res <- cbind( colData( object ), res )
   if( addColData | tidy ){
     colData( object ) <- res
@@ -185,6 +186,7 @@ estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ..
   stopifnot( is( object, "SummarizedBenchmark" ) )
   validObject( object )
   assayNames <- assayNames( object )
+  object <- cleanPerformanceMetrics( object )
   allRes <- lapply( assayNames, function(x){
     if( length( object@performanceMetrics[[x]] ) > 0 ){
       estimateMetricsForAssay( object, assay=x, ... )
@@ -214,6 +216,15 @@ estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ..
   }else{
     return( allRes )
   }
+}
+
+cleanPerformanceMetrics <- function( object ){
+  prevMetrics <- elementMetadata( colData( object ) )$colType == "performanceMetric"
+  if( any( prevMetrics ) ){
+    message("Found already estimated performance metrics, replacing these")
+    colData( object ) <- colData( object )[,!prevMetrics,drop=FALSE]
+  }
+  object
 }
 
 #' @title Reformat performance metrics to a long format.
