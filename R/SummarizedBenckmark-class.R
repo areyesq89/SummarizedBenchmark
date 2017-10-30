@@ -241,19 +241,20 @@ setReplaceMethod( "performanceMetrics",
 #' @export
 setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
                   function(x, ..., value)
-                 {
-                   oldNames <- names( assays( x, withDimnames=FALSE ) )
-                   names( assays( x, withDimnames=FALSE ) ) <- value
-                   newNames <- names( assays( x, withDimnames=FALSE ) )
-                   mm <- match( names( x@performanceMetrics ),  oldNames )
-                   names( x@performanceMetrics)[mm] <- newNames
-                   truthCol <- elementMetadata( rowData( x ) )$colType == "groundTruth"
-                   if( any( truthCol ) ){
-                    mm <- match( colnames( rowData( x ) )[truthCol], oldNames )
-                    colnames(rowData( x ))[truthCol][mm] <- newNames
-                   }
-                   x
-                  } )
+{
+  oldNames <- names( assays( x, withDimnames=FALSE ) )
+  names( assays( x, withDimnames=FALSE ) ) <- value
+  newNames <- names( assays( x, withDimnames=FALSE ) )
+  mm <- match( names( x@performanceMetrics ),  oldNames )
+  names( x@performanceMetrics)[mm] <- newNames
+  truthCol <- elementMetadata( rowData( x ) )$colType == "groundTruth"
+  truthCol[is.na(truthCol)] <- FALSE
+  if( any( truthCol ) ){
+    mm <- match( colnames( rowData( x ) )[truthCol], oldNames )
+    colnames(rowData( x ))[truthCol][mm] <- newNames
+  }
+  x
+} )
 
 #' SummarizedBenchmark example
 #'
