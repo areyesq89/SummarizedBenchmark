@@ -135,9 +135,9 @@ SummarizedBenchmark <- function( assays, colData, ftData=NULL,
   if( length( unique( sapply( assays, nrow ) ) ) > 1 ){
     stop("All metric matrices must have the same number of rows.")
   }
+  elementMetadata(groundTruth) <- DataFrame(colType="groundTruth")
   if( is.null( ftData ) ){
-    rData <- DataFrame(groundTruth)
-    elementMetadata(rData) <- DataFrame(colType="groundTruth")
+    rData <- groundTruth
   }else{
     elementMetadata( ftData ) <- DataFrame( colType="featureData" )
     rData <- cbind( groundTruth, ftData )
