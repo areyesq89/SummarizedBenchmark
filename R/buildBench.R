@@ -9,7 +9,7 @@
 #'        Ignored if NULL. (default = NULL)
 #' @param truthCols Character vector of column names in data set corresponding to
 #'        ground truth values for each assay. If specified, column will be added to
-#'        the \code{groundTruth DataFrame for the returned SummarizedBenchmark object.
+#'        the \code{groundTruth} DataFrame for the returned SummarizedBenchmark object.
 #'        If the \code{BenchDesign} includes only a single assay, the same name
 #'        will be used for the assay. If the \code{BenchDesign} includes multiple assays,
 #'        to map data set columns with assays, the vector must have names corresponding
