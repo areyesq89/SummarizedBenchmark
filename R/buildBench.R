@@ -155,18 +155,32 @@ evalBMethodsParallel <- function(b, BPPARAM) {
 
 ## helper function to convert method info to character for colData
 cleanBMethods <- function(b, ptabular) {
-    df <- lapply(b$methods, cleanBMethod, bdata = b$bdata, ptabular = ptabular)
+    df <- mapply(cleanBMethod, m = b$methods, mname = names(b$methods), 
+                 MoreArgs = list(bdata = b$bdata, ptabular = ptabular))
     df <- data.table::rbindlist(df, fill=TRUE)
     df$blabel <- names(b$methods)
     df
 }
 
-cleanBMethod <- function(m, bdata, ptabular) {
-    ## parse package/version information
-    bmeta <- funcMeta(eval_tidy(m$func))
+cleanBMethod <- function(m, mname, bdata, ptabular) {
+    ## check if `meta =` is specified for method
+    if (!is.null(m$meta)) {
+        if (!is(m$meta, "list") ||
+            length(names(m$meta)) != length(m$meta) ||
+            is.null(names(m$meta)) ||
+            any(names(m$meta) == "")) {
+            warning(paste0("bmeta parameter specified for method '",
+                           mname, "' will not be used. ",
+                           "meta must be a list of named entries."))
+            m$meta <- NULL
+        }
+    }
 
+    ## parse package/version information
+    bmeta <- funcMeta(m$func, m$meta)
+    
     ## parse primary method
-    if (bmeta$is_anon[1]) {
+    if (bmeta$bfunc_anon[1]) {
         bfunc <- gsub("\n", ";", quo_text(m$func))
     } else {
         bfunc <- quo_name(m$func)
@@ -197,20 +211,59 @@ cleanBMethod <- function(m, bdata, ptabular) {
 
 
 ## helper to gather important information for function
-funcMeta <- function(f) {
-    fenv <- environment(f)
+funcMeta <- function(f, meta) {
 
-    pkg_name <- packageName(fenv)
-    pkg_anon <- is.null(pkg_name)
+    f <- eval_tidy(f) 
+    ## determine if main `bfunc` was anonymous
+    f_anon <- is.null(packageName(environment(f)))
 
-    if (pkg_anon) {
-        pkg_name <- NA_character_
-        pkg_vers <- NA_character_
-    } else {
-        pkg_vers <- as(packageVersion(pkg_name), "character")
+    fsrc <- f
+    vers_src <- "bfunc"
+    if ("pkg_func" %in% names(meta)) {
+        vers_src <- "bmeta_func"
+        fsrc <- eval_tidy(meta$pkg_func)
+    } else if ("pkg_name" %in% names(meta) |
+               "pkg_name" %in% names(meta)) {
+        pkg_name <- ifelse("pkg_name" %in% names(meta),
+                           meta$pkg_name, NA_character_)
+        pkg_vers <- ifelse("pkg_vers" %in% names(meta),
+                           meta$pkg_vers, NA_character_)
+        vers_src <- "bmeta_manual"
+        fsrc <- NULL
+    }
+
+    if (!is.null(fsrc)) {
+        fenv <- environment(fsrc)
+        pkg_name <- packageName(fenv)
+        if (is.null(pkg_name)) {
+            pkg_name <- NA_character_
+            pkg_vers <- NA_character_
+        } else {
+            pkg_vers <- as(packageVersion(pkg_name), "character")
+        }
     }
     
-    data.frame(is_anon = pkg_anon, pkg_name = pkg_name, pkg_vers = pkg_vers)
+    res <- data.frame(bfunc_anon = f_anon, vers_src = vers_src,
+                      pkg_name = pkg_name, pkg_vers = pkg_vers)
+
+    ## need to parse and merge manually defined metadata columns 
+    if (!is.null(meta)) {
+        meta_func <- meta[["pkg_func"]] 
+        meta <- meta[!(names(meta) %in% c("pkg_func", "pkg_name", "pkg_vers"))]
+        if (length(meta) > 0) {
+            names(meta) <- paste0("meta_", names(meta))
+        }
+        if (!is.null(meta_func)) {
+            meta_func <- gsub("\n", ";", quo_text(meta_func))
+            if (nchar(meta_func) > 20) {
+                meta_func <- "omitted (>20 char)"
+            }
+            meta <- c(meta, "pkg_func" = meta_func)
+        }
+        res <- c(res, meta)
+    }
+
+    res
 }
 
 

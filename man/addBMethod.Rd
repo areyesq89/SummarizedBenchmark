@@ -4,7 +4,7 @@
 \alias{addBMethod}
 \title{Add new method to BenchDesign object}
 \usage{
-addBMethod(b, blabel, bfunc, bpost = NULL, ...)
+addBMethod(b, blabel, bfunc, bpost = NULL, bmeta = NULL, ...)
 }
 \arguments{
 \item{b}{BenchDesign object.}
@@ -16,6 +16,11 @@ addBMethod(b, blabel, bfunc, bpost = NULL, ...)
 \item{bpost}{Optional post-processing function that takes
 output of \code{bfunc} as input. Ignored if NULL.
 (default = NULL)}
+
+\item{bmeta}{Optional metadata information for method to be
+included in \code{colData} of \code{SummarizedBenchmark} object
+generated using \code{buildBench}. See Details for more
+information. Ignored if NULL. (default = NULL)}
 
 \item{...}{Named \code{parameter = value} pairs to be passed to
 \code{func}.}
@@ -38,6 +43,24 @@ the output of the workhorse function, \code{bfunc}, needs to be
 further processed. As an example, \code{bpost} may be a simple
 "getter" function for accessing the column of interest from
 the large object returned by \code{bfunc}.
+
+The optional \code{bmeta} parameter accepts a named list of metadata
+tags to be included for the method in the resulting \code{SummarizedBenchmark}
+object. This can be useful for two primary cases. First, it can help keep
+analyses better organized by allowing the specification of additional
+information that should be stored with methods, e.g. a tag for "method type"
+or descriptive information on why the method was included in the comparison.
+Second, and more improtantly, the \code{bmeta} parameter can be used to overwrite
+the package and version information that is automatically extracted from the
+function specified to \code{bfunc}. This is particularly useful when the function
+passed to \code{bfunc} is a wrapper for a script in (or outside of) R, and the
+appropriate package and version information can't be directly pulled from
+\code{bfunc}. In this case, the user can either manually specify the \code{"pkg_name"}
+and \code{"pkg_vers"} values to \code{bmeta} as a list, or specify a separate function
+that should be used to determine the package name and version. If a separate
+function should be used, it should be passed to \code{bmeta} as a list entry
+with the name \code{pkg_func} and first quoted using \code{rlang::quo}, e.g.
+\code{list(pkg_func = quo(p.adjust)}.
 }
 \examples{
 \dontrun{
