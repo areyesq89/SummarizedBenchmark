@@ -69,15 +69,19 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
             stop("Invalid naming of bpost functions specified for methods.")
         }
     } else {
-        assay_names <- truthCol
+        if (is.null(truthCol)) {
+            assay_names <- "bench"
+        } else {
+            assay_names <- truthCol
+        }
     }
 
     ## check if truthCol is in bdata and 1-dim vector
     if (!is.null(truthCol)) {
-        stopifnot(truthCol %in% names(b$bdata))
+        stopifnot(truthCol %in% names(b$bdata),
+                  length(truthCol) == nassays)
         if (nassays > 1) {
-            stopifnot(length(truthCol) == nassays,
-                      all(names(truthCol) %in% assay_names))
+            stopifnot(names(truthCol) %in% assay_names)
         }
     }
 
@@ -118,13 +122,15 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
                      colData = df,
                      performanceMetrics = pf)
 
-    ## rename assay to match groundTruth column is specified
+    ## pull out grouthTruth if available
     if (!is.null(truthCol)) {
+        sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCol])
+        ## rename assay to match groundTruth for nassays == 1 case
         if (nassays == 1) {
             names(sbParams[["assays"]]) <- truthCol
             names(sbParams[["performanceMetrics"]]) <- truthCol
         }
-        sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCol])
+        ## rename grouthTruth to match assays for nassays > 1 case
         if (nassays > 1) {
             names(sbParams[["groundTruth"]]) <- names(truthCol)
         }
