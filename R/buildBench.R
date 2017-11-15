@@ -7,10 +7,14 @@
 #' @param data Data set to be used for benchmarking, will take priority over
 #'        data set originally specified to BenchDesign object. 
 #'        Ignored if NULL. (default = NULL)
-#' @param truthCol Character name of column in data set corresponding to ground
-#'        truth values. If specified, column will be added to \code{groundTruth}
-#'        DataFrame for the returned SummarizedBenchmark object, and same name
-#'        will be used for assay. (default = NULL)
+#' @param truthCols Character vector of column names in data set corresponding to
+#'        ground truth values for each assay. If specified, column will be added to
+#'        the \code{groundTruth DataFrame for the returned SummarizedBenchmark object.
+#'        If the \code{BenchDesign} includes only a single assay, the same name
+#'        will be used for the assay. If the \code{BenchDesign} includes multiple assays,
+#'        to map data set columns with assays, the vector must have names corresponding
+#'        to the assay names specified to the \code{bpost} parameter at each
+#'        \code{addBMethod} call. (default = NULL)
 #' @param ftCols Vector of character names of columns in data set that should be
 #'        included as feature data (row data) in the returned SummarizedBenchmark
 #'        object. (default = NULL)
@@ -39,7 +43,7 @@
 #' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes
-buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
+buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
                        ptabular = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
     if (!is.null(data)) {
@@ -69,19 +73,19 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
             stop("Invalid naming of bpost functions specified for methods.")
         }
     } else {
-        if (is.null(truthCol)) {
+        if (is.null(truthCols)) {
             assay_names <- "bench"
         } else {
-            assay_names <- truthCol
+            assay_names <- truthCols
         }
     }
 
-    ## check if truthCol is in bdata and 1-dim vector
-    if (!is.null(truthCol)) {
-        stopifnot(truthCol %in% names(b$bdata),
-                  length(truthCol) == nassays)
+    ## check if truthCols is in bdata and 1-dim vector
+    if (!is.null(truthCols)) {
+        stopifnot(truthCols %in% names(b$bdata),
+                  length(truthCols) == nassays)
         if (nassays > 1) {
-            stopifnot(names(truthCol) %in% assay_names)
+            stopifnot(names(truthCols) %in% assay_names)
         }
     }
 
@@ -123,16 +127,16 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
                      performanceMetrics = pf)
 
     ## pull out grouthTruth if available
-    if (!is.null(truthCol)) {
-        sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCol])
+    if (!is.null(truthCols)) {
+        sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCols])
         ## rename assay to match groundTruth for nassays == 1 case
         if (nassays == 1) {
-            names(sbParams[["assays"]]) <- truthCol
-            names(sbParams[["performanceMetrics"]]) <- truthCol
+            names(sbParams[["assays"]]) <- truthCols
+            names(sbParams[["performanceMetrics"]]) <- truthCols
         }
         ## rename grouthTruth to match assays for nassays > 1 case
         if (nassays > 1) {
-            names(sbParams[["groundTruth"]]) <- names(truthCol)
+            names(sbParams[["groundTruth"]]) <- names(truthCols)
         }
     }
 

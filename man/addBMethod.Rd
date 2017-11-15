@@ -44,6 +44,9 @@ further processed. As an example, \code{bpost} may be a simple
 "getter" function for accessing the column of interest from
 the large object returned by \code{bfunc}.
 
+If multiple assays (i.e. result metrics) should be generated, the optional
+\code{bpost} parameter now handle a list of functions.
+
 The optional \code{bmeta} parameter accepts a named list of metadata
 tags to be included for the method in the resulting \code{SummarizedBenchmark}
 object. This can be useful for two primary cases. First, it can help keep
