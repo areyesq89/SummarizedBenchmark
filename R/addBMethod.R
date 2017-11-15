@@ -31,6 +31,9 @@
 #'        `func`.
 #'
 #' @details
+#' If multiple assays (i.e. result metrics) should be generated, the optional
+#' `bpost` parameter now handle a list of functions.
+#' 
 #' The optional `bmeta` parameter accepts a named list of metadata
 #' tags to be included for the method in the resulting `SummarizedBenchmark`
 #' object. This can be useful for two primary cases. First, it can help keep

@@ -52,10 +52,33 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
              "Please specify a non-NULL dataset to build SummarizedBenchmark.")
     }
 
+    ## determine number of assay to generate
+    nassays <- sapply(b$methods, function(x) { length(eval_tidy(x$post, b$bdata)) })
+    nassays <- unique(nassays)
+    if (all(nassays %in% 0:1)) {
+        nassays <- 1
+    } else if (length(nassays) > 1) {
+        stop("Invalid number of bpost functions specified for methods.")
+    }
+
+    ## if multiple assays are used, make sure that all are same name
+    if (nassays > 1) {
+        assay_names <- lapply(b$methods, function(x) { names(eval_tidy(x$post, b$bdata)) })
+        assay_names <- unique(unlist(assay_names))
+        if (length(assay_names) != nassays) {
+            stop("Invalid naming of bpost functions specified for methods.")
+        }
+    } else {
+        assay_names <- truthCol
+    }
+
     ## check if truthCol is in bdata and 1-dim vector
     if (!is.null(truthCol)) {
         stopifnot(truthCol %in% names(b$bdata))
-        stopifnot(dim(b$bdata$truthCol) == 1)
+        if (nassays > 1) {
+            stopifnot(length(truthCol) == nassays,
+                      all(names(truthCol) %in% assay_names))
+        }
     }
 
     ## check if ftCols are in bdata
@@ -72,16 +95,24 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
     } else {
         a <- evalBMethods(b)
     }
-    a <- do.call(cbind, a)
-    a <- list("bench" = a)
 
+    ## handle mult-assay separately
+    if (nassays == 1) {
+        a <- do.call(cbind, a)
+        a <- list("bench" = a)
+    } else {
+        a <- lapply(assay_names, function(x) { sapply(a, `[[`, x) })
+        names(a) <- assay_names
+    }
+    
     ## colData: method information
     df <- cleanBMethods(b, ptabular)
     
     ## performanceMetrics: empty
-    pf <- SimpleList(list("bench" = list()))
-
-
+    pf <- rep(list("bench" = list()), nassays)
+    names(pf) <- assay_names
+    pf <- SimpleList(pf)
+    
     ## list of initialization parameters
     sbParams <- list(assays = a,
                      colData = df,
@@ -89,10 +120,14 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
 
     ## rename assay to match groundTruth column is specified
     if (!is.null(truthCol)) {
-        names(sbParams[["assays"]]) <- truthCol
-        names(sbParams[["performanceMetrics"]]) <- truthCol
-
+        if (nassays == 1) {
+            names(sbParams[["assays"]]) <- truthCol
+            names(sbParams[["performanceMetrics"]]) <- truthCol
+        }
         sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCol])
+        if (nassays > 1) {
+            names(sbParams[["groundTruth"]]) <- names(truthCol)
+        }
     }
 
     ## add feature columns if specified
@@ -112,6 +147,15 @@ evalBMethods <- function(b) {
                      expr <- quo(UQ(x$func)(!!! x$dparams))
                      if (is.function(eval_tidy(x$post, b$bdata))) {
                          expr <- quo(UQ(x$post)(!! expr))
+                     } else if (is.list(eval_tidy(x$post, b$bdata))) {
+                         epost <- eval_tidy(x$post, b$bdata)
+                         enames <- names(epost)
+                         if (all(sapply(epost, is_function))) {
+                             expr <- quo({
+                                 z <- (!! expr)
+                                 lapply(UQ(x$post), function(zz) { zz(z) })
+                             })
+                         }
                      }
                      tryCatch(
                          eval_tidy(expr, b$bdata),
@@ -136,6 +180,15 @@ evalBMethodsParallel <- function(b, BPPARAM) {
                        expr <- quo(UQ(x$func)(!!! x$dparams))
                        if (is.function(eval_tidy(x$post, b$bdata))) {
                            expr <- quo(UQ(x$post)(!! expr))
+                       } else if (is.list(eval_tidy(x$post, b$bdata))) {
+                           epost <- eval_tidy(x$post, b$bdata)
+                           enames <- names(epost)
+                           if (all(sapply(epost, is_function))) {
+                               expr <- quo({
+                                   z <- (!! expr)
+                                   lapply(UQ(x$post), function(zz) { zz(z) })
+                               })
+                           }
                        }
                        tryCatch(
                            eval_tidy(expr, b$bdata),
@@ -156,7 +209,8 @@ evalBMethodsParallel <- function(b, BPPARAM) {
 ## helper function to convert method info to character for colData
 cleanBMethods <- function(b, ptabular) {
     df <- mapply(cleanBMethod, m = b$methods, mname = names(b$methods), 
-                 MoreArgs = list(bdata = b$bdata, ptabular = ptabular))
+                 MoreArgs = list(bdata = b$bdata, ptabular = ptabular),
+                 SIMPLIFY = FALSE)
     df <- data.table::rbindlist(df, fill=TRUE)
     df$blabel <- names(b$methods)
     df
