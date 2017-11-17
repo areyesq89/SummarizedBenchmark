@@ -223,7 +223,7 @@ setReplaceMethod( "performanceMetrics",
 #' Accessor and replacement of the assay names of a SummarizedBenchmark object.
 #'
 #' @docType methods
-#' @name assayNames
+#' @name Accessors
 #' @aliases assayNames assayNames,SummarizedBenchmark-method assayNames<-,SummarizedBenchmark,character-method
 #'
 #' @param x a \code{SummarizedBenchmark} object.
@@ -246,7 +246,7 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
   names( assays( x, withDimnames=FALSE ) ) <- value
   newNames <- names( assays( x, withDimnames=FALSE ) )
   mm <- match( names( x@performanceMetrics ),  oldNames )
-  names( x@performanceMetrics)[mm] <- newNames
+  names( x@performanceMetrics )[mm] <- newNames
   truthCol <- elementMetadata( rowData( x ) )$colType == "groundTruth"
   truthCol[is.na(truthCol)] <- FALSE
   if( any( truthCol ) ){
@@ -255,6 +255,28 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
   }
   x
 } )
+
+#' @name Accessors
+#' @aliases mcols<-,SummarizedBenchmark-method
+#' @docType methods
+#' @import BiocGenerics
+#' @export
+setReplaceMethod("mcols", "SummarizedBenchmark",
+    function(x, ..., value)
+{
+    x <- BiocGenerics:::replaceSlots(x,
+        rowRanges=local({
+            r <- rowRanges( x )
+            if( length( value ) > 0 ){
+              wc <- colnames( value ) %in% assayNames( x )
+              mcols( value )$colType <- ifelse( wc, "groundTruth", "featureData" )
+            }
+            mcols( r ) <- value
+            r
+        }),
+        check=FALSE)
+    x
+})
 
 #' SummarizedBenchmark example
 #'
