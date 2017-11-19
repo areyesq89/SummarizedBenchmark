@@ -178,7 +178,7 @@ performanceMetricsSB <- function( object, assay=NULL ){
   }
 }
 
-#' Accessor for the 'performanceMetrics' slot of a SummarizedBenchmark object.
+#' Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.
 #'
 #' @docType methods
 #' @name performanceMetrics
@@ -220,10 +220,10 @@ setReplaceMethod( "performanceMetrics",
                    object
                  } )
 
-#' Accessor and replacement of the assay names of a SummarizedBenchmark object.
-#'
+#' Accessor and replacement functions for the slots of a SummarizedBenchmark object.
 #' @docType methods
 #' @name Accessors
+#' @rdname Accessors
 #' @aliases assayNames assayNames,SummarizedBenchmark-method assayNames<-,SummarizedBenchmark,character-method
 #'
 #' @param x a \code{SummarizedBenchmark} object.
@@ -256,9 +256,8 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
   x
 } )
 
-#' @name Accessors
+#' @rdname Accessors
 #' @aliases mcols<-,SummarizedBenchmark-method
-#' @docType methods
 #' @import BiocGenerics
 #' @export
 setReplaceMethod("mcols", "SummarizedBenchmark",
@@ -277,6 +276,43 @@ setReplaceMethod("mcols", "SummarizedBenchmark",
         check=FALSE)
     x
 })
+
+#' @rdname Accessors
+#' @export
+setGeneric("groundTruths",
+           function( object, ... )
+             standardGeneric("groundTruths"))
+
+#' @rdname Accessors
+#' @aliases groundTruths groundTruths,SummarizedBenchmark-method groundTruths<-,SummarizedBenchmark-method
+#' @param object a \code{SummarizedBenchmark} object.
+#' @export
+setMethod(
+  "groundTruths",
+  "SummarizedBenchmark",
+  function( object, ... ){
+    stopifnot( is( object, "SummarizedBenchmark") )
+    cols <- mcols( mcols(object) )$colType == "groundTruth"
+    mcols(object, ...)[,cols]
+  }
+)
+
+#' @rdname Accessors
+#' @export
+setGeneric( "groundTruths<-",
+            function( object, ..., value ) standardGeneric( "groundTruths<-" ) )
+
+#' @rdname Accessors
+#' @exportMethod "groundTruths<-"
+setReplaceMethod(
+  "groundTruths",
+  "SummarizedBenchmark",
+  function(object, ..., value){
+    mcols(object, ...) <- value
+    object
+  }
+)
+
 
 #' SummarizedBenchmark example
 #'
