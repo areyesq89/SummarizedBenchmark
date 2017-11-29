@@ -4,7 +4,7 @@
 \alias{buildBench}
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
-buildBench(b, data = NULL, truthCol = NULL, ftCols = NULL,
+buildBench(b, data = NULL, truthCols = NULL, ftCols = NULL,
   ptabular = TRUE, parallel = FALSE, BPPARAM = bpparam())
 }
 \arguments{
@@ -14,10 +14,14 @@ buildBench(b, data = NULL, truthCol = NULL, ftCols = NULL,
 data set originally specified to BenchDesign object. 
 Ignored if NULL. (default = NULL)}
 
-\item{truthCol}{Character name of column in data set corresponding to ground
-truth values. If specified, column will be added to \code{groundTruth}
-DataFrame for the returned SummarizedBenchmark object, and same name
-will be used for assay. (default = NULL)}
+\item{truthCols}{Character vector of column names in data set corresponding to
+ground truth values for each assay. If specified, column will be added to
+the \code{groundTruth} DataFrame for the returned SummarizedBenchmark object.
+If the \code{BenchDesign} includes only a single assay, the same name
+will be used for the assay. If the \code{BenchDesign} includes multiple assays,
+to map data set columns with assays, the vector must have names corresponding
+to the assay names specified to the \code{bpost} parameter at each
+\code{addBMethod} call. (default = NULL)}
 
 \item{ftCols}{Vector of character names of columns in data set that should be
 included as feature data (row data) in the returned SummarizedBenchmark

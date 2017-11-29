@@ -7,10 +7,14 @@
 #' @param data Data set to be used for benchmarking, will take priority over
 #'        data set originally specified to BenchDesign object. 
 #'        Ignored if NULL. (default = NULL)
-#' @param truthCol Character name of column in data set corresponding to ground
-#'        truth values. If specified, column will be added to \code{groundTruth}
-#'        DataFrame for the returned SummarizedBenchmark object, and same name
-#'        will be used for assay. (default = NULL)
+#' @param truthCols Character vector of column names in data set corresponding to
+#'        ground truth values for each assay. If specified, column will be added to
+#'        the \code{groundTruth} DataFrame for the returned SummarizedBenchmark object.
+#'        If the \code{BenchDesign} includes only a single assay, the same name
+#'        will be used for the assay. If the \code{BenchDesign} includes multiple assays,
+#'        to map data set columns with assays, the vector must have names corresponding
+#'        to the assay names specified to the \code{bpost} parameter at each
+#'        \code{addBMethod} call. (default = NULL)
 #' @param ftCols Vector of character names of columns in data set that should be
 #'        included as feature data (row data) in the returned SummarizedBenchmark
 #'        object. (default = NULL)
@@ -39,7 +43,7 @@
 #' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes
-buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
+buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
                        ptabular = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
     if (!is.null(data)) {
@@ -52,10 +56,37 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
              "Please specify a non-NULL dataset to build SummarizedBenchmark.")
     }
 
-    ## check if truthCol is in bdata and 1-dim vector
-    if (!is.null(truthCol)) {
-        stopifnot(truthCol %in% names(b$bdata))
-        stopifnot(dim(b$bdata$truthCol) == 1)
+    ## determine number of assay to generate
+    nassays <- sapply(b$methods, function(x) { length(eval_tidy(x$post, b$bdata)) })
+    nassays <- unique(nassays)
+    if (all(nassays %in% 0:1)) {
+        nassays <- 1
+    } else if (length(nassays) > 1) {
+        stop("Invalid number of bpost functions specified for methods.")
+    }
+
+    ## if multiple assays are used, make sure that all are same name
+    if (nassays > 1) {
+        assay_names <- lapply(b$methods, function(x) { names(eval_tidy(x$post, b$bdata)) })
+        assay_names <- unique(unlist(assay_names))
+        if (length(assay_names) != nassays) {
+            stop("Invalid naming of bpost functions specified for methods.")
+        }
+    } else {
+        if (is.null(truthCols)) {
+            assay_names <- "bench"
+        } else {
+            assay_names <- truthCols
+        }
+    }
+
+    ## check if truthCols is in bdata and 1-dim vector
+    if (!is.null(truthCols)) {
+        stopifnot(truthCols %in% names(b$bdata),
+                  length(truthCols) == nassays)
+        if (nassays > 1) {
+            stopifnot(names(truthCols) %in% assay_names)
+        }
     }
 
     ## check if ftCols are in bdata
@@ -72,27 +103,41 @@ buildBench <- function(b, data = NULL, truthCol = NULL, ftCols = NULL,
     } else {
         a <- evalBMethods(b)
     }
-    a <- do.call(cbind, a)
-    a <- list("bench" = a)
 
+    ## handle mult-assay separately
+    if (nassays == 1) {
+        a <- do.call(cbind, a)
+        a <- list("bench" = a)
+    } else {
+        a <- lapply(assay_names, function(x) { sapply(a, `[[`, x) })
+        names(a) <- assay_names
+    }
+    
     ## colData: method information
     df <- cleanBMethods(b, ptabular)
     
     ## performanceMetrics: empty
-    pf <- SimpleList(list("bench" = list()))
-
-
+    pf <- rep(list("bench" = list()), nassays)
+    names(pf) <- assay_names
+    pf <- SimpleList(pf)
+    
     ## list of initialization parameters
     sbParams <- list(assays = a,
                      colData = df,
                      performanceMetrics = pf)
 
-    ## rename assay to match groundTruth column is specified
-    if (!is.null(truthCol)) {
-        names(sbParams[["assays"]]) <- truthCol
-        names(sbParams[["performanceMetrics"]]) <- truthCol
-
-        sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCol])
+    ## pull out grouthTruth if available
+    if (!is.null(truthCols)) {
+        sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCols])
+        ## rename assay to match groundTruth for nassays == 1 case
+        if (nassays == 1) {
+            names(sbParams[["assays"]]) <- truthCols
+            names(sbParams[["performanceMetrics"]]) <- truthCols
+        }
+        ## rename grouthTruth to match assays for nassays > 1 case
+        if (nassays > 1) {
+            names(sbParams[["groundTruth"]]) <- names(truthCols)
+        }
     }
 
     ## add feature columns if specified
@@ -112,6 +157,15 @@ evalBMethods <- function(b) {
                      expr <- quo(UQ(x$func)(!!! x$dparams))
                      if (is.function(eval_tidy(x$post, b$bdata))) {
                          expr <- quo(UQ(x$post)(!! expr))
+                     } else if (is.list(eval_tidy(x$post, b$bdata))) {
+                         epost <- eval_tidy(x$post, b$bdata)
+                         enames <- names(epost)
+                         if (all(sapply(epost, is_function))) {
+                             expr <- quo({
+                                 z <- (!! expr)
+                                 lapply(UQ(x$post), function(zz) { zz(z) })
+                             })
+                         }
                      }
                      tryCatch(
                          eval_tidy(expr, b$bdata),
@@ -136,6 +190,15 @@ evalBMethodsParallel <- function(b, BPPARAM) {
                        expr <- quo(UQ(x$func)(!!! x$dparams))
                        if (is.function(eval_tidy(x$post, b$bdata))) {
                            expr <- quo(UQ(x$post)(!! expr))
+                       } else if (is.list(eval_tidy(x$post, b$bdata))) {
+                           epost <- eval_tidy(x$post, b$bdata)
+                           enames <- names(epost)
+                           if (all(sapply(epost, is_function))) {
+                               expr <- quo({
+                                   z <- (!! expr)
+                                   lapply(UQ(x$post), function(zz) { zz(z) })
+                               })
+                           }
                        }
                        tryCatch(
                            eval_tidy(expr, b$bdata),
@@ -155,18 +218,33 @@ evalBMethodsParallel <- function(b, BPPARAM) {
 
 ## helper function to convert method info to character for colData
 cleanBMethods <- function(b, ptabular) {
-    df <- lapply(b$methods, cleanBMethod, bdata = b$bdata, ptabular = ptabular)
+    df <- mapply(cleanBMethod, m = b$methods, mname = names(b$methods), 
+                 MoreArgs = list(bdata = b$bdata, ptabular = ptabular),
+                 SIMPLIFY = FALSE)
     df <- data.table::rbindlist(df, fill=TRUE)
     df$blabel <- names(b$methods)
     df
 }
 
-cleanBMethod <- function(m, bdata, ptabular) {
-    ## parse package/version information
-    bmeta <- funcMeta(eval_tidy(m$func))
+cleanBMethod <- function(m, mname, bdata, ptabular) {
+    ## check if `meta =` is specified for method
+    if (!is.null(m$meta)) {
+        if (!is(m$meta, "list") ||
+            length(names(m$meta)) != length(m$meta) ||
+            is.null(names(m$meta)) ||
+            any(names(m$meta) == "")) {
+            warning(paste0("bmeta parameter specified for method '",
+                           mname, "' will not be used. ",
+                           "meta must be a list of named entries."))
+            m$meta <- NULL
+        }
+    }
 
+    ## parse package/version information
+    bmeta <- funcMeta(m$func, m$meta)
+    
     ## parse primary method
-    if (bmeta$is_anon[1]) {
+    if (bmeta$bfunc_anon[1]) {
         bfunc <- gsub("\n", ";", quo_text(m$func))
     } else {
         bfunc <- quo_name(m$func)
@@ -197,20 +275,59 @@ cleanBMethod <- function(m, bdata, ptabular) {
 
 
 ## helper to gather important information for function
-funcMeta <- function(f) {
-    fenv <- environment(f)
+funcMeta <- function(f, meta) {
 
-    pkg_name <- packageName(fenv)
-    pkg_anon <- is.null(pkg_name)
+    f <- eval_tidy(f) 
+    ## determine if main `bfunc` was anonymous
+    f_anon <- is.null(packageName(environment(f)))
 
-    if (pkg_anon) {
-        pkg_name <- NA_character_
-        pkg_vers <- NA_character_
-    } else {
-        pkg_vers <- as(packageVersion(pkg_name), "character")
+    fsrc <- f
+    vers_src <- "bfunc"
+    if ("pkg_func" %in% names(meta)) {
+        vers_src <- "bmeta_func"
+        fsrc <- eval_tidy(meta$pkg_func)
+    } else if ("pkg_name" %in% names(meta) |
+               "pkg_name" %in% names(meta)) {
+        pkg_name <- ifelse("pkg_name" %in% names(meta),
+                           meta$pkg_name, NA_character_)
+        pkg_vers <- ifelse("pkg_vers" %in% names(meta),
+                           meta$pkg_vers, NA_character_)
+        vers_src <- "bmeta_manual"
+        fsrc <- NULL
+    }
+
+    if (!is.null(fsrc)) {
+        fenv <- environment(fsrc)
+        pkg_name <- packageName(fenv)
+        if (is.null(pkg_name)) {
+            pkg_name <- NA_character_
+            pkg_vers <- NA_character_
+        } else {
+            pkg_vers <- as(packageVersion(pkg_name), "character")
+        }
     }
     
-    data.frame(is_anon = pkg_anon, pkg_name = pkg_name, pkg_vers = pkg_vers)
+    res <- data.frame(bfunc_anon = f_anon, vers_src = vers_src,
+                      pkg_name = pkg_name, pkg_vers = pkg_vers)
+
+    ## need to parse and merge manually defined metadata columns 
+    if (!is.null(meta)) {
+        meta_func <- meta[["pkg_func"]] 
+        meta <- meta[!(names(meta) %in% c("pkg_func", "pkg_name", "pkg_vers"))]
+        if (length(meta) > 0) {
+            names(meta) <- paste0("meta_", names(meta))
+        }
+        if (!is.null(meta_func)) {
+            meta_func <- gsub("\n", ";", quo_text(meta_func))
+            if (nchar(meta_func) > 20) {
+                meta_func <- "omitted (>20 char)"
+            }
+            meta <- c(meta, "pkg_func" = meta_func)
+        }
+        res <- c(res, meta)
+    }
+
+    res
 }
 
 
