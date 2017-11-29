@@ -156,7 +156,14 @@ sb <- addPerformanceMetric(
 
 The function `addDefaultMetrics` inputs a __SummarizedBenchmark__ 
 object and, depending on the names of the assays, it will add
-predefined performance metrics. For example, if an assay of the
+predefined performance metrics. A list of predefined performance
+metrics is available upon calling the function `availableMetrics`,
+
+```{r}
+availableMetrics()
+```
+
+For example, if an assay of the
 __SummarizedBenchmark__ object is called "qvalue", it will add
 the metric _rejections_ by default. Check the help page for 
 the list of predefined performance metrics for each assay (`?addDefaultMetrics`).

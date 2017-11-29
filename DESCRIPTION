@@ -14,13 +14,15 @@ Description: This package defines the SummarizedBenchmarck class, which extends
 Depends: tidyr,
          SummarizedExperiment,
          S4Vectors,
+         BiocGenerics,
          methods,
-	 UpSetR,
+         UpSetR,
          rlang,
          stringr,
          data.table,
          utils,
-         BiocParallel
+         BiocParallel,
+         ggplot2
 Suggests: iCOBRA,
           BiocStyle,
           knitr,

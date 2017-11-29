@@ -13,9 +13,6 @@ plotMethodsOverlap(object, alpha = 0.1, ...)
 
 \item{...}{Further arguments passed to \code{\link{upset}}}
 }
-\value{
-An \code{\link{SummarizedBenchmark}} object with performance functions.
-}
 \description{
 This function looks for an assay called 'qvalues' and given an alpha threshold,
 it binarizes the qvalue matrix depending on whether the qvalues pass the alpha
@@ -26,6 +23,7 @@ threshold. Then it uses the function \code{\link{upset}} to plot the overlaps.
 data( sb )
 plotMethodsOverlap(sb)
 }
+
 
 }
 \author{

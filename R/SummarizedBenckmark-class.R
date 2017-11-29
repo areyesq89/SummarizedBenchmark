@@ -178,7 +178,7 @@ performanceMetricsSB <- function( object, assay=NULL ){
   }
 }
 
-#' Accessor for the 'performanceMetrics' slot of a SummarizedBenchmark object.
+#' Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.
 #'
 #' @docType methods
 #' @name performanceMetrics
@@ -220,10 +220,10 @@ setReplaceMethod( "performanceMetrics",
                    object
                  } )
 
-#' Accessor and replacement of the assay names of a SummarizedBenchmark object.
-#'
+#' Accessor and replacement functions for the slots of a SummarizedBenchmark object.
 #' @docType methods
-#' @name assayNames
+#' @name Accessors
+#' @rdname Accessors
 #' @aliases assayNames assayNames,SummarizedBenchmark-method assayNames<-,SummarizedBenchmark,character-method
 #'
 #' @param x a \code{SummarizedBenchmark} object.
@@ -246,7 +246,7 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
   names( assays( x, withDimnames=FALSE ) ) <- value
   newNames <- names( assays( x, withDimnames=FALSE ) )
   mm <- match( names( x@performanceMetrics ),  oldNames )
-  names( x@performanceMetrics)[mm] <- newNames
+  names( x@performanceMetrics )[mm] <- newNames
   truthCol <- elementMetadata( rowData( x ) )$colType == "groundTruth"
   truthCol[is.na(truthCol)] <- FALSE
   if( any( truthCol ) ){
@@ -255,6 +255,64 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
   }
   x
 } )
+
+#' @rdname Accessors
+#' @aliases mcols<-,SummarizedBenchmark-method
+#' @import BiocGenerics
+#' @export
+setReplaceMethod("mcols", "SummarizedBenchmark",
+    function(x, ..., value)
+{
+    x <- BiocGenerics:::replaceSlots(x,
+        rowRanges=local({
+            r <- rowRanges( x )
+            if( length( value ) > 0 ){
+              wc <- colnames( value ) %in% assayNames( x )
+              mcols( value )$colType <- ifelse( wc, "groundTruth", "featureData" )
+            }
+            mcols( r ) <- value
+            r
+        }),
+        check=FALSE)
+    x
+})
+
+#' @rdname Accessors
+#' @export
+setGeneric("groundTruths",
+           function( object, ... )
+             standardGeneric("groundTruths"))
+
+#' @rdname Accessors
+#' @aliases groundTruths groundTruths,SummarizedBenchmark-method groundTruths<-,SummarizedBenchmark-method
+#' @param object a \code{SummarizedBenchmark} object.
+#' @export
+setMethod(
+  "groundTruths",
+  "SummarizedBenchmark",
+  function( object, ... ){
+    stopifnot( is( object, "SummarizedBenchmark") )
+    cols <- mcols( mcols(object) )$colType == "groundTruth"
+    mcols(object, ...)[,cols]
+  }
+)
+
+#' @rdname Accessors
+#' @export
+setGeneric( "groundTruths<-",
+            function( object, ..., value ) standardGeneric( "groundTruths<-" ) )
+
+#' @rdname Accessors
+#' @exportMethod "groundTruths<-"
+setReplaceMethod(
+  "groundTruths",
+  "SummarizedBenchmark",
+  function(object, ..., value){
+    mcols(object, ...) <- value
+    object
+  }
+)
+
 
 #' SummarizedBenchmark example
 #'

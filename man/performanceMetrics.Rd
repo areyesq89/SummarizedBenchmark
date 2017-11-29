@@ -8,7 +8,7 @@
 \alias{performanceMetrics<-,SummarizedBenchmark,SimpleList-method}
 \alias{performanceMetrics<-}
 \alias{performanceMetrics}
-\title{Accessor for the 'performanceMetrics' slot of a SummarizedBenchmark object.}
+\title{Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.}
 \usage{
 performanceMetrics(object, ...)
 
@@ -29,7 +29,7 @@ performanceMetrics(object, ...) <- value
 \item{value}{A SimpleList of the same length as the number of assays}
 }
 \description{
-Accessor for the 'performanceMetrics' slot of a SummarizedBenchmark object.
+Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.
 }
 \examples{
 
