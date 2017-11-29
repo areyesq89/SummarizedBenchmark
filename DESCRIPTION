@@ -21,7 +21,8 @@ Depends: tidyr,
          stringr,
          data.table,
          utils,
-         BiocParallel
+         BiocParallel,
+         ggplot2
 Suggests: iCOBRA,
           BiocStyle,
           knitr,
