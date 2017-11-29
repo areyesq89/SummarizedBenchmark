@@ -31,7 +31,7 @@ library("DESeq2")
 library("tximport")
 ```
 
-# Downloading the Example Data
+# Preparing the Data
 
 We use a simulated data set from _Soneson et al. (2016)_ to demonstrate how the `SummarizedBenchmark` package can be used to benchmark methods for differential expression analysis. The simulated data set is available for download from ArrayExpress in the RSEM output format, and includes 6 samples consisting of three replicates each from two conditions. The data set contains 15,677 transcripts and 3,858 genes from human chromosome 1 (Ensembl GRCh37.71 build). A more complete description of the data is available in the supplementary materials of _Soneson et al. (2016)_ [here](http://dx.doi.org/10.5256/f1000research.7563.d114722), including code for how the data was generated.
 
@@ -64,8 +64,6 @@ unzip(file.path(d, "truth.zip"), exdir = d)
 truthdat <- readr::read_tsv(file.path(d, "truth_transcript.txt"))
 ```
 
-# BenchDesign: Setting Up and Executing the Benchmark
-
 For this benchmark, we compare the results of differential expression analysis using three popular methods: DESeq2, edgeR, and limma-voom.
 
 All data for the benchmark should be added to a single list (or data.frame), here called `mydat`.
@@ -81,6 +79,10 @@ mydat <- list(coldat = mycoldat,
               true_lfc = truthdat$logFC)
 ```
 
+# Standard Workflow
+
+## Benchmark Set-Up and Execution
+
 Next, we initialize the `BenchDesign` object. Here, we initialize the object with the data set.
 
 ```{r}
@@ -90,51 +92,59 @@ bd <- BenchDesign(mydat)
 Each method in the comparison is added to `bd` using `addBMethod`.
 
 ```{r}
+deseq2_pvals <- function(countData, colData, design, contrast) {
+    dds <- DESeqDataSetFromMatrix(countData,
+                                  colData = colData,
+                                  design = design)
+    dds <- DESeq(dds)
+    res <- results(dds, contrast = contrast)
+    res$pvalue
+}
+
+edgeR_pvals <- function(countData, group, design) {
+    y <- DGEList(countData, group = group)
+    y <- calcNormFactors(y)
+    des <- model.matrix(design)
+    y <- estimateDisp(y, des)
+    fit <- glmFit(y, des)
+    lrt <- glmLRT(fit, coef=2)
+    lrt$table$PValue
+}
+
+voom_pvals <- function(countData, group, design) {
+    y <- DGEList(countData, group = group)
+    y <- calcNormFactors(y)
+    des <- model.matrix(design)
+    y <- voom(y, des, plot=TRUE)
+    eb <- eBayes(lmFit(y, des))
+    eb$p.value[, 2]
+}
+
+bd <- addBMethod(b = bd,
+                 blabel = "deseq2",
+                 bfunc = deseq2_pvals,
+                 countData = cntdat,
+                 colData = coldat, 
+                 design = ~condition,
+                 contrast = c("condition", "2", "1"))
+
 bd %<>%
-    addBMethod("deseq2",
-               function(countData, colData, design, contrast) {
-                   dds <- DESeqDataSetFromMatrix(countData,
-                                                 colData = colData,
-                                                 design = design)
-                   dds <- DESeq(dds)
-                   results(dds, contrast = contrast)
-               },
-               bpost = list(pv = function(x) { x$pvalue },
-                            lfc = function(x) { x$log2FoldChange }),
-               countData = cntdat, colData = coldat, 
-               design = ~condition, contrast = c("condition", "2", "1")) %>%
-    addBMethod("edgeR",
-               function(countData, group, design) {
-                   y <- DGEList(countData, group = group)
-                   y <- calcNormFactors(y)
-                   des <- model.matrix(design)
-                   y <- estimateDisp(y, des)
-                   fit <- glmFit(y, des)
-                   glmLRT(fit, coef=2)
-               },
-               bpost = list(pv = function(x) { x$table$PValue },
-                            lfc = function(x) { x$table$logFC }),
-               countData = cntdat, group = coldat$condition,
+    addBMethod(blabel = "edgeR",
+               bfunc = edgeR_pvals,
+               countData = cntdat,
+               group = coldat$condition,
                design = ~coldat$condition) %>%
-    addBMethod("voom",
-               function(countData, group, design) {
-                   y <- DGEList(countData, group = group)
-                   y <- calcNormFactors(y)
-                   des <- model.matrix(design)
-                   y <- voom(y, des, plot=TRUE)
-                   eBayes(lmFit(y, des))
-               },
-               bpost = list(pv = function(x) { x$p.value[, 2] },
-                            lfc = function(x) { x$coefficients[, 2] }),
-               countData = cntdat, group = coldat$condition,
+    addBMethod(blabel = "voom",
+               bfunc = voom_pvals,
+               countData = cntdat,
+               group = coldat$condition,
                design = ~coldat$condition)
 ```
 
 So far, none of the methods have been executed. The `BenchDesign` object simply serves as a container describing _how_ the methods should be executed. To apply each method to the data, we simply call `buildBench`.
 
 ```{r}
-sb <- buildBench(b = bd,
-                 truthCols = c(pv = "true_status", lfc = "true_lfc"))
+sb <- buildBench(bd, truthCols = "true_status")
 ```
 
 We can inspect the results.
@@ -145,7 +155,7 @@ sb
 
 The resulting object is a `SummarizedBenchmark`.
 
-# SummarizedBenchmark: Parsing Results From the Benchmark
+## Benchmark Analysis
 
 The `SummarizedBenchmark` object now contains the results from executing each method on the data set. This information is stored under `assays`.
 
@@ -158,6 +168,68 @@ sb %<>% addPerformanceMetric("EucledianDist",
                                  sqrt(sum((query - truth)^2))
                              })
 ```
+
+
+# Advanced Use
+
+## Multiple Output: p-values and log-fold change
+
+```{r}
+deseq2_run <- function(countData, colData, design, contrast) {
+    dds <- DESeqDataSetFromMatrix(countData,
+                                  colData = colData,
+                                  design = design)
+    dds <- DESeq(dds)
+    results(dds, contrast = contrast)
+}
+
+edgeR_run <- function(countData, group, design) {
+    y <- DGEList(countData, group = group)
+    y <- calcNormFactors(y)
+    des <- model.matrix(design)
+    y <- estimateDisp(y, des)
+    fit <- glmFit(y, des)
+    glmLRT(fit, coef=2)
+}
+
+voom_run <- function(countData, group, design) {
+    y <- DGEList(countData, group = group)
+    y <- calcNormFactors(y)
+    des <- model.matrix(design)
+    y <- voom(y, des, plot=TRUE)
+    eBayes(lmFit(y, des))
+}
+
+bd %<>%
+    addBMethod(blabel = "deseq2",
+               bfunc = deseq2_run,
+               bpost = list(pv = function(x) { x$pvalue },
+                            lfc = function(x) { x$log2FoldChange }),
+               countData = cntdat,
+               colData = coldat, 
+               design = ~condition,
+               contrast = c("condition", "2", "1")) %>%
+    addBMethod(blabel = "edgeR",
+               bfunc = edgeR_run,
+               bpost = list(pv = function(x) { x$table$PValue },
+                            lfc = function(x) { x$table$logFC }),
+               countData = cntdat,
+               group = coldat$condition,
+               design = ~coldat$condition) %>%
+    addBMethod(blabel = "voom",
+               bfunc = voom_run,
+               bpost = list(pv = function(x) { x$p.value[, 2] },
+                            lfc = function(x) { x$coefficients[, 2] }),
+               countData = cntdat,
+               group = coldat$condition,
+               design = ~coldat$condition)
+```
+
+```{r}
+sb <- buildBench(b = bd,
+                 truthCols = c(pv = "true_status")), lfc = "true_lfc"))
+```
+
 
 # References
 
