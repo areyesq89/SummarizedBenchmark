@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-When trying to decide how to perform a data analysis in R, it can be difficult to know which tool or method is the "best" for the problem. Benchmarking the performance of tools on real and simulated data sets is a common way of learning about the relative strengths and weaknesses of each approach. However, as the number of tools and parameters being compared increases, keeping track of output and how it was generated can quickly become messy. The **BenchDesign** class and associated functions implemented in `SummarizedExperiment` provide one solution for this problem. 
+When trying to decide how to perform a data analysis in R, it can be difficult to know which tool or method is the "best" for the problem. Benchmarking the performance of tools on real and simulated data sets is a common way of learning about the relative strengths and weaknesses of each approach. However, as the number of tools and parameters being compared increases, keeping track of output and how it was generated can quickly become messy. The **BenchDesign** class and associated functions implemented in `SummarizedBenchmark` provide one solution for this problem. 
 
 ```{r, echo = FALSE, message = FALSE}
 library("SummarizedBenchmark")
@@ -238,13 +238,13 @@ A trivial example of using the multi-assay support through `bpost` is given for 
 b <- BenchDesign(tdat) %>%
     addBMethod(blabel = "bonf",
                bfunc = p.adjust,
-               bpost = list(regular = (function(x) { x }),
-                            negative = (function(x) { -x })),
+               bpost = list(regular = function(x) { x },
+                            negative = function(x) { -x }),
                p = pval, method = "bonferroni") %>%
     addBMethod(blabel = "BH",
                bfunc = p.adjust,
-               bpost = list(regular = (function(x) { x }),
-                            negative = (function(x) { -x })),
+               bpost = list(regular = function(x) { x },
+                            negative = function(x) { -x }),
                p = pval, method = "BH")
 ```
 
