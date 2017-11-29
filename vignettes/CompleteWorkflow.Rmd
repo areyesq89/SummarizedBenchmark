@@ -1,0 +1,164 @@
+---
+title: "SummarizedBenchmark: A Complete Workflow"
+author: "Patrick Kimes"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
+abstract: >
+  benchmakr package version: `r packageVersion("SummarizedBenchmark")`
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{SummarizedBenchmark: A Complete Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+When trying to decide how to perform a data analysis in R, it can be difficult to know which tool or method is the "best" for the problem. Benchmarking the performance of tools on real and simulated data sets is a common way of learning about the relative strengths and weaknesses of each approach. However, as the number of tools and parameters being compared increases, keeping track of output and how it was generated can quickly become messy. The **BenchDesign** and **SummarizedBenchmark** classes and associated functions implemented in `SummarizedBenchmark` provide one solution for this problem. 
+
+```{r, echo = FALSE, message = FALSE}
+library("SummarizedBenchmark")
+library("magrittr")
+
+library("limma")
+library("edgeR")
+library("DESeq2")
+library("tximport")
+```
+
+# Downloading the Example Data
+
+We use a simulated data set from _Soneson et al. (2016)_ to demonstrate how the `SummarizedBenchmark` package can be used to benchmark methods for differential expression analysis. The simulated data set is available for download from ArrayExpress in the RSEM output format, and includes 6 samples consisting of three replicates each from two conditions. The data set contains 15,677 transcripts and 3,858 genes from human chromosome 1 (Ensembl GRCh37.71 build). A more complete description of the data is available in the supplementary materials of _Soneson et al. (2016)_ [here](http://dx.doi.org/10.5256/f1000research.7563.d114722), including code for how the data was generated.
+
+```{r download-data}
+## download simulated RSEM transcript-level data
+d <- tempdir()
+download.file(url = paste0("https://www.ebi.ac.uk/arrayexpress/files/",
+                           "E-MTAB-4119/E-MTAB-4119.processed.3.zip"),
+              destfile = file.path(d, "samples.zip"))
+unzip(file.path(d, "samples.zip"), exdir = d)
+
+## read in simulated TPM values using tximport
+fl <- list.files(d, pattern = "*_rsem.txt", full.names=TRUE)
+names(fl) <- gsub("sample(.*)_rsem.txt", "\\1", basename(fl))
+txi <- tximport(fl, txIn = TRUE, txOut = TRUE,
+                geneIdCol = "gene_id",
+                txIdCol = "transcript_id",
+                countsCol = "expected_count",
+                lengthCol = "effective_length",
+                abundanceCol = "TPM",
+                countsFromAbundance = "scaledTPM")
+
+## download transcript-level truth data
+download.file(url = paste0("https://www.ebi.ac.uk/arrayexpress/files/",
+                           "E-MTAB-4119/E-MTAB-4119.processed.2.zip"),
+              destfile = file.path(d, "truth.zip"))
+unzip(file.path(d, "truth.zip"), exdir = d)
+
+## read in expected results for simulated data
+truthdat <- readr::read_tsv(file.path(d, "truth_transcript.txt"))
+```
+
+# BenchDesign: Setting Up and Executing the Benchmark
+
+For this benchmark, we compare the results of differential expression analysis using three popular methods: DESeq2, edgeR, and limma-voom.
+
+All data for the benchmark should be added to a single list (or data.frame), here called `mydat`.
+
+```{r}
+mycounts <- round(txi$counts)
+mycoldat <- data.frame(condition = factor(rep(c(1, 2), each = 3)))
+rownames(mycoldat) <- colnames(mycounts)
+
+mydat <- list(coldat = mycoldat,
+              cntdat = mycounts,
+              true_status = truthdat$status,
+              true_lfc = truthdat$logFC)
+```
+
+Next, we initialize the `BenchDesign` object. Here, we initialize the object with the data set.
+
+```{r}
+bd <- BenchDesign(mydat)
+```
+
+Each method in the comparison is added to `bd` using `addBMethod`.
+
+```{r}
+bd %<>%
+    addBMethod("deseq2",
+               function(countData, colData, design, contrast) {
+                   dds <- DESeqDataSetFromMatrix(countData,
+                                                 colData = colData,
+                                                 design = design)
+                   dds <- DESeq(dds)
+                   results(dds, contrast = contrast)
+               },
+               bpost = list(pv = function(x) { x$pvalue },
+                            lfc = function(x) { x$log2FoldChange }),
+               countData = cntdat, colData = coldat, 
+               design = ~condition, contrast = c("condition", "2", "1")) %>%
+    addBMethod("edgeR",
+               function(countData, group, design) {
+                   y <- DGEList(countData, group = group)
+                   y <- calcNormFactors(y)
+                   des <- model.matrix(design)
+                   y <- estimateDisp(y, des)
+                   fit <- glmFit(y, des)
+                   glmLRT(fit, coef=2)
+               },
+               bpost = list(pv = function(x) { x$table$PValue },
+                            lfc = function(x) { x$table$logFC }),
+               countData = cntdat, group = coldat$condition,
+               design = ~coldat$condition) %>%
+    addBMethod("voom",
+               function(countData, group, design) {
+                   y <- DGEList(countData, group = group)
+                   y <- calcNormFactors(y)
+                   des <- model.matrix(design)
+                   y <- voom(y, des, plot=TRUE)
+                   eBayes(lmFit(y, des))
+               },
+               bpost = list(pv = function(x) { x$p.value[, 2] },
+                            lfc = function(x) { x$coefficients[, 2] }),
+               countData = cntdat, group = coldat$condition,
+               design = ~coldat$condition)
+```
+
+So far, none of the methods have been executed. The `BenchDesign` object simply serves as a container describing _how_ the methods should be executed. To apply each method to the data, we simply call `buildBench`.
+
+```{r}
+sb <- buildBench(b = bd,
+                 truthCols = c(pv = "true_status", lfc = "true_lfc"))
+```
+
+We can inspect the results.
+
+```{r}
+sb
+```
+
+The resulting object is a `SummarizedBenchmark`.
+
+# SummarizedBenchmark: Parsing Results From the Benchmark
+
+The `SummarizedBenchmark` object now contains the results from executing each method on the data set. This information is stored under `assays`.
+
+These results can be parsed using "performance metrics."
+
+```{r}
+sb %<>% addPerformanceMetric("EucledianDist",
+                             assay="lfc",
+                             function(query, truth) {
+                                 sqrt(sum((query - truth)^2))
+                             })
+```
+
+# References
+
+- [Soneson C, Love MI and Robinson MD. 2016. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. F1000Research, 4:1521. (doi: 10.12688/f1000research.7563.2)](https://f1000research.com/articles/4-1521/v2)
