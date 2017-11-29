@@ -56,21 +56,34 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
              "Please specify a non-NULL dataset to build SummarizedBenchmark.")
     }
 
+    ## determine whether bpost was specified as a list
+    assay_aslist <- sapply(b$methods, function(x) { is.list(eval_tidy(x$post, b$bdata)) })
+    assay_aslist <- unique(assay_aslist)
+    if (length(assay_aslist) > 1) {
+        stop("Inconsistent bpost specification style across methods. ",
+             "If bpost is specified as a list for any method, it must be specified ",
+             "as a list for all methods.")
+    }
+    
     ## determine number of assay to generate
     nassays <- sapply(b$methods, function(x) { length(eval_tidy(x$post, b$bdata)) })
     nassays <- unique(nassays)
     if (all(nassays %in% 0:1)) {
         nassays <- 1
     } else if (length(nassays) > 1) {
-        stop("Invalid number of bpost functions specified for methods.")
+        stop("Inconsistent bpost length across methods. ",
+             "If bpost is specified as a list for any method, it must be specified ",
+             "as a list of the same length for all methods.")
     }
 
     ## if multiple assays are used, make sure that all are same name
-    if (nassays > 1) {
+    if (assay_aslist) {
         assay_names <- lapply(b$methods, function(x) { names(eval_tidy(x$post, b$bdata)) })
         assay_names <- unique(unlist(assay_names))
         if (length(assay_names) != nassays) {
-            stop("Invalid naming of bpost functions specified for methods.")
+            stop("Inconsistent bpost naming across methods. ",
+                 "If bpost is specified as a list for any method, it must be specified ",
+                 "as a list of the same length, with the same names, for all methods.")
         }
     } else {
         if (is.null(truthCols)) {
@@ -84,11 +97,14 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
     if (!is.null(truthCols)) {
         stopifnot(truthCols %in% names(b$bdata),
                   length(truthCols) == nassays)
-        if (nassays > 1) {
-            stopifnot(names(truthCols) %in% assay_names)
+        if (assay_aslist &&
+            !all(names(truthCols) %in% assay_names)) {
+            stop("Invalid truthCols specification. ",
+                 "If bpost is specified as a list and truthCols is also specified, ",
+                 "truthCols must be a named list with the same names as bpost.")
         }
     }
-
+    
     ## check if ftCols are in bdata
     if (!is.null(ftCols)) {
         stopifnot(ftCols %in% names(b$bdata))
@@ -105,12 +121,12 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
     }
 
     ## handle mult-assay separately
-    if (nassays == 1) {
-        a <- do.call(cbind, a)
-        a <- list("bench" = a)
-    } else {
+    if (assay_aslist) {
         a <- lapply(assay_names, function(x) { sapply(a, `[[`, x) })
         names(a) <- assay_names
+    } else {
+        a <- do.call(cbind, a)
+        a <- list("bench" = a)
     }
     
     ## colData: method information
@@ -125,26 +141,25 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
     sbParams <- list(assays = a,
                      colData = df,
                      performanceMetrics = pf)
-
+    
     ## pull out grouthTruth if available
     if (!is.null(truthCols)) {
         sbParams[["groundTruth"]] <- DataFrame(b$bdata[truthCols])
-        ## rename assay to match groundTruth for nassays == 1 case
-        if (nassays == 1) {
+        if (assay_aslist) {
+            ## rename grouthTruth to match assays for named assays case
+            names(sbParams[["groundTruth"]]) <- names(truthCols)
+        } else {
+            ## rename assay to match groundTruth
             names(sbParams[["assays"]]) <- truthCols
             names(sbParams[["performanceMetrics"]]) <- truthCols
         }
-        ## rename grouthTruth to match assays for nassays > 1 case
-        if (nassays > 1) {
-            names(sbParams[["groundTruth"]]) <- names(truthCols)
-        }
     }
-
+    
     ## add feature columns if specified
     if (!is.null(ftCols)) {
         sbParams[["ftData"]] <- DataFrame(b$bdata[ftCols])
     }
-
+    
     do.call(SummarizedBenchmark, sbParams)
 }
 
