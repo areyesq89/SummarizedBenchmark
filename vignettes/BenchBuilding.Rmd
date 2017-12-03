@@ -91,7 +91,6 @@ b <- BenchDesign(tdat)
 Then, each method of interest is added to the `BenchDesign` using `addBMethod()`. 
 
 ```{r}
-b <- BenchDesign(tdat)
 b <- addBMethod(b, blabel = "bonf", bfunc = p.adjust,
                 p = pval, method = "bonferroni")
 ```
