@@ -4,7 +4,7 @@
 \alias{expandBMethod}
 \title{Expand method in BenchDesign object across parameter settings}
 \usage{
-expandBMethod(b, blabel, param = NULL, list = NULL, ..., replace = FALSE,
+expandBMethod(b, blabel, param = NULL, ..., replace = FALSE,
   overwrite = FALSE)
 }
 \arguments{
@@ -17,17 +17,12 @@ specified if only one parameter should be replaced in original
 method definition. Only one of `param` or `list` should be
 specified. (default = NULL)}
 
-\item{list}{Named list of parameter sets to be used in place of
-original method definition. Each parameter set should also be a
-named list of parameter, value pairs. All values which include a
-variable must be quoted using `rlang::quo`. Only one of `param` or `list`
-should be specified. Names of parameter sets will be used as the
-new method names in the BenchDesign object. An error will be returned 
-if an existing method name is used. (defualt = NULL)}
-
-\item{...}{Named list of value to use for overwriting the specified
-parameter in the original method definition. Names will be
-used as the new method names in the BenchDesign object.  
+\item{...}{If `param != NULL`, a named list of values to use for
+overwriting the specified parameter in the original method definition.
+If `param = NULL`, then a named list of parameter sets to be used in
+place of parameters in the original method definition. Each parameter set
+should also be a named list of parameter, value pairs.
+Names will be used as the new method names in the BenchDesign object.
 An error will be returned if an existing method name is used.
 (defualt = NULL)}
 

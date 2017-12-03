@@ -11,18 +11,14 @@
 #'        specified if only one parameter should be replaced in original
 #'        method definition. Only one of `param` or `list` should be
 #'        specified. (default = NULL)
-#' @param ... Named list of value to use for overwriting the specified
-#'        parameter in the original method definition. Names will be
-#'        used as the new method names in the BenchDesign object.  
+#' @param ... If `param != NULL`, a named list of values to use for
+#'        overwriting the specified parameter in the original method definition.
+#'        If `param = NULL`, then a named list of parameter sets to be used in
+#'        place of parameters in the original method definition. Each parameter set
+#'        should also be a named list of parameter, value pairs.
+#'        Names will be used as the new method names in the BenchDesign object.
 #'        An error will be returned if an existing method name is used.
 #'        (defualt = NULL) 
-#' @param list Named list of parameter sets to be used in place of
-#'        original method definition. Each parameter set should also be a
-#'        named list of parameter, value pairs. All values which include a
-#'        variable must be quoted using `rlang::quo`. Only one of `param` or `list`
-#'        should be specified. Names of parameter sets will be used as the
-#'        new method names in the BenchDesign object. An error will be returned 
-#'        if an existing method name is used. (defualt = NULL)
 #' @param replace Logical whether original `blabel` object should be removed
 #'        if method expansion is successful. (default = FALSE)
 #' @param overwrite Logical whether to overwrite the existing list of
@@ -38,74 +34,55 @@
 #'
 #' @export
 #' @author Patrick Kimes
-expandBMethod <- function(b, blabel, param = NULL, list = NULL, ...,
+expandBMethod <- function(b, blabel, param = NULL, ...,
                           replace = FALSE, overwrite = FALSE) {
     UseMethod("expandBMethod")
 }
 
-expandBMethod.BenchDesign <- function(b, blabel, param = NULL, list = NULL, ...,
+expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
                                       replace = FALSE, overwrite = FALSE) { 
-    ## capture input
+    ## capture new parameter sets
     qd <- quos(...)
+
+    ## verify that parameter names are valid
+    if (is.null(names(qd))) {
+        stop("New parameter values must be named.")
+    }
+    if (any(names(qd) %in% names(b$methods))) {
+        stop("New method names should not overlap with names of current methods.")
+    }
+    if (any(duplicated(names(qd)))) {
+        stop("New method names must be unique.")
+    }
     
     ## verify that method definition already exists
     if(!(blabel %in% names(b$methods))) {
         stop("Specified method is not defined in BenchDesign.")
     }
-    
     bm <- b$methods[[blabel]]
-
-    ## verify that exactly one of 'param' or 'list' was specified
-    if (!is.null(param) && !is.null(list)) {
-        stop("Only one of 'param' or 'list' should be specified.")
-    }
-    if (is.null(param) && is.null(list)) {
-        stop("One of 'param' or 'list' should be specified.")
-    }
     
-    ## expand differently depending on 
-    if (!is.null(param)) {
-        if (is.null(names(qd))) {
-            stop("New parameter values must be named.")
+    ## expand differently based on whether param is specified
+    if (is.null(param)) {
+        if (overwrite) {
+            zl <- lapply(1:length(qd), function(zi) {
+                qdqi <- lapply(lang_args(qd[[zi]]), as_quosure)
+                bm$dparams <- qdqi
+                bm
+            })
+        } else {
+            zl <- lapply(1:length(qd), function(zi) {
+                qdqi <- lapply(lang_args(qd[[zi]]), as_quosure)
+                bm$dparams <- replace(bm$dparams, names(qdqi), qdqi)
+                bm
+            })
         }
-        if (any(names(qd) %in% names(b$methods))) {
-            stop("New method names should not overlap with names of current methods.")
-        }
-        if (any(duplicated(names(qd)))) {
-            stop("New method names must be unique.")
-        }
-        
+    } else {
         zl <- lapply(1:length(qd), function(zi) {
             bm$dparams[[param]] <- qd[[zi]]
             bm
         })
-        names(zl) <- names(qd)
-        
-    } else {
-        if (is.null(names(list))) {
-            stop("New parameter sets must be named.")
-        }
-        if (any(names(list) %in% names(b$methods))) {
-            stop("New method names should not overlap with names of current methods.")
-        }
-        if (any(duplicated(names(list)))) {
-            stop("New method names must be unique.")
-        }
-
-        if (overwrite) {
-            zl <- lapply(1:length(list), function(zi) {
-                bm$dparams <- list[[zi]]
-                bm
-            })
-        } else {
-            zl <- lapply(1:length(list), function(zi) {
-                bm$dparams <- replace(bm$dparams,
-                                      names(list[[zi]]), list[[zi]])
-                bm
-            })
-        }
-        names(zl) <- names(list)
     }
+    names(zl) <- names(qd)
 
     ## drop source method
     if (replace) {

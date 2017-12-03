@@ -4,7 +4,7 @@
 \alias{modifyBMethod}
 \title{Modify definition of method in BenchDesign object}
 \usage{
-modifyBMethod(b, blabel, ..., overwite = FALSE)
+modifyBMethod(b, blabel, ..., overwrite = FALSE)
 }
 \arguments{
 \item{b}{BenchDesign object.}

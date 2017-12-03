@@ -53,7 +53,7 @@
 #' @import rlang
 #' @export
 #' @author Patrick Kimes
-modifyBMethod <- function(b, blabel, ..., overwite = FALSE) {
+modifyBMethod <- function(b, blabel, ..., overwrite = FALSE) {
     UseMethod("modifyBMethod")
 }
 
