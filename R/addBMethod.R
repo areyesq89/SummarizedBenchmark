@@ -21,19 +21,19 @@
 #' @param blabel Character name for the method.
 #' @param bfunc Primary function to be benchmarked.
 #' @param bpost Optional post-processing function that takes
-#'        output of `bfunc` as input. Ignored if NULL.
+#'        results of `bfunc` as input. Ignored if NULL.
+#'        If multiple assays (metrics) should be generated for each
+#'        method, this can be accomplished by specifying a named
+#'        list of post-processing functions, one for each assay. 
 #'        (default = NULL)
 #' @param bmeta Optional metadata information for method to be
 #'        included in `colData` of `SummarizedBenchmark` object
 #'        generated using `buildBench`. See Details for more
 #'        information. Ignored if NULL. (default = NULL)
 #' @param ... Named `parameter = value` pairs to be passed to
-#'        `func`.
+#'        `bfunc`.
 #'
 #' @details
-#' If multiple assays (i.e. result metrics) should be generated, the optional
-#' `bpost` parameter now handle a list of functions.
-#' 
 #' The optional `bmeta` parameter accepts a named list of metadata
 #' tags to be included for the method in the resulting `SummarizedBenchmark`
 #' object. This can be useful for two primary cases. First, it can help keep
@@ -50,7 +50,7 @@
 #' that should be used to determine the package name and version. If a separate
 #' function should be used, it should be passed to `bmeta` as a list entry
 #' with the name `pkg_func` and first quoted using `rlang::quo`, e.g.
-#' `list(pkg_func = quo(p.adjust)`.
+#' `list(pkg_func = quo(p.adjust))`.
 #' 
 #' @examples
 #' \dontrun{
@@ -72,6 +72,7 @@
 #' }
 #'
 #' @md
+#' @import rlang
 #' @export
 #' @author Patrick Kimes
 addBMethod <- function(b, blabel, bfunc, bpost = NULL, bmeta = NULL, ...) {

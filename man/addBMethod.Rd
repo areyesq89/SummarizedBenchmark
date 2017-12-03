@@ -14,7 +14,10 @@ addBMethod(b, blabel, bfunc, bpost = NULL, bmeta = NULL, ...)
 \item{bfunc}{Primary function to be benchmarked.}
 
 \item{bpost}{Optional post-processing function that takes
-output of \code{bfunc} as input. Ignored if NULL.
+results of \code{bfunc} as input. Ignored if NULL.
+If multiple assays (metrics) should be generated for each
+method, this can be accomplished by specifying a named
+list of post-processing functions, one for each assay.
 (default = NULL)}
 
 \item{bmeta}{Optional metadata information for method to be
@@ -23,7 +26,7 @@ generated using \code{buildBench}. See Details for more
 information. Ignored if NULL. (default = NULL)}
 
 \item{...}{Named \code{parameter = value} pairs to be passed to
-\code{func}.}
+\code{bfunc}.}
 }
 \description{
 This function takes a BenchDesign object and returns a
@@ -44,9 +47,6 @@ further processed. As an example, \code{bpost} may be a simple
 "getter" function for accessing the column of interest from
 the large object returned by \code{bfunc}.
 
-If multiple assays (i.e. result metrics) should be generated, the optional
-\code{bpost} parameter now handle a list of functions.
-
 The optional \code{bmeta} parameter accepts a named list of metadata
 tags to be included for the method in the resulting \code{SummarizedBenchmark}
 object. This can be useful for two primary cases. First, it can help keep
@@ -63,7 +63,7 @@ and \code{"pkg_vers"} values to \code{bmeta} as a list, or specify a separate fu
 that should be used to determine the package name and version. If a separate
 function should be used, it should be passed to \code{bmeta} as a list entry
 with the name \code{pkg_func} and first quoted using \code{rlang::quo}, e.g.
-\code{list(pkg_func = quo(p.adjust)}.
+\code{list(pkg_func = quo(p.adjust))}.
 }
 \examples{
 \dontrun{
