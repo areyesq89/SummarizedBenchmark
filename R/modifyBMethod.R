@@ -8,12 +8,12 @@
 #' 
 #' @param b BenchDesign object.
 #' @param blabel Character name of method to be modified.
-#' @param ... Named `parameter = value` pairs to overwrite 
+#' @param ... Named parameter, value pairs to overwrite 
 #'        in method definition. This can include `bfunc`,
 #'        `bpost`, and `bmeta` parameters. All other named parameters
 #'        will be added to the list of parameters to be passed to
 #'        `bfunc`.
-#' @param overwrite logical whether to overwrite the existing list of
+#' @param overwrite Logical whether to overwrite the existing list of
 #'        parameters to be passed to `bfunc` (TRUE), or to simply add
 #'        the new parameters to the existing list (FALSE).
 #'        (default = FALSE) 
@@ -46,6 +46,9 @@
 #' showBMethod(bd, "qv")
 #' }
 #'
+#' @return
+#' Modified BenchDesign object.
+#' 
 #' @md
 #' @import rlang
 #' @export

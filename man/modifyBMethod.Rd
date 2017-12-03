@@ -11,16 +11,19 @@ modifyBMethod(b, blabel, ..., overwite = FALSE)
 
 \item{blabel}{Character name of method to be modified.}
 
-\item{...}{Named \code{parameter = value} pairs to overwrite
+\item{...}{Named parameter, value pairs to overwrite
 in method definition. This can include \code{bfunc},
 \code{bpost}, and \code{bmeta} parameters. All other named parameters
 will be added to the list of parameters to be passed to
 \code{bfunc}.}
 
-\item{overwrite}{logical whether to overwrite the existing list of
+\item{overwrite}{Logical whether to overwrite the existing list of
 parameters to be passed to \code{bfunc} (TRUE), or to simply add
 the new parameters to the existing list (FALSE).
 (default = FALSE)}
+}
+\value{
+Modified BenchDesign object.
 }
 \description{
 This function takes a BenchDesign object and the name of a method
