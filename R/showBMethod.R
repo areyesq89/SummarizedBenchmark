@@ -17,6 +17,8 @@
 #' }
 #' 
 #' @md
+#' @import rlang
+#' @importFrom stringr str_trunc str_pad
 #' @export
 #' @author Patrick Kimes
 showBMethod <- function(b, n) {
@@ -31,11 +33,25 @@ showBMethod <- function(b, n) {
     cat("bpost:\n")
     cat("    ", quo_text(m$post), "\n")
 
-    dn <- names(m$dparams)
-    d <- sapply(m$dparams, quo_name)
+    cat("bmeta:\n")
+    if (!is.null(m$meta)) {
+        meta_n <- names(m$meta)
+        meta_q <- sapply(m$meta, quo_text)
+        for (i in seq(meta_n))
+            cat(stringr::str_trunc(paste("    ", meta_n[i], ":", meta_q[i]), 60), "\n")
+    } else {
+        cat("     none\n")
+    }
+    
     cat("parameters:\n")
-    for (i in seq(dn))
-        cat("    ", dn[i], ":", d[i], "\n")
+    if (length(m$dparams) > 0) {
+        param_n <- names(m$dparams)
+        param_q <- sapply(m$dparams, quo_name)
+        for (i in seq(param_n))
+            cat(stringr::str_trunc(paste("    ", param_n[i], ":", param_q[i]), 60), "\n")
+    } else {
+        cat("     none\n")
+    }
 }
 
 
