@@ -17,9 +17,9 @@ specified if only one parameter should be replaced in original
 method definition. Only one of `param` or `list` should be
 specified. (default = NULL)}
 
-\item{...}{If `param != NULL`, a named list of values to use for
+\item{...}{If `param != NULL`, named values to use for
 overwriting the specified parameter in the original method definition.
-If `param = NULL`, then a named list of parameter sets to be used in
+If `param = NULL`, then named lists of parameter sets to be used in
 place of parameters in the original method definition. Each parameter set
 should also be a named list of parameter, value pairs.
 Names will be used as the new method names in the BenchDesign object.
@@ -41,10 +41,6 @@ This function takes a BenchDesign object and the name of a method
 already defined in the object, and returns a modified BenchDesign
 object with multiple copies of the method differing by the specified
 parameter sets.
-}
-\details{
-Currently, if the `list` approach is used, all variables must be quoted using
-the `rlang::quo` function.
 }
 \author{
 Patrick Kimes
