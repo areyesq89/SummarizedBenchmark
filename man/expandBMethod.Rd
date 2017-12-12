@@ -4,8 +4,8 @@
 \alias{expandBMethod}
 \title{Expand method in BenchDesign object across parameter settings}
 \usage{
-expandBMethod(b, blabel, param = NULL, ..., replace = FALSE,
-  overwrite = FALSE)
+expandBMethod(b, blabel, param = NULL, ..., .replace = FALSE,
+  .overwrite = FALSE)
 }
 \arguments{
 \item{b}{BenchDesign object.}
@@ -26,10 +26,10 @@ Names will be used as the new method names in the BenchDesign object.
 An error will be returned if an existing method name is used.
 (defualt = NULL)}
 
-\item{replace}{Logical whether original `blabel` object should be removed
+\item{.replace}{Logical whether original `blabel` object should be removed
 if method expansion is successful. (default = FALSE)}
 
-\item{overwrite}{Logical whether to overwrite the existing list of
+\item{.overwrite}{Logical whether to overwrite the existing list of
 parameters (TRUE) or to simply add the new parameters to the existing
 list (FALSE). (default = FALSE)}
 }

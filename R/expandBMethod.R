@@ -19,9 +19,9 @@
 #'        Names will be used as the new method names in the BenchDesign object.
 #'        An error will be returned if an existing method name is used.
 #'        (defualt = NULL) 
-#' @param replace Logical whether original `blabel` object should be removed
+#' @param .replace Logical whether original `blabel` object should be removed
 #'        if method expansion is successful. (default = FALSE)
-#' @param overwrite Logical whether to overwrite the existing list of
+#' @param .overwrite Logical whether to overwrite the existing list of
 #'        parameters (TRUE) or to simply add the new parameters to the existing
 #'        list (FALSE). (default = FALSE) 
 #'
@@ -35,12 +35,12 @@
 #' @export
 #' @author Patrick Kimes
 expandBMethod <- function(b, blabel, param = NULL, ...,
-                          replace = FALSE, overwrite = FALSE) {
+                          .replace = FALSE, .overwrite = FALSE) {
     UseMethod("expandBMethod")
 }
 
 expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
-                                      replace = FALSE, overwrite = FALSE) { 
+                                      .replace = FALSE, .overwrite = FALSE) { 
     ## capture new parameter sets
     qd <- quos(...)
 
@@ -63,7 +63,7 @@ expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
     
     ## expand differently based on whether param is specified
     if (is.null(param)) {
-        if (overwrite) {
+        if (.overwrite) {
             zl <- lapply(1:length(qd), function(zi) {
                 qdqi <- lapply(lang_args(qd[[zi]]), as_quosure)
                 bm$dparams <- qdqi
@@ -85,7 +85,7 @@ expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
     names(zl) <- names(qd)
 
     ## drop source method
-    if (replace) {
+    if (.replace) {
         b$methods <- b$methods[names(b$methods) != blabel]
     }
     

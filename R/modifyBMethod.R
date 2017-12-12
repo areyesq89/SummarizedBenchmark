@@ -13,7 +13,7 @@
 #'        `bpost`, and `bmeta` parameters. All other named parameters
 #'        will be added to the list of parameters to be passed to
 #'        `bfunc`.
-#' @param overwrite Logical whether to overwrite the existing list of
+#' @param .overwrite Logical whether to overwrite the existing list of
 #'        parameters to be passed to `bfunc` (TRUE), or to simply add
 #'        the new parameters to the existing list (FALSE).
 #'        (default = FALSE) 
@@ -53,12 +53,12 @@
 #' @import rlang
 #' @export
 #' @author Patrick Kimes
-modifyBMethod <- function(b, blabel, ..., overwrite = FALSE) {
+modifyBMethod <- function(b, blabel, ..., .overwrite = FALSE) {
     UseMethod("modifyBMethod")
 }
 
 #' @export
-modifyBMethod.BenchDesign <- function(b, blabel, ..., overwrite = FALSE) {
+modifyBMethod.BenchDesign <- function(b, blabel, ..., .overwrite = FALSE) {
     ## capture input
     qd <- quos(...)
 
@@ -82,7 +82,7 @@ modifyBMethod.BenchDesign <- function(b, blabel, ..., overwrite = FALSE) {
 
     ## process named parameters to be used for bfunc
     qd <- qd[! names(qd) %in% c("bfunc", "bpost", "bmeta")]
-    if (overwrite) {
+    if (.overwrite) {
         bm$dparams <- qd
     } else {
         bm$dparams <- replace(bm$dparams, names(qd), qd)

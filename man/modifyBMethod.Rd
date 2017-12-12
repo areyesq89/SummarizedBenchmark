@@ -4,7 +4,7 @@
 \alias{modifyBMethod}
 \title{Modify definition of method in BenchDesign object}
 \usage{
-modifyBMethod(b, blabel, ..., overwrite = FALSE)
+modifyBMethod(b, blabel, ..., .overwrite = FALSE)
 }
 \arguments{
 \item{b}{BenchDesign object.}
@@ -17,7 +17,7 @@ in method definition. This can include \code{bfunc},
 will be added to the list of parameters to be passed to
 \code{bfunc}.}
 
-\item{overwrite}{Logical whether to overwrite the existing list of
+\item{.overwrite}{Logical whether to overwrite the existing list of
 parameters to be passed to \code{bfunc} (TRUE), or to simply add
 the new parameters to the existing list (FALSE).
 (default = FALSE)}
