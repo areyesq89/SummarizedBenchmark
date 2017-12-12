@@ -330,7 +330,7 @@ funcMeta <- function(f, meta) {
         meta_func <- meta[["pkg_func"]] 
         meta <- meta[!(names(meta) %in% c("pkg_func", "pkg_name", "pkg_vers"))]
         if (length(meta) > 0) {
-            names(meta) <- paste0("meta_", names(meta))
+            names(meta) <- paste0("meta.", names(meta))
         }
         if (!is.null(meta_func)) {
             meta_func <- gsub("\n", ";", quo_text(meta_func))
