@@ -11,23 +11,19 @@
 #'        specified if only one parameter should be replaced in original
 #'        method definition. Only one of `param` or `list` should be
 #'        specified. (default = NULL)
-#' @param ... If `param != NULL`, a named list of values to use for
+#' @param ... If `param != NULL`, named values to use for
 #'        overwriting the specified parameter in the original method definition.
-#'        If `param = NULL`, then a named list of parameter sets to be used in
+#'        If `param = NULL`, then named lists of parameter sets to be used in
 #'        place of parameters in the original method definition. Each parameter set
 #'        should also be a named list of parameter, value pairs.
 #'        Names will be used as the new method names in the BenchDesign object.
 #'        An error will be returned if an existing method name is used.
 #'        (defualt = NULL) 
-#' @param replace Logical whether original `blabel` object should be removed
+#' @param .replace Logical whether original `blabel` object should be removed
 #'        if method expansion is successful. (default = FALSE)
-#' @param overwrite Logical whether to overwrite the existing list of
+#' @param .overwrite Logical whether to overwrite the existing list of
 #'        parameters (TRUE) or to simply add the new parameters to the existing
 #'        list (FALSE). (default = FALSE) 
-#'
-#' @details
-#' Currently, if the `list` approach is used, all variables must be quoted using
-#' the `rlang::quo` function.
 #' 
 #' @return
 #' Modified BenchDesign object.
@@ -35,12 +31,12 @@
 #' @export
 #' @author Patrick Kimes
 expandBMethod <- function(b, blabel, param = NULL, ...,
-                          replace = FALSE, overwrite = FALSE) {
+                          .replace = FALSE, .overwrite = FALSE) {
     UseMethod("expandBMethod")
 }
 
 expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
-                                      replace = FALSE, overwrite = FALSE) { 
+                                      .replace = FALSE, .overwrite = FALSE) { 
     ## capture new parameter sets
     qd <- quos(...)
 
@@ -63,29 +59,63 @@ expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
     
     ## expand differently based on whether param is specified
     if (is.null(param)) {
-        if (overwrite) {
+        if (.overwrite) {
             zl <- lapply(1:length(qd), function(zi) {
                 qdqi <- lapply(lang_args(qd[[zi]]), as_quosure)
+                ## ###################
+                if ("bfunc" %in% names(qdqi)) {
+                    bm$func <- qdqi$bfunc
+                }
+                if ("bpost" %in% names(qdqi)) {
+                    bm$post <- qdqi$bpost
+                }
+                if ("bmeta" %in% names(qdqi)) {
+                    bm$meta <- eval_tidy(qdqi$bmeta)
+                }
+                qdqi <- qdqi[! names(qdqi) %in% c("bfunc", "bpost", "bmeta")]
+                ## ###################
                 bm$dparams <- qdqi
                 bm
             })
         } else {
             zl <- lapply(1:length(qd), function(zi) {
                 qdqi <- lapply(lang_args(qd[[zi]]), as_quosure)
+                ## ###################
+                if ("bfunc" %in% names(qdqi)) {
+                    bm$func <- qdqi$bfunc
+                }
+                if ("bpost" %in% names(qdqi)) {
+                    bm$post <- qdqi$bpost
+                }
+                if ("bmeta" %in% names(qdqi)) {
+                    bm$meta <- eval_tidy(qdqi$bmeta)
+                }
+                qdqi <- qdqi[! names(qdqi) %in% c("bfunc", "bpost", "bmeta")]
+                ## ###################
                 bm$dparams <- replace(bm$dparams, names(qdqi), qdqi)
                 bm
             })
         }
     } else {
         zl <- lapply(1:length(qd), function(zi) {
-            bm$dparams[[param]] <- qd[[zi]]
+            ## ###################
+            if (param == "bfunc") {
+                bm$func <- qd[[zi]]
+            } else if (param == "bpost") {
+                bm$post <- qd[[zi]]
+            } else if (param == "bmeta") {
+                bm$meta <- eval_tidy(qd[[zi]])
+            } else {
+                bm$dparams[[param]] <- qd[[zi]]
+            }
+            ## ###################
             bm
         })
     }
     names(zl) <- names(qd)
 
     ## drop source method
-    if (replace) {
+    if (.replace) {
         b$methods <- b$methods[names(b$methods) != blabel]
     }
     

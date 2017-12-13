@@ -46,7 +46,7 @@ showBMethod <- function(b, n) {
     cat("parameters:\n")
     if (length(m$dparams) > 0) {
         param_n <- names(m$dparams)
-        param_q <- sapply(m$dparams, quo_name)
+        param_q <- sapply(m$dparams, quo_text)
         for (i in seq(param_n))
             cat(stringr::str_trunc(paste("    ", param_n[i], ":", param_q[i]), 60), "\n")
     } else {
