@@ -6,7 +6,7 @@ package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
 abstract: >
   "When performing a data analysis in R, users are often presented with multiple packages and methods for accomplishing the same task. Benchmarking the performance of these different methods on real and simulated data sets is a common way of learning the relative strengths and weaknesses of each approach. However, as the number of tools and parameters compared increases, keeping track of output and how it was generated quickly becomes messy. The `SummarizedBenchmark` package provides a framework for organizing benchmark comparisons. This vignette introduces the general approach and features of the package using several examples of varying complexity. SummarizedBenchmark package version: `r packageVersion("SummarizedBenchmark")`"
 output:
-  rmarkdown::html_document:
+  BiocStyle::html_document:
     highlight: pygments
     toc: true
     fig_width: 5
@@ -125,6 +125,7 @@ b <- b %>%
   addBMethod("qv", qvalue::qvalue,
              p = pval,
              bpost = function(x) { x$qvalues })
+
 ```
 
 For some methods, such as the q-value approach above, it may be necessary to call a "post-processing" function on the primary method to extract the desired output (here, the q-values). This should be specified using the optional `bpost` parameter. 
@@ -139,10 +140,14 @@ While the bench now includes all the information necessary for performing the be
 
 ```{r}
 sb <- buildBench(b, truthCols = "H")
-sb
 ```
 
-The returned object is a `SummarizedBenchmark`. The table of adjusted p-values is contained in a single "assay" of the object with each method added using `addBMethod` as a column with the corresponding `blabel` as the name.
+The returned object is a `SummarizedBenchmark` class. 
+
+# The SummarizedBenchmark class
+
+The `SummarizedBenchmark` object is an extension of a `SummarizedExperiment` object. 
+Continuing with the example from the previous section, the table of adjusted p-values is contained in a single "assay" of the object with each method added using `addBMethod` as a column with the corresponding `blabel` as the name.
 
 ```{r}
 head(assay(sb))
@@ -154,11 +159,90 @@ Metadata for the methods is contained in the `colData` of the same object, with 
 colData(sb)
 ```
 
-In addition to columns for the functions and parameters specified with `addBMethod` (`bfunc, bpost, blabel, param.*`), the `colData` includes several other columns added during the `buildBench` process. Most notably,  columns for the package name and version of `bfunc` if available (`pkg_name`, `pkg_vers`).
+In addition to columns for the functions and parameters specified with `addBMethod` (`bfunc, bpost, blabel, param.*`), the `colData` includes several other columns added during the `buildBench` process. Most notably,  columns for the package name and version of `bfunc` if available (`pkg_name`, `pkg_vers`). 
 
-The resulting object can be saved to disk with the method information tied directly to the resulting output. Additionally, comparison of the adjusted p-values can now be carried out using downstream methods using the `SummarizedBenchmark` framework.
+When available, ground truth data is contained in the `rowData` of the `SummarizedBenchmark` object.
 
-**Include SummarizedBenchmark usage here.**
+```{r}
+rowData( sb )
+```
+
+An important advantage of using `BioC` infrastructure to save this kind of results is that the metadata is tighly linked to the data. Thus, it is possible, for example, to subset the data while keeping the link to its respective metadata in a single step. For example, the code below extracts the data  from the first two methods
+ 
+```{r}
+sbSub <- sb[,1:2]
+colData( sbSub )
+```
+
+Note that the `SummarizedBenchmark` object is similar to a `SummarizedExperiment` object. However, the `SummarizedBenchmark` object contains an additional slot where users can define performance metrics to evaluate the different methods.
+
+## Defining performance metrics {#performanceMetrics}
+
+Since different benchmarks might use different metrics to evaluate the performance the methods, the `SummarizedBenchmark` class provides a flexible way to define performance metrics. We can define performance metrics using the function `addPerformanceMetric` by providing a `SummarizedBenchmark` object, a name of the metric, an `assay` name, and the function that defines it. Importantly, the function must contain the following two arguments: query (refering to a vector of values being evaluated, i.e. the output of one method) and truth (refering to the vector of ground truths). If further arguments are provided to the performance function, these must contain default values. 
+
+For our example, we define the performance metric TPR (True Positive Rate) that calculates the fraction of true positives recovered given an alpha value. This performance metric uses the `H` assay of our `SummarizedBenchmark` example.
+
+```{r addPerformanceMetric}
+sb <- addPerformanceMetric(
+  object=sb,
+  assay="H",
+  evalMetric="TPR",
+  evalFunction = function( query, truth, alpha=0.1 ){
+    goodHits <- sum( (query < alpha) & truth == 1 )
+    goodHits / sum(truth == 1)
+    }
+)
+
+performanceMetrics(sb)[["H"]]
+```
+
+## Evaluating performance metrics 
+
+Once having defined all the desired performance metrics, the function `estimatePerformanceMetrics` calculates these for each method.  Parameters for the performance functions can be passed here. For example, in the case below, we are specifying the performance functions to be estimated for several `alpha` values.
+
+```{r}
+resWide <- estimatePerformanceMetrics( sb, alpha=c(0.05, 0.1, 0.2) )
+resWide
+```
+
+By default, the function above returns a `DataFrame`, where the parameters of the performance function are stored in its `elementMetadata`
+
+```{r elWide}
+elementMetadata(resWide)
+```
+
+A second possibility is to set the parameter `addColData` for these results to be stored in the `colData` of the `SummarizedBenchmark` object. 
+
+```{r}
+sb <- estimatePerformanceMetrics( sb, 
+                                  alpha=c(0.05, 0.1, 0.2), 
+                                  addColData=TRUE)
+colData( sb )
+elementMetadata(colData(sb))
+```
+
+Finally, if the user prefers tidier formats, by setting the parameter `tidy=TRUE` the function returns a long-formated version of the results. 
+
+```{r}
+estimatePerformanceMetrics( sb, 
+                            alpha=c(0.05, 0.1, 0.2), 
+                            tidy=TRUE )
+```
+
+As an alternative to get the same `data.frame` the previous chunk, we can call the function `tidyUpMetrics` on the saved results from a `SummarizedBenchmark` object
+
+```{r}
+head( tidyUpMetrics(sb) )
+```
+
+For example, the code below extracts the `TPR` for an alpha of 0.1 for the bonferroni method.
+
+```{r}
+tidyUpMetrics( sb ) %>%
+  dplyr:::filter( blabel == "bonf", alpha == 0.1, performanceMetric == "TPR" ) %>%
+  dplyr:::select( value )
+
+```
 
 # Differential Expression Case Study
 
@@ -308,7 +392,47 @@ sb
 
 ## Benchmark Evaluation
 
-**Include SummarizedBenchmark stuff here (performance metrics, plots, subsetting/SummarizedExperiment features).**
+By running the code above, the results of three differential expression methods (`edgeR`, `limma-voom` and `DESeq2`) will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric`, as described before in Section \@ref(performanceMetrics). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics` returns a `data.frame` of these metrics together with their respective assay names and whether they require ground truths.
+
+```{r availableMetrics}
+availableMetrics()
+```
+
+For example, if we change the assay name of our object from `H` to `qvalue` and then call the function `addDefaultMetrics`, the metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` will be added to our object. 
+
+```{r}
+assayNames( sb ) <- "qvalue"
+sb <- addDefaultMetrics( sb )
+names( performanceMetrics( sb )[["qvalue"]] )
+```
+
+```{r echo=FALSE}
+assay(sb)[,"deseq2"][is.na( assay(sb)[,"deseq2"] )] <- 1
+```
+
+Having defined the desired performance metrics, the function `estimatePerformanceMetrics` will calculate these metrics for each of the three methods. 
+
+```{r}
+estimatePerformanceMetrics( sb, 
+                            alpha=c(0.01, 0.05, 0.1, 0.2), 
+                            tidy=TRUE) %>%
+  dplyr:::select( blabel, value, performanceMetric, alpha ) %>%
+  tail()
+```
+
+Furthermore, if the `SummarizedBenchmark` object contains an assay called `qvalue`, the functions `plotMethodsOverlap` and `plotROC` are helpful to visualize the performance of the different methods.
+
+`plotMethodsOverlap` is a wrapper for the function `upset` from the `UpSetR` package that is helpful to visualize the overlaps between hits of different methods for a given alpha value. 
+
+```{r, fig.width=4.5, fig.height=4}
+plotMethodsOverlap( sb, alpha=0.1, order.by="freq")
+```
+
+From the plot above, it is evident that there is a large number of transcripts that are detected to be differentially expressed by all three methods. There are also smallers sets of transcripts that are detected uniquely by a single method or subsets of methods. Another typical way to compare the performance of different methods are Receiver Operating Characteristic (ROC) curves. The function `plotROC` inputs a `SummarizeBenchmark` object and draws the ROC curves for all methods contained in it. 
+
+```{r, fig.width=5, fig.height=4}
+plotROC(sb)
+```
 
 # Advanced Features
 
@@ -544,6 +668,56 @@ showBMethod(bde, "deseq2_v2")
 
 ## Manually Constructing a SummarizedBenchmark
 
+So far, this vignette has shown the recommended use of `SummarizedBenchmark`, that enables users to perform benchmarks automatically keeping track of parameters and software versions. However, users can also construct `SummarizedBenchmark` objects from standard `S3` data objects. 
+
+Using data from the `r BiocStyle::Biocpkg("iCOBRA")`package [@Soneson_2016], this part of the vignette demonstrates how to build `SummarizedBenchmark` objects from `S3` objects. The dataset contains differential expression results of three different methods (`r BiocStyle::Biocpkg("limma")`, `r BiocStyle::Biocpkg("edgeR")` and `r BiocStyle::Biocpkg("DESeq2")`) applied to a simulated RNA-seq dataset.
+
+```{r cobraData, message=FALSE, warning=FALSE}
+library(iCOBRA)
+data(cobradata_example)
+```
+
+The process of building a `SummarizedBenchmark` object is similar to the one used to construct a `SummarizedExperiment` object. To build a `SummarizedBenchmark` object, three main objects are required (1) a list where each element corresponds to a data.frame, (2) a `DataFrame` with annotations of the methods and (3) when available, a `DataFrame` of ground truths. 
+
+In the `SummarizedBenchmark` object, each output of the methods is considered a different `assay`. For example, using the differential expression dataset example, we can define two assays, q-values and estimated log fold changes. For each `assay`, we arrange the output of the different methods as a matrix where each column corresponds to a method and each row corresponds to each feature (in this case, genes). We will need a list in which each of it's element corresponds to an assay.
+
+```{r arrangeLists}
+assays <- list(
+  qvalue=cobradata_example@padj,
+  logFC=cobradata_example@score )
+assays[["qvalue"]]$DESeq2 <- p.adjust(cobradata_example@pval$DESeq2, method="BH")
+head( assays[["qvalue"]], 3)
+head( assays[["logFC"]], 3)
+```
+
+Since these are simulated data, the ground truths for both assays are known. We can format these as a `DataFrame` where each column corresponds to an assay and each row corresponds to a feature.
+
+```{r groundTruths}
+library(S4Vectors)
+groundTruth <- DataFrame( cobradata_example@truth[,c("status", "logFC")] )
+colnames(groundTruth) <- names( assays )
+groundTruth <- groundTruth[rownames(assays[[1]]),]
+head( groundTruth )
+```
+
+Then, the method names are also reformatted as a `DataFrame` 
+
+```{r buildColData}
+colData <- DataFrame( method=colnames(assays[[1]]) )
+colData
+```
+
+A `SummarizedBenchmark` is build using the following command
+
+```{r buildSB}
+sb <- SummarizedBenchmark(
+  assays=assays, 
+  colData=colData,
+  groundTruth=groundTruth )
+```
+
+
 # References
 
 - [Soneson C, Love MI and Robinson MD. 2016. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. F1000Research, 4:1521. (doi: 10.12688/f1000research.7563.2)](https://f1000research.com/articles/4-1521/v2)
+

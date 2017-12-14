@@ -293,7 +293,7 @@ setMethod(
   function( object, ... ){
     stopifnot( is( object, "SummarizedBenchmark") )
     cols <- mcols( mcols(object) )$colType == "groundTruth"
-    mcols(object, ...)[,cols]
+    mcols(object, ...)[,cols, drop=FALSE]
   }
 )
 
