@@ -4,7 +4,7 @@ author: "Patrick K. Kimes, Alejandro Reyes"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
 abstract: >
-  "When performing a data analysis in R, users are often presented with multiple packages and methods for accomplishing the same task. Benchmarking the performance of these different methods on real and simulated data sets is a common way of learning the relative strengths and weaknesses of each approach. However, as the number of tools and parameters compared increases, keeping track of output and how it was generated quickly becomes messy. The `SummarizedBenchmark` package provides a framework for organizing benchmark comparisons. This vignette introduces the general approach and features of the package using several examples of varying complexity. SummarizedBenchmark package version: `r packageVersion("SummarizedBenchmark")`"
+  "When performing a data analysis in R, users are often presented with multiple packages and methods for accomplishing the same task. Benchmarking the performance of these different methods on real and simulated data sets is a common way of learning the relative strengths and weaknesses of each approach. However, as the number of tools and parameters increases, keeping track of output and how it was generated can quickly becomes messy. The `SummarizedBenchmark` package provides a framework for organizing benchmark comparisons. This vignette introduces the general approach and features of the package using two examples. SummarizedBenchmark package version: `r packageVersion("SummarizedBenchmark")`"
 output:
   BiocStyle::html_document:
     highlight: pygments
@@ -29,27 +29,24 @@ knitr::opts_chunk$set(tidy = FALSE,
 
 # Introduction
 
-With `SummarizedBenchmark`, a complete benchmarking workflow is comprised of three primary components: **(1)** data, **(2)** methods, and **(3)** performance metrics. The first two (_data_ and _methods_) are necessary for carrying out the benchmark experiment, and the last (_performance metrics_) is essential for evaluating the results of the experiment. Following this approach, the `SummarizedBenchmark` package includes two types of objects: **BenchDesign** objects and **SummarizedBenchmark** objects. BenchDesign objects contain only the design of the benchmark experiment, namely the _data_ and _methods_. After constructing a BenchDesign, the experiment can be executed, and the results returned as a SummarizedBenchmark. SummarizedBenchmark objects extend the Bioconductor `SummarizedExperiment` class, with the additional capability of working with _performance metrics_.  
+With `SummarizedBenchmark`, a complete benchmarking workflow is comprised of three primary components:
 
-The basic framework is illustrated in the figure below. Blue components must be specified by users. First, a BenchDesign is created with _data_ and _methods_. Next a SummarizedBenchmark is created with the method outputs, and paired with _performance metrics_, again specified by the user. For convenience, several default _performance metrics_ are implemented in the package, and can be accessed with several simple commands.  
+1. data,
+2. methods, and
+3. performance metrics.
+
+The first two (_data_ and _methods_) are necessary for carrying out the benchmark experiment, and the last (_performance metrics_) is essential for evaluating the results of the experiment. Following this approach, the `SummarizedBenchmark` package defines two types of objects: **BenchDesign** objects and **SummarizedBenchmark** objects. BenchDesign objects contain only the design of the benchmark experiment, namely the _data_ and _methods_. After constructing a BenchDesign, the experiment can be executed to create a SummarizedBenchmark. SummarizedBenchmark objects extend the Bioconductor `SummarizedExperiment` class, with the additional capability of working with _performance metrics_.  
+
+The basic framework is illustrated in the figure below. Blue components must be specified by users. First, a BenchDesign is created with _data_ and _methods_. Next a SummarizedBenchmark is created with the method outputs, and paired with _performance metrics_ specified by the user. For convenience, several default _performance metrics_ are implemented in the package, and can be accessed with simple commands.  
 
 ![basic benchmarking class relationship](summarizedbenchmark-figure1.png)
 
-In this vignette, we first illustrate the basic use of both the **BenchDesign** and **SummarizedBenchmark** classes with a simple comparison of methods for p-value correction in the context of multiple hypothesis testing. Then, we describe more advanced features of the package with a case study comparison of common methods for differential expression analysis.
-
-## Related Work
-
-Related frameworks for benchmarking methods have been proposed in R, notably: [`iCOBRA`](https://github.com/markrobinsonuzh/iCOBRA) (available on Bioconductor) and [`dscr`](https://github.com/stephens999/dscr) (available on GitHub). The SummarizedBenchmark approach differs from both `iCOBRA` and `dscr` in several important ways.
-
-First, while the `iCOBRA` package provides support for evaluating the results of a benchmark experiment, it does not include infrastructure for experiment setup and execution. In this way, while no equivalent to the `BenchDesign` class exists as part of the `iCOBRA` package, the `iCOBRA` "`COBRAData`" class is similar to our "`SummarizedBenchmark`" class. However, by extending the standard Bioconductor `SummarizedExperiment` class, the `SummarizedBenchmark` class has the advantage of following a well-known data structure and facilitating easier downstream analyses. Finally, it may not even be reasonable to directly compare `iCOBRA` and `SummarizedBenchmark`, as `iCOBRA` was developed explicitly for the purpose of comparing results of _"binary classification and ranking methods"_ with a web application (Shiny app) for interactive analyses. Our package is designed with the goal of handling a much larger collection of benchmark studies.
-
-In both design and structure, the `SummarizedBenchmark` framework is much closer to the `dscr` package. Similar to `Summarizedbenchmark`, the `dscr` framework requires three components: **(1)** data simulators, **(2)** methods, and **(3)** score functions. However, `SummarizedBenchmark` differs from `dscr` notably in implementation. In addition to extending the `SummarizedExperiment` class for the `SummarizedBenchmark` class, the storage and execution of methods in `BenchDesign` makes use of the "**tidy eval**" approach recently proposed and implemented in the `rlang` package. 
+In this vignette, we first illustrate the basic use of both the **BenchDesign** and **SummarizedBenchmark** classes with a simple comparison of methods for p-value correction in the context of multiple hypothesis testing. Then, we describe more advanced features of the package with a case study comparing three methods for differential expression analysis.
 
 # Quickstart Case Study
 
 ```{r}
-##library("SummarizedBenchmark")
-devtools::load_all()
+library("SummarizedBenchmark")
 library("magrittr")
 ```
 
@@ -142,12 +139,7 @@ While the bench now includes all the information necessary for performing the be
 sb <- buildBench(b, truthCols = "H")
 ```
 
-The returned object is a `SummarizedBenchmark` class. 
-
-# The SummarizedBenchmark class
-
-The `SummarizedBenchmark` object is an extension of a `SummarizedExperiment` object. 
-Continuing with the example from the previous section, the table of adjusted p-values is contained in a single "assay" of the object with each method added using `addBMethod` as a column with the corresponding `blabel` as the name.
+The returned object is a `SummarizedBenchmark` class. The `SummarizedBenchmark` object is an extension of a `SummarizedExperiment` object. The table of adjusted p-values is contained in a single "assay" of the object with each method added using `addBMethod()` as a column with the corresponding `blabel` as the name.
 
 ```{r}
 head(assay(sb))
@@ -164,31 +156,29 @@ In addition to columns for the functions and parameters specified with `addBMeth
 When available, ground truth data is contained in the `rowData` of the `SummarizedBenchmark` object.
 
 ```{r}
-rowData( sb )
+rowData(sb)
 ```
 
-An important advantage of using `BioC` infrastructure to save this kind of results is that the metadata is tighly linked to the data. Thus, it is possible, for example, to subset the data while keeping the link to its respective metadata in a single step. For example, the code below extracts the data  from the first two methods
+An important advantage of building on the existing `SummarizedExperiment` class and Bioconductor infrastructure to save the results is that the metadata is tighly linked to the data. Thus, it is possible, for example, to subset the data while keeping the link to its respective metadata in a single step. For example, the code below extracts the data for only the first two methods.
  
 ```{r}
 sbSub <- sb[,1:2]
-colData( sbSub )
+colData(sbSub)
 ```
 
-Note that the `SummarizedBenchmark` object is similar to a `SummarizedExperiment` object. However, the `SummarizedBenchmark` object contains an additional slot where users can define performance metrics to evaluate the different methods.
+In addition to extending the `SummarizedExperiment` class, the `SummarizedBenchmark` class contains an additional slot where users can define performance metrics to evaluate the different methods.
 
-## Defining performance metrics {#performanceMetrics}
+Since different benchmarking experiments may require the use of different metrics to evaluate the performance of the methods, the `SummarizedBenchmark` class provides a flexible way to define performance metrics. We can define performance metrics using the function `addPerformanceMetric` by providing a `SummarizedBenchmark` object, a name of the metric, an `assay` name, and the function that defines it. Importantly, the function must contain the following two arguments: query (referring to a vector of values being evaluated, i.e. the output of one method) and truth (referring to the vector of ground truths). If further arguments are provided to the performance function, these must contain default values. 
 
-Since different benchmarks might use different metrics to evaluate the performance the methods, the `SummarizedBenchmark` class provides a flexible way to define performance metrics. We can define performance metrics using the function `addPerformanceMetric` by providing a `SummarizedBenchmark` object, a name of the metric, an `assay` name, and the function that defines it. Importantly, the function must contain the following two arguments: query (refering to a vector of values being evaluated, i.e. the output of one method) and truth (refering to the vector of ground truths). If further arguments are provided to the performance function, these must contain default values. 
-
-For our example, we define the performance metric TPR (True Positive Rate) that calculates the fraction of true positives recovered given an alpha value. This performance metric uses the `H` assay of our `SummarizedBenchmark` example.
+For our example, we define the performance metric "TPR" (True Positive Rate) that calculates the fraction of true positives recovered given an alpha value. This performance metric uses the `H` assay of our `SummarizedBenchmark` example.
 
 ```{r addPerformanceMetric}
 sb <- addPerformanceMetric(
-  object=sb,
-  assay="H",
-  evalMetric="TPR",
-  evalFunction = function( query, truth, alpha=0.1 ){
-    goodHits <- sum( (query < alpha) & truth == 1 )
+  object = sb,
+  assay = "H",
+  evalMetric = "TPR",
+  evalFunction = function(query, truth, alpha = 0.1) {
+    goodHits <- sum((query < alpha) & truth == 1)
     goodHits / sum(truth == 1)
     }
 )
@@ -196,52 +186,49 @@ sb <- addPerformanceMetric(
 performanceMetrics(sb)[["H"]]
 ```
 
-## Evaluating performance metrics 
-
-Once having defined all the desired performance metrics, the function `estimatePerformanceMetrics` calculates these for each method.  Parameters for the performance functions can be passed here. For example, in the case below, we are specifying the performance functions to be estimated for several `alpha` values.
+Having defined all the desired performance metrics, the function `estimatePerformanceMetrics` calculates these for each method.  Parameters for the performance functions can be passed here. For example, in the case below, we are specifying the performance functions to be estimated for several `alpha` values.
 
 ```{r}
-resWide <- estimatePerformanceMetrics( sb, alpha=c(0.05, 0.1, 0.2) )
+resWide <- estimatePerformanceMetrics(sb, alpha = c(0.05, 0.1, 0.2))
 resWide
 ```
 
-By default, the function above returns a `DataFrame`, where the parameters of the performance function are stored in its `elementMetadata`
+By default, the function above returns a `DataFrame`, where the parameters of the performance function are stored in its `elementMetadata`.
 
 ```{r elWide}
 elementMetadata(resWide)
 ```
 
-A second possibility is to set the parameter `addColData` for these results to be stored in the `colData` of the `SummarizedBenchmark` object. 
+A second possibility is to set the parameter `addColData = TRUE` for these results to be stored in the `colData` of the `SummarizedBenchmark` object. 
 
 ```{r}
-sb <- estimatePerformanceMetrics( sb, 
-                                  alpha=c(0.05, 0.1, 0.2), 
-                                  addColData=TRUE)
-colData( sb )
+sb <- estimatePerformanceMetrics(sb, 
+                                 alpha = c(0.05, 0.1, 0.2), 
+                                 addColData = TRUE)
+colData(sb)
 elementMetadata(colData(sb))
 ```
 
-Finally, if the user prefers tidier formats, by setting the parameter `tidy=TRUE` the function returns a long-formated version of the results. 
+Finally, if the user prefers tidier formats, by setting the parameter `tidy = TRUE` the function returns a long-formated version of the results. 
 
 ```{r}
-estimatePerformanceMetrics( sb, 
-                            alpha=c(0.05, 0.1, 0.2), 
-                            tidy=TRUE )
+estimatePerformanceMetrics(sb, 
+                           alpha = c(0.05, 0.1, 0.2), 
+                           tidy = TRUE)
 ```
 
-As an alternative to get the same `data.frame` the previous chunk, we can call the function `tidyUpMetrics` on the saved results from a `SummarizedBenchmark` object
+As an alternative to get the same `data.frame` as the previous chunk, we can call the function `tidyUpMetrics` on the saved results from a `SummarizedBenchmark` object.
 
 ```{r}
-head( tidyUpMetrics(sb) )
+head(tidyUpMetrics(sb))
 ```
 
-For example, the code below extracts the `TPR` for an alpha of 0.1 for the bonferroni method.
+For example, the code below extracts the `TPR` for an alpha of 0.1 for the Bonferroni method.
 
 ```{r}
-tidyUpMetrics( sb ) %>%
-  dplyr:::filter( blabel == "bonf", alpha == 0.1, performanceMetric == "TPR" ) %>%
-  dplyr:::select( value )
-
+tidyUpMetrics(sb) %>%
+  dplyr:::filter(blabel == "bonf", alpha == 0.1, performanceMetric == "TPR") %>%
+  dplyr:::select(value)
 ```
 
 # Differential Expression Case Study
@@ -401,22 +388,22 @@ availableMetrics()
 For example, if we change the assay name of our object from `H` to `qvalue` and then call the function `addDefaultMetrics`, the metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` will be added to our object. 
 
 ```{r}
-assayNames( sb ) <- "qvalue"
-sb <- addDefaultMetrics( sb )
-names( performanceMetrics( sb )[["qvalue"]] )
+assayNames(sb) <- "qvalue"
+sb <- addDefaultMetrics(sb)
+names(performanceMetrics(sb)[["qvalue"]])
 ```
 
 ```{r echo=FALSE}
-assay(sb)[,"deseq2"][is.na( assay(sb)[,"deseq2"] )] <- 1
+assay(sb)[,"deseq2"][is.na(assay(sb)[, "deseq2"])] <- 1
 ```
 
 Having defined the desired performance metrics, the function `estimatePerformanceMetrics` will calculate these metrics for each of the three methods. 
 
 ```{r}
-estimatePerformanceMetrics( sb, 
-                            alpha=c(0.01, 0.05, 0.1, 0.2), 
-                            tidy=TRUE) %>%
-  dplyr:::select( blabel, value, performanceMetric, alpha ) %>%
+estimatePerformanceMetrics(sb, 
+                           alpha = c(0.01, 0.05, 0.1, 0.2), 
+                           tidy = TRUE) %>%
+  dplyr:::select(blabel, value, performanceMetric, alpha) %>%
   tail()
 ```
 
@@ -716,6 +703,13 @@ sb <- SummarizedBenchmark(
   groundTruth=groundTruth )
 ```
 
+# Related Work
+
+Related frameworks for benchmarking have been proposed in R, notably: [`iCOBRA`](https://github.com/markrobinsonuzh/iCOBRA) (available on Bioconductor) and [`dscr`](https://github.com/stephens999/dscr) (available on GitHub). The `SummarizedBenchmark` package differs from both `iCOBRA` and `dscr` in several important ways.
+
+First, while the `iCOBRA` package provides support for evaluating the results of a benchmark experiment, it does not include infrastructure for experiment setup and execution. In this way, while no equivalent to the `BenchDesign` class exists as part of the `iCOBRA` package, the `iCOBRA` "`COBRAData`" class is similar to our "`SummarizedBenchmark`" class. However, by extending the standard Bioconductor `SummarizedExperiment` class, the `SummarizedBenchmark` class has the advantage of following a well-known data structure and facilitating easier downstream analyses. Finally, it may not even be reasonable to directly compare `iCOBRA` and `SummarizedBenchmark`, as `iCOBRA` was developed explicitly for the purpose of comparing results of _"binary classification and ranking methods"_ with a web application (Shiny app) for interactive analyses. Our package is designed with the goal of handling a much larger collection of benchmark studies.
+
+In both design and structure, the `SummarizedBenchmark` framework is much closer to the `dscr` package. Similar to `Summarizedbenchmark`, the `dscr` framework requires three components: **(1)** data simulators, **(2)** methods, and **(3)** score functions. However, `SummarizedBenchmark` differs from `dscr` notably in implementation. In addition to extending the `SummarizedExperiment` class for the `SummarizedBenchmark` class, the storage and execution of methods in `BenchDesign` makes use of the "**tidy eval**" approach recently proposed and implemented in the `rlang` package. 
 
 # References
 
