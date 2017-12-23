@@ -35,6 +35,7 @@ expandBMethod <- function(b, blabel, param = NULL, ...,
     UseMethod("expandBMethod")
 }
 
+#' @export
 expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
                                       .replace = FALSE, .overwrite = FALSE) { 
     ## capture new parameter sets
