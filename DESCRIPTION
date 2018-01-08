@@ -28,7 +28,8 @@ Suggests: iCOBRA,
           knitr,
           magrittr,
           IHW,
-          qvalue
+          qvalue,
+          testthat
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

@@ -50,12 +50,18 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
         b$bdata <- data
     }
     
-    ## make sure data is actually specified
+    ## make sure data is provided
     if (is.null(b$bdata)) {
         stop("data in BenchDesign is NULL.\n",
              "Please specify a non-NULL dataset to build SummarizedBenchmark.")
     }
 
+    ## make sure methods are specified
+    if (length(b$methods) == 0) {
+        stop("list of methods in BenchDesign is empty.\n",
+             "Please specify at least one method to build SummarizedBenchmark.")
+    }
+    
     ## determine whether bpost was specified as a list
     assay_aslist <- sapply(b$methods, function(x) { is.list(eval_tidy(x$post, b$bdata)) })
     assay_aslist <- unique(assay_aslist)
@@ -98,7 +104,7 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
         stopifnot(truthCols %in% names(b$bdata),
                   length(truthCols) == nassays)
         if (assay_aslist &&
-            !all(names(truthCols) %in% assay_names)) {
+            (!all(names(truthCols) %in% assay_names) || is.null(names(truthCols)))) {
             stop("Invalid truthCols specification. ",
                  "If bpost is specified as a list and truthCols is also specified, ",
                  "truthCols must be a named list with the same names as bpost.")
@@ -106,10 +112,12 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
     }
     
     ## check if ftCols are in bdata
-    if (!is.null(ftCols)) {
-        stopifnot(ftCols %in% names(b$bdata))
+    if (!is.null(ftCols) && !all(ftCols %in% names(b$bdata))) {
+        stop("Invalid ftCols specification. ",
+             "ftCols must be a subset of the column names of the input data.")
     }
 
+    ## check validity of ptabular, parallel values (unit logical value) 
     stopifnot((length(ptabular) == 1) && is.logical(ptabular))
     stopifnot((length(parallel) == 1) && is.logical(parallel))
     
