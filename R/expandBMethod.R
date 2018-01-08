@@ -42,7 +42,7 @@ expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
     qd <- quos(...)
 
     ## verify that parameter names are valid
-    if (is.null(names(qd))) {
+    if (any(nchar(names(qd)) == 0)) {
         stop("New parameter values must be named.")
     }
     if (any(names(qd) %in% names(b$methods))) {
