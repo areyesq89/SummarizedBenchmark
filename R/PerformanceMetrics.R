@@ -33,6 +33,7 @@
 #' @export
 #'
 addPerformanceMetric <- function( object, evalMetric, assay, evalFunction ){
+  stopifnot( is(object, "SummarizedBenchmark") )
   validObject( object )
   if( is.null( evalMetric ) ){
     stop("Please specify a name for the new evaluation metric (parameter evalMetric).")

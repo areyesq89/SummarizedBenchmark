@@ -22,7 +22,10 @@
 #' @importFrom UpSetR upset
 #'
 plotMethodsOverlap <- function( object, alpha=0.1, ... ){
-  if( ! ( "qvalue" %in% assayNames(object) ) ){
+  stopifnot( is( object, "SummarizedExperiment" ) )
+  stopifnot( is( alpha, "numeric") )
+  stopifnot( alpha >=0 & alpha <= 1 )
+  if( !( "qvalue" %in% assayNames( object ) ) ){
     stop("The function 'plotOverlaps' requires an assay names 'qvalue'")
   }
   upset( as.data.frame( 1*( assays( object )[["qvalue"]] < alpha) ), ... )
@@ -54,7 +57,7 @@ plotROC <- function( object ){
   if( !any( assayNames( object ) %in% "qvalue" ) ){
     stop("Assay 'qvalue' not found.")
   }
-  if( !assayHasTruths(object, "qvalue") ){
+  if( !assayHasTruths( object, "qvalue" ) ){
     stop("Ground truths not found for assay 'qvalue'")
   }
   metricsDf <- do.call( rbind, lapply( colnames(object), function(method){
