@@ -270,7 +270,7 @@ cleanBMethod <- function(m, mname, bdata, ptabular) {
     if (bmeta$bfunc_anon[1]) {
         bfunc <- gsub("\n", ";", quo_text(m$func))
     } else {
-        bfunc <- quo_name(m$func)
+        bfunc <- quo_text(m$func)
     }
 
     ## parse method parameters
@@ -300,11 +300,15 @@ cleanBMethod <- function(m, mname, bdata, ptabular) {
 ## helper to gather important information for function
 funcMeta <- function(f, meta) {
 
-    f <- eval_tidy(f) 
     ## determine if main `bfunc` was anonymous
-    f_anon <- is.null(packageName(environment(f)))
+    ## -- If an anonymous bfunc was specified directly to *BMethod, then the
+    ##    capturing envirnment of the anonymous function will be a child of the
+    ##    SummarizedBenchmark environment.
+    ##    Handle this by greping for a 
+    f_anon <- is.null(packageName(environment(eval_tidy(f)))) ||
+        grepl("^\\s*function\\s*\\(", quo_text(f))
 
-    fsrc <- f
+    fsrc <- eval_tidy(f)
     vers_src <- "bfunc"
     if ("pkg_func" %in% names(meta)) {
         vers_src <- "bmeta_func"
@@ -320,12 +324,12 @@ funcMeta <- function(f, meta) {
     }
 
     if (!is.null(fsrc)) {
-        fenv <- environment(fsrc)
-        pkg_name <- packageName(fenv)
-        if (is.null(pkg_name)) {
+        if (f_anon) {
             pkg_name <- NA_character_
             pkg_vers <- NA_character_
         } else {
+            fenv <- environment(fsrc)
+            pkg_name <- packageName(fenv)
             pkg_vers <- as(packageVersion(pkg_name), "character")
         }
     }

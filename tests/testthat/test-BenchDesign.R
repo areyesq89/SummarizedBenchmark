@@ -29,7 +29,7 @@ test_that("constructor accepts data input", {
 })
 
 
-test_that("methods can be added", {
+test_that("methods can be added and removed", {
     bd <- BenchDesign(tdat)
 
     bd <- addBMethod(bd,
@@ -49,6 +49,12 @@ test_that("methods can be added", {
     ## check showBMethod, showBMethods print
     expect_output(showBMethod(bd, "bonf"), "bonf")
     expect_output(showBMethods(bd), "bonf")
+
+    ## check method can be removed
+    expect_silent(bd_drop <- dropBMethod(bd, "bonf"))
+
+    ## check error when trying to remove undefined method 
+    expect_error(dropBMethod(bd, "apple"), "method is not defined")
 })
 
 
@@ -106,6 +112,8 @@ test_that("methods can be expanded", {
     ## check other param unchanged
     expect_identical(bd_exp$methods$bonf$dparams$method,
                      bd_exp$methods$bonf_alt2$dparams$method)
+    ## check defined methods are valid and don't break buildBench call
+    expect_is(buildBench(bd_exp), "SummarizedBenchmark")
                      
     ## check method expansion w/ replacing original method
     bd_replace <- expandBMethod(bd, "bonf", param = "p",
@@ -113,47 +121,55 @@ test_that("methods can be expanded", {
                                 bonf_alt2 = pval / 4,
                                 .replace = TRUE)
     expect_equal(names(bd_replace$methods), c("bonf_alt1", "bonf_alt2"))
-    
+    ## check defined methods are valid and don't break buildBench call
+    expect_is(buildBench(bd_replace), "SummarizedBenchmark")
+
     ## check method expansion w/ mult params
     bd_mult <- expandBMethod(bd, "bonf",
                              bonf_alt1 = list(p = pval / 2),
-                             bonf_alt2 = list(p = pval / 4, method = "bh"))
+                             bonf_alt2 = list(p = pval / 4, method = "BH"))
     expect_equal(names(bd_mult$methods), c("bonf", "bonf_alt1", "bonf_alt2"))
     ## check params changed only for expected (note: values equal but not identical)
     expect_equal(bd_mult$methods$bonf_alt1$dparams$p, quo(pval / 2))
     expect_equal(bd_mult$methods$bonf_alt1$dparams$method, quo("bonferroni"))
     expect_equal(bd_mult$methods$bonf_alt2$dparams$p, quo(pval / 4))
-    expect_equal(bd_mult$methods$bonf_alt2$dparams$method, quo("bh"))
+    expect_equal(bd_mult$methods$bonf_alt2$dparams$method, quo("BH"))
+    ## check defined methods are valid and don't break buildBench call
+    expect_is(buildBench(bd_mult), "SummarizedBenchmark")
 
     ## check method expansion w/ mult params and overwriting all 'params' 
     bd_ow <- expandBMethod(bd, "bonf",
                             bonf_alt1 = list(p = pval / 2),
-                            bonf_alt2 = list(p = pval / 4, method = "bh"),
+                            bonf_alt2 = list(p = pval / 4, method = "BH"),
                             .overwrite = TRUE)
     expect_equal(names(bd_ow$methods), c("bonf", "bonf_alt1", "bonf_alt2"))
     ## check params changed only for expected (note: values equal but not identical)
     expect_equal(bd_ow$methods$bonf_alt1$dparams$p, quo(pval / 2))
     expect_null(bd_ow$methods$bonf_alt1$dparams$method)
     expect_equal(bd_ow$methods$bonf_alt2$dparams$p, quo(pval / 4))
-    expect_equal(bd_ow$methods$bonf_alt2$dparams$method, quo("bh"))
+    expect_equal(bd_ow$methods$bonf_alt2$dparams$method, quo("BH"))
+    ## check defined methods are valid and don't break buildBench call
+    expect_is(buildBench(bd_ow), "SummarizedBenchmark")
 
     ## check handling of non-parameter "special" values (bfunc, bpost, bmeta)
     bd_spec <- expandBMethod(bd, "bonf",
-                             bonf_alt1 = list(bfunc = function(x) { x },
+                             bonf_alt1 = list(bfunc = function(p, method) { p },
                                               bpost = p.adjust,
                                               bmeta = list(new_purpose = "test special values")),
-                             bonf_alt2 = list(bfunc = function(x) { x / 2 },
-                                              bpost = sum,
+                             bonf_alt2 = list(bfunc = function(p, method) { p / 2 },
+                                              bpost = function(x) { x * 2 },
                                               bmeta = list(new_purpose = "test special values again")),
                              .replace = TRUE)
     expect_equal(names(bd_spec$methods), c("bonf_alt1", "bonf_alt2"))
-    expect_equal(bd_spec$methods$bonf_alt1$func, quo(function(x) { x }))
+    expect_equal(bd_spec$methods$bonf_alt1$func, quo(function(p, method) { p }))
     expect_equal(bd_spec$methods$bonf_alt1$post, quo(p.adjust))
     expect_equal(bd_spec$methods$bonf_alt1$meta, list(new_purpose = "test special values"))
-    expect_equal(bd_spec$methods$bonf_alt2$func, quo(function(x) { x / 2 }))
-    expect_equal(bd_spec$methods$bonf_alt2$post, quo(sum))
+    expect_equal(bd_spec$methods$bonf_alt2$func, quo(function(p, method) { p / 2 }))
+    expect_equal(bd_spec$methods$bonf_alt2$post, quo(function(x) { x * 2}))
     expect_equal(bd_spec$methods$bonf_alt2$meta, list(new_purpose = "test special values again"))
-
+    ## check defined methods are valid and don't break buildBench call
+    expect_is(buildBench(bd_spec), "SummarizedBenchmark")
+    
     ## check error when invalid method specified
     expect_error(expandBMethod(bd, "apple", bonf_alt1 = list(p = pval / 2)), "not defined")
 
