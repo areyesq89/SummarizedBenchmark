@@ -57,63 +57,22 @@ expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
         stop("Specified method is not defined in BenchDesign.")
     }
     bm <- b$methods[[blabel]]
-    
-    ## expand differently based on whether param is specified
+
+    ## convert new params to named list of quosures
+    new_names <- names(qd)
     if (is.null(param)) {
-        if (.overwrite) {
-            zl <- lapply(1:length(qd), function(zi) {
-                qdqi <- lapply(lang_args(qd[[zi]]), as_quosure)
-                ## ###################
-                if ("bfunc" %in% names(qdqi)) {
-                    bm$func <- qdqi$bfunc
-                }
-                if ("bpost" %in% names(qdqi)) {
-                    bm$post <- qdqi$bpost
-                }
-                if ("bmeta" %in% names(qdqi)) {
-                    bm$meta <- eval_tidy(qdqi$bmeta)
-                }
-                qdqi <- qdqi[! names(qdqi) %in% c("bfunc", "bpost", "bmeta")]
-                ## ###################
-                bm$dparams <- qdqi
-                bm
-            })
-        } else {
-            zl <- lapply(1:length(qd), function(zi) {
-                qdqi <- lapply(lang_args(qd[[zi]]), as_quosure)
-                ## ###################
-                if ("bfunc" %in% names(qdqi)) {
-                    bm$func <- qdqi$bfunc
-                }
-                if ("bpost" %in% names(qdqi)) {
-                    bm$post <- qdqi$bpost
-                }
-                if ("bmeta" %in% names(qdqi)) {
-                    bm$meta <- eval_tidy(qdqi$bmeta)
-                }
-                qdqi <- qdqi[! names(qdqi) %in% c("bfunc", "bpost", "bmeta")]
-                ## ###################
-                bm$dparams <- replace(bm$dparams, names(qdqi), qdqi)
-                bm
-            })
-        }
+        qd <- lapply(1:length(qd), function(zi) {
+            lapply(lang_args(qd[[zi]]), as_quosure)
+        })
     } else {
-        zl <- lapply(1:length(qd), function(zi) {
-            ## ###################
-            if (param == "bfunc") {
-                bm$func <- qd[[zi]]
-            } else if (param == "bpost") {
-                bm$post <- qd[[zi]]
-            } else if (param == "bmeta") {
-                bm$meta <- eval_tidy(qd[[zi]])
-            } else {
-                bm$dparams[[param]] <- qd[[zi]]
-            }
-            ## ###################
-            bm
+        qd <- lapply(1:length(qd), function(zi) {
+            qdqi <- quos(!! param := !! qd[[zi]])
         })
     }
-    names(zl) <- names(qd)
+    
+    ## handle all using same named list format
+    zl <- lapply(qd, .modmethod, m = bm, .overwrite = .overwrite)
+    names(zl) <- new_names
 
     ## drop source method
     if (.replace) {

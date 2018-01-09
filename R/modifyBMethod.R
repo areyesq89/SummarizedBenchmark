@@ -67,29 +67,49 @@ modifyBMethod.BenchDesign <- function(b, blabel, ..., .overwrite = FALSE) {
         stop("Specified method is not defined in BenchDesign.")
     }
 
+    ## modify and add to bench
     bm <- b$methods[[blabel]]
+    b$methods[[blabel]] <- .modmethod(bm, qd, .overwrite)
 
+    return(b)
+}
+
+
+#' Modify BenchDesign Method
+#'
+#' Given a method defined in a BenchDesign, this helper function
+#' returns a modified method with new parameters defined as a
+#' list of quosures.
+#' 
+#' @param m method
+#' @param q quosure list of new parameters
+#' @param .overwrite logical whether to overwrite parameters
+#'
+#' @return
+#' modified method. 
+#'
+#' @rdname modmethod
+#' @keywords internal
+#' @author Patrick Kimes
+.modmethod <- function(m, q, .overwrite) {
     ## parse out bfunc, bpost, bmeta
-    if ("bfunc" %in% names(qd)) {
-        bm$func <- qd$bfunc
+    if ("bfunc" %in% names(q)) {
+        m$func <- q$bfunc
     }
-    if ("bpost" %in% names(qd)) {
-        bm$post <- qd$bpost
+    if ("bpost" %in% names(q)) {
+        m$post <- q$bpost
     }
-    if ("bmeta" %in% names(qd)) {
-        bm$meta <- eval_tidy(qd$bmeta)
+    if ("bmeta" %in% names(q)) {
+        m$meta <- eval_tidy(q$bmeta)
     }
 
     ## process named parameters to be used for bfunc
-    qd <- qd[! names(qd) %in% c("bfunc", "bpost", "bmeta")]
+    q <- q[! names(q) %in% c("bfunc", "bpost", "bmeta")]
     if (.overwrite) {
-        bm$dparams <- qd
+        m$dparams <- q
     } else {
-        bm$dparams <- replace(bm$dparams, names(qd), qd)
+        m$dparams <- replace(m$dparams, names(q), q)
     }
-        
-    ## add to bench
-    b$methods[[blabel]] <- bm
-
-    return(b)
+    
+    return(m)
 }
