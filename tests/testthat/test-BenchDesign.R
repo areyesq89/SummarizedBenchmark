@@ -29,7 +29,7 @@ test_that("constructor accepts data input", {
 })
 
 
-test_that("methods can be added", {
+test_that("methods can be added and removed", {
     bd <- BenchDesign(tdat)
 
     bd <- addBMethod(bd,
@@ -49,6 +49,12 @@ test_that("methods can be added", {
     ## check showBMethod, showBMethods print
     expect_output(showBMethod(bd, "bonf"), "bonf")
     expect_output(showBMethods(bd), "bonf")
+
+    ## check method can be removed
+    expect_silent(bd_drop <- dropBMethod(bd, "bonf"))
+
+    ## check error when trying to remove undefined method 
+    expect_error(dropBMethod(bd, "apple"), "method is not defined")
 })
 
 
