@@ -3,7 +3,9 @@
 #' @description
 #' This function looks for an assay called 'qvalues' and given an alpha threshold,
 #' it binarizes the qvalue matrix depending on whether the qvalues pass the alpha
-#' threshold. Then it uses the function \code{\link{upset}} to plot the overlaps.
+#' threshold. Then it uses the function \code{\link{upset}} to plot the overlaps. 
+#' The plot is only generated if at least 2 rejections result from the given 
+#' alpha threshold.
 #'
 #' @param object A \code{\link{SummarizedBenchmark}} object.
 #' @param alpha An alpha value.
@@ -28,7 +30,11 @@ plotMethodsOverlap <- function( object, alpha=0.1, ... ){
   if( !( "qvalue" %in% assayNames( object ) ) ){
     stop("The function 'plotOverlaps' requires an assay names 'qvalue'")
   }
-  upset( as.data.frame( 1*( assays( object )[["qvalue"]] < alpha) ), ... )
+  uobj <- as.data.frame( 1*( assays( object )[["qvalue"]] < alpha) )
+  if ( sum(uobj) < 2 ){
+    stop("To plot overlaps, at least 2 observations must pass the alpha threshold.")
+  }
+  upset(uobj , ... )
 }
 
 #' @title ROC curve for 'qvalue' assays
