@@ -4,8 +4,8 @@
 #' This function looks for an assay called 'qvalues' and given an alpha threshold,
 #' it binarizes the qvalue matrix depending on whether the qvalues pass the alpha
 #' threshold. Then it uses the function \code{\link{upset}} to plot the overlaps. 
-#' The plot is only generated if at least 2 rejections result from the given 
-#' alpha threshold.
+#' The plot is only generated if at least 2 methods have observations that pass
+#' the alpha threshold.
 #'
 #' @param object A \code{\link{SummarizedBenchmark}} object.
 #' @param alpha An alpha value.
@@ -31,8 +31,8 @@ plotMethodsOverlap <- function( object, alpha=0.1, ... ){
     stop("The function 'plotOverlaps' requires an assay names 'qvalue'")
   }
   uobj <- as.data.frame( 1*( assays( object )[["qvalue"]] < alpha) )
-  if ( sum(uobj) < 2 ){
-    stop("To plot overlaps, at least 2 observations must pass the alpha threshold.")
+  if ( sum(colSums(uobj) > 0) < 2 ){
+    stop("To plot overlaps, at least 2 methods must have observations that pass the alpha threshold.")
   }
   upset(uobj , ... )
 }
