@@ -145,7 +145,7 @@ The returned object is a `SummarizedBenchmark` class. The `SummarizedBenchmark` 
 head(assay(sb))
 ```
 
-Metadata for the methods is contained in the `colData` of the same object, with each row corresponding to a single method in the comparison.
+Metadata for the methods is contained in the `colData` of the same object, with each row corresponding to one method in the comparison.
 
 ```{r}
 colData(sb)
@@ -166,7 +166,7 @@ sbSub <- sb[,1:2]
 colData(sbSub)
 ```
 
-In addition to extending the `SummarizedExperiment` class, the `SummarizedBenchmark` class contains an additional slot where users can define performance metrics to evaluate the different methods.
+In addition, the `SummarizedBenchmark` class contains an additional slot where users can define performance metrics to evaluate the different methods.
 
 Since different benchmarking experiments may require the use of different metrics to evaluate the performance of the methods, the `SummarizedBenchmark` class provides a flexible way to define performance metrics. We can define performance metrics using the function `addPerformanceMetric` by providing a `SummarizedBenchmark` object, a name of the metric, an `assay` name, and the function that defines it. Importantly, the function must contain the following two arguments: query (referring to a vector of values being evaluated, i.e. the output of one method) and truth (referring to the vector of ground truths). If further arguments are provided to the performance function, these must contain default values. 
 
