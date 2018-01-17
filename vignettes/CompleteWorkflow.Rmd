@@ -240,43 +240,13 @@ library("DESeq2")
 library("tximport")
 ```
 
-In this more advanced case study, we use a simulated data set from _Soneson et al. (2016)_ to demonstrate how the `SummarizedBenchmark` package can be used to benchmark methods for differential expression analysis. Namely, we compare the methods implemented in the `DESeq2`, `edgeR`, and `limma` packages. The simulated data set includes 6 samples of three replicates each from two conditions. For each sample, transcript-level expression is provided as transcripts per-million (TPM) values for 15,677 transcripts from human chromosome 1 (Ensembl GRCh37.71). A more complete description of the data, including code for how the data ws generated, is available in the Supplementary Materials of _Soneson et al. (2016)_ [here](http://dx.doi.org/10.5256/f1000research.7563.d114722).
+In this more advanced case study, we use a simulated data set from _Soneson et al. (2016)_ to demonstrate how the `SummarizedBenchmark` package can be used to benchmark methods for differential expression analysis. Namely, we compare the methods implemented in the `DESeq2`, `edgeR`, and `limma` packages. The simulated data set includes 6 samples of three replicates each from two conditions. For each sample, transcript-level expression is provided as transcripts per-million (TPM) values for 15,677 transcripts from human chromosome 1 (Ensembl GRCh37.71). A more complete description of the data, including code for how the data ws generated, is available in the Supplementary Materials of _Soneson et al. (2016)_ [here](http://dx.doi.org/10.5256/f1000research.7563.d114722). We provide precomputed objects containing these count and ground truth data. 
 
-## Preparing the Data
-
-The data is available for download from ArrayExpress. Expression data for each sample is provided in the RSEM output format. Corresponding information for the ground truth underlying the simulated data is also available, including transcript differential expression status.
-
-First, we download and import the transcript-level TPM values using the `tximport` package.
-
-```{r download-data}
-d <- tempdir()
-download.file(url = paste0("https://www.ebi.ac.uk/arrayexpress/files/",
-                           "E-MTAB-4119/E-MTAB-4119.processed.3.zip"),
-              destfile = file.path(d, "samples.zip"))
-unzip(file.path(d, "samples.zip"), exdir = d)
-
-fl <- list.files(d, pattern = "*_rsem.txt", full.names=TRUE)
-names(fl) <- gsub("sample(.*)_rsem.txt", "\\1", basename(fl))
-txi <- tximport(fl, txIn = TRUE, txOut = TRUE,
-                geneIdCol = "gene_id",
-                txIdCol = "transcript_id",
-                countsCol = "expected_count",
-                lengthCol = "effective_length",
-                abundanceCol = "TPM",
-                countsFromAbundance = "scaledTPM")
+```{r loadingSoneson}
+data("soneson2016")
+head( txi$counts )
+head( truthdat )
 ```
-
-Next, we obtain and load the ground truth information that can be used for evaluating the results of the differential expression analysis.
-
-```{r}
-download.file(url = paste0("https://www.ebi.ac.uk/arrayexpress/files/",
-                           "E-MTAB-4119/E-MTAB-4119.processed.2.zip"),
-              destfile = file.path(d, "truth.zip"))
-unzip(file.path(d, "truth.zip"), exdir = d)
-
-truthdat <- readr::read_tsv(file.path(d, "truth_transcript.txt"))
-```
-
 ## Benchmark Set-Up and Execution
 
 We begin the benchmarking process by creating our `BenchDesign` object with the data set. The `BenchDesign` can be initialized with a data.frame (as in the case study above), or more generally, with a list object. In this case study, since methods for differential expression require more than just the expression counts, e.g. the experimental design, we construct a list containing each of these inputs as a named entry.
@@ -385,7 +355,7 @@ By running the code above, the results of three differential expression methods 
 availableMetrics()
 ```
 
-For example, if we change the assay name of our object from `H` to `qvalue` and then call the function `addDefaultMetrics`, the metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` will be added to our object. 
+For example, if we change the assay name of our object from `H` to `qvalue` and then execute the function `addDefaultMetrics`, the metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` will be added to our object. 
 
 ```{r}
 assayNames(sb) <- "qvalue"
@@ -649,58 +619,6 @@ bde <- bd %>%
                                    bmeta = list(note = "nonsensical order")))
 showBMethod(bde, "deseq2_v1")
 showBMethod(bde, "deseq2_v2")
-```
-
-# Non-Standard Use
-
-## Manually Constructing a SummarizedBenchmark
-
-So far, this vignette has shown the recommended use of `SummarizedBenchmark`, that enables users to perform benchmarks automatically keeping track of parameters and software versions. However, users can also construct `SummarizedBenchmark` objects from standard `S3` data objects. 
-
-Using data from the `r BiocStyle::Biocpkg("iCOBRA")`package [@Soneson_2016], this part of the vignette demonstrates how to build `SummarizedBenchmark` objects from `S3` objects. The dataset contains differential expression results of three different methods (`r BiocStyle::Biocpkg("limma")`, `r BiocStyle::Biocpkg("edgeR")` and `r BiocStyle::Biocpkg("DESeq2")`) applied to a simulated RNA-seq dataset.
-
-```{r cobraData, message=FALSE, warning=FALSE}
-library(iCOBRA)
-data(cobradata_example)
-```
-
-The process of building a `SummarizedBenchmark` object is similar to the one used to construct a `SummarizedExperiment` object. To build a `SummarizedBenchmark` object, three main objects are required (1) a list where each element corresponds to a data.frame, (2) a `DataFrame` with annotations of the methods and (3) when available, a `DataFrame` of ground truths. 
-
-In the `SummarizedBenchmark` object, each output of the methods is considered a different `assay`. For example, using the differential expression dataset example, we can define two assays, q-values and estimated log fold changes. For each `assay`, we arrange the output of the different methods as a matrix where each column corresponds to a method and each row corresponds to each feature (in this case, genes). We will need a list in which each of it's element corresponds to an assay.
-
-```{r arrangeLists}
-assays <- list(
-  qvalue=cobradata_example@padj,
-  logFC=cobradata_example@score )
-assays[["qvalue"]]$DESeq2 <- p.adjust(cobradata_example@pval$DESeq2, method="BH")
-head( assays[["qvalue"]], 3)
-head( assays[["logFC"]], 3)
-```
-
-Since these are simulated data, the ground truths for both assays are known. We can format these as a `DataFrame` where each column corresponds to an assay and each row corresponds to a feature.
-
-```{r groundTruths}
-library(S4Vectors)
-groundTruth <- DataFrame( cobradata_example@truth[,c("status", "logFC")] )
-colnames(groundTruth) <- names( assays )
-groundTruth <- groundTruth[rownames(assays[[1]]),]
-head( groundTruth )
-```
-
-Then, the method names are also reformatted as a `DataFrame` 
-
-```{r buildColData}
-colData <- DataFrame( method=colnames(assays[[1]]) )
-colData
-```
-
-A `SummarizedBenchmark` is build using the following command
-
-```{r buildSB}
-sb <- SummarizedBenchmark(
-  assays=assays, 
-  colData=colData,
-  groundTruth=groundTruth )
 ```
 
 # Related Work

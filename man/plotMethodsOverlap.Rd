@@ -16,7 +16,9 @@ plotMethodsOverlap(object, alpha = 0.1, ...)
 \description{
 This function looks for an assay called 'qvalues' and given an alpha threshold,
 it binarizes the qvalue matrix depending on whether the qvalues pass the alpha
-threshold. Then it uses the function \code{\link{upset}} to plot the overlaps.
+threshold. Then it uses the function \code{\link{upset}} to plot the overlaps. 
+The plot is only generated if at least 2 methods have observations that pass
+the alpha threshold.
 }
 \examples{
 \dontrun{
