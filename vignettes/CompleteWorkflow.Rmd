@@ -637,6 +637,33 @@ bd %>%
     showBMethods()
 ```
 
+## Reusing a BenchDesign Across Data Sets
+
+When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single `BenchDesign` object across multiple data sets. While the `BenchDesign` objects in the examples above were all initialized with a data set, this is not necessary. 
+
+```{r}
+bdnull <- BenchDesign()
+bdnull
+```
+
+As before, methods can be added to the `BenchDesign` with `addBMethod()`, and the benchmark experiment run using `buildBench()`.
+
+```{r}
+bdnull <- bdnull %>%
+  addBMethod(blabel = "bonf", bfunc = p.adjust,
+             p = pval, method = "bonferroni") %>%
+  addBMethod(blabel = "BH", bfunc = p.adjust,
+             p = pval, method = "BH")
+```
+
+While not mentioned above, the `buildBench()` method accepts an optional `data=` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the `BenchDesign` object.
+
+```{r}
+buildBench(bdnull, data = tdat)
+```
+
+By specifying data during the `buildBench()` step the exact same benchmark comparison, as defined in the common `BenchDesign` object, can be carried out consistently across multiple data sets. While this approach works even if the common `BenchDesign` object contains a default data set, it is recommended that the `BenchDesign` be created without any data to avoid errors.
+
 # Related Work
 
 Related frameworks for benchmarking have been proposed in R, notably: [`iCOBRA`](https://github.com/markrobinsonuzh/iCOBRA) (available on Bioconductor) and [`dscr`](https://github.com/stephens999/dscr) (available on GitHub). The `SummarizedBenchmark` package differs from both `iCOBRA` and `dscr` in several important ways.
