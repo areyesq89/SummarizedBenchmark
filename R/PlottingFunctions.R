@@ -29,7 +29,7 @@ plotMethodsOverlap <- function( object, assay="qvalue", alpha=0.1, ... ){
   stopifnot( is( alpha, "numeric") )
   stopifnot( alpha >=0 & alpha <= 1 )
   if( !( assay %in% assayNames( object ) ) ){
-    stop(sprintf("The function 'plotOverlaps' requires an assay names '%s'", assay) )
+    stop(sprintf("Assay name '%s' not found", assay) )
   }
   uobj <- as.data.frame( 1*( assays( object )[[assay]] < alpha) )
   if ( sum(colSums(uobj) > 0) < 2 ){
