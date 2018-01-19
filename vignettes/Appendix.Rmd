@@ -24,7 +24,7 @@ editor_options:
 
 The data is available for download from ArrayExpress. Expression data for each sample is provided in the RSEM output format. Corresponding information for the ground truth underlying the simulated data is also available, including transcript differential expression status.
 
-First, we download and import the transcript-level TPM values using the `tximport` package.
+First, we download and import the transcript-level TPM values using the `r BiocStyle::pkg_ver('tximport')` package.
 
 ```{r download-data}
 d <- tempdir()
@@ -54,25 +54,25 @@ download.file(url = paste0("https://www.ebi.ac.uk/arrayexpress/files/",
 unzip(file.path(d, "truth.zip"), exdir = d)
 
 truthdat <- readr::read_tsv(file.path(d, "truth_transcript.txt"))
-save( txi, truthdat, file="../data/soneson2016.rda" )
+#save( txi, truthdat, file="../data/soneson2016.rda" )
 ```
 
 # Non-Standard Use
 
 ## Manually Constructing a SummarizedBenchmark
 
-So far, this vignette has shown the recommended use of `SummarizedBenchmark`, that enables users to perform benchmarks automatically keeping track of parameters and software versions. However, users can also construct `SummarizedBenchmark` objects from standard `S3` data objects. 
+So far, this vignette has shown the recommended use of *SummarizedBenchmark*, that enables users to perform benchmarks automatically keeping track of parameters and software versions. However, users can also construct *SummarizedBenchmark* objects from standard `S3` data objects. 
 
-Using data from the `r BiocStyle::Biocpkg("iCOBRA")`package [@Soneson_2016], this part of the vignette demonstrates how to build `SummarizedBenchmark` objects from `S3` objects. The dataset contains differential expression results of three different methods (`r BiocStyle::Biocpkg("limma")`, `r BiocStyle::Biocpkg("edgeR")` and `r BiocStyle::Biocpkg("DESeq2")`) applied to a simulated RNA-seq dataset.
+Using data from the `r BiocStyle::Biocpkg("iCOBRA")`package [@Soneson_2016], this part of the vignette demonstrates how to build *SummarizedBenchmark* objects from `S3` objects. The dataset contains differential expression results of three different methods (`r BiocStyle::Biocpkg("limma")`, `r BiocStyle::Biocpkg("edgeR")` and `r BiocStyle::Biocpkg("DESeq2")`) applied to a simulated RNA-seq dataset.
 
 ```{r cobraData, message=FALSE, warning=FALSE}
 library(iCOBRA)
 data(cobradata_example)
 ```
 
-The process of building a `SummarizedBenchmark` object is similar to the one used to construct a `SummarizedExperiment` object. To build a `SummarizedBenchmark` object, three main objects are required (1) a list where each element corresponds to a data.frame, (2) a `DataFrame` with annotations of the methods and (3) when available, a `DataFrame` of ground truths. 
+The process of building a *SummarizedBenchmark* object is similar to the one used to construct a *SummarizedExperiment* object. To build a *SummarizedBenchmark* object, three main objects are required (1) a list where each element corresponds to a *data.frame*, (2) a *DataFrame* with annotations of the methods and (3) when available, a *DataFrame* of ground truths. 
 
-In the `SummarizedBenchmark` object, each output of the methods is considered a different `assay`. For example, using the differential expression dataset example, we can define two assays, q-values and estimated log fold changes. For each `assay`, we arrange the output of the different methods as a matrix where each column corresponds to a method and each row corresponds to each feature (in this case, genes). We will need a list in which each of it's element corresponds to an assay.
+In the *SummarizedBenchmark* object, each output of the methods is considered a different `assay`. For example, using the differential expression dataset example, we can define two assays, q-values and estimated log fold changes. For each `assay`, we arrange the output of the different methods as a matrix where each column corresponds to a method and each row corresponds to each feature (in this case, genes). We will need a list in which each of it's element corresponds to an assay.
 
 ```{r arrangeLists}
 assays <- list(
@@ -83,7 +83,7 @@ head( assays[["qvalue"]], 3)
 head( assays[["logFC"]], 3)
 ```
 
-Since these are simulated data, the ground truths for both assays are known. We can format these as a `DataFrame` where each column corresponds to an assay and each row corresponds to a feature.
+Since these are simulated data, the ground truths for both assays are known. We can format these as a *DataFrame* where each column corresponds to an assay and each row corresponds to a feature.
 
 ```{r groundTruths}
 library(S4Vectors)
@@ -93,14 +93,14 @@ groundTruth <- groundTruth[rownames(assays[[1]]),]
 head( groundTruth )
 ```
 
-Then, the method names are also reformatted as a `DataFrame` 
+Then, the method names are also reformatted as a *DataFrame* 
 
 ```{r buildColData}
 colData <- DataFrame( method=colnames(assays[[1]]) )
 colData
 ```
 
-A `SummarizedBenchmark` is build using the following command
+A *SummarizedBenchmark* is build using the following command
 
 ```{r buildSB}
 library(SummarizedBenchmark)
