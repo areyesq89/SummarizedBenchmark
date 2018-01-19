@@ -2,7 +2,7 @@
 % Please edit documentation in R/PlottingFunctions.R
 \name{plotROC}
 \alias{plotROC}
-\title{ROC curve for 'qvalue' assays}
+\title{Plotting ROC curves}
 \usage{
 plotROC(object, assay = "qvalue")
 }
