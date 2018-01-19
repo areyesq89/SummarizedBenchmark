@@ -35,13 +35,13 @@ With `SummarizedBenchmark`, a complete benchmarking workflow is comprised of thr
 2. methods, and
 3. performance metrics.
 
-The first two (_data_ and _methods_) are necessary for carrying out the benchmark experiment, and the last (_performance metrics_) is essential for evaluating the results of the experiment. Following this approach, the `SummarizedBenchmark` package defines two types of objects: **BenchDesign** objects and **SummarizedBenchmark** objects. BenchDesign objects contain only the design of the benchmark experiment, namely the _data_ and _methods_. After constructing a BenchDesign, the experiment can be executed to create a SummarizedBenchmark. SummarizedBenchmark objects extend the Bioconductor `SummarizedExperiment` class, with the additional capability of working with _performance metrics_.  
+The first two (_data_ and _methods_) are necessary for carrying out the benchmark experiment, and the last (_performance metrics_) is essential for evaluating the results of the experiment. Following this approach, the `SummarizedBenchmark` package defines two types of objects: *BenchDesign* objects and *SummarizedBenchmark* objects. *BenchDesign* objects contain only the design of the benchmark experiment, namely the _data_ and _methods_. After constructing a BenchDesign, the experiment can be executed to create a *SummarizedBenchmark*. SummarizedBenchmark objects extend the Bioconductor `SummarizedExperiment` class, with the additional capability of working with _performance metrics_.  
 
 The basic framework is illustrated in the figure below. Blue components must be specified by users. First, a BenchDesign is created with _data_ and _methods_. Next a SummarizedBenchmark is created with the method outputs, and paired with _performance metrics_ specified by the user. For convenience, several default _performance metrics_ are implemented in the package, and can be accessed with simple commands.  
 
 ![basic benchmarking class relationship](summarizedbenchmark-figure1.png)
 
-In this vignette, we first illustrate the basic use of both the **BenchDesign** and **SummarizedBenchmark** classes with a simple comparison of methods for p-value correction in the context of multiple hypothesis testing. Then, we describe more advanced features of the package with a case study comparing three methods for differential expression analysis.
+In this vignette, we first illustrate the basic use of both the *BenchDesign* and *SummarizedBenchmark* classes with a simple comparison of methods for p-value correction in the context of multiple hypothesis testing. Then, we describe more advanced features of the package with a case study comparing three methods for differential expression analysis.
 
 # Quickstart Case Study
 
@@ -50,13 +50,13 @@ library("SummarizedBenchmark")
 library("magrittr")
 ```
 
-To illustrate the basic use of the `BenchDesign` class, we use the `tdat` data set included with this package. 
+To illustrate the basic use of the *BenchDesign* class, we use the `tdat` data set included with this package. 
 
 ```{r}
 data(tdat)
 ```
 
-The data set is a data.frame containing the results of 50 two-sample t-tests. The tests were performed using independently simulated sets of 20 observations drawn from a single standard Normal distribution (when `H = 0`) or two mean-shifted Normal distributions (when `H = 1`).
+The data set is a *data.frame* containing the results of 50 two-sample t-tests. The tests were performed using independently simulated sets of 20 observations drawn from a single standard Normal distribution (when `H = 0`) or two mean-shifted Normal distributions (when `H = 1`).
 
 ```{r}
 head(tdat)
@@ -68,7 +68,7 @@ Several approaches have been proposed and implemented to compute *adjusted p-val
 2. Benjamini-Hochberg (`p.adjust` w/ `method = "BH"`), and
 3. Storey's FDR q-value (`qvalue::qvalue`).
 
-First, consider how benchmarking the three methods might look without the `SummarizedBenchmark` framework.  
+First, consider how benchmarking the three methods might look without the *SummarizedBenchmark* framework.  
 
 To compare methods, each is applied to `tdat`, and the results are stored in separate variables. 
 
@@ -81,24 +81,24 @@ qv <- qvalue::qvalue(p = tdat$pval)
 adjp_qv <- qv$qvalues
 ```
 
-Since the output of each method is a vector of length 50 (the number of hypotheses tested), to keep things clean, they can be combined into a single data.frame.
+Since the output of each method is a vector of length 50 (the number of hypotheses tested), to keep things clean, they can be combined into a single *data.frame*.
 
 ```{r}
 adjp <- cbind.data.frame(adjp_bonf, adjp_bh, adjp_qv)
 head(adjp)
 ```
 
-The data.frame of adjusted p-values can be used to compare the methods, either by directly parsing the table or using a framework like `iCOBRA`. Additionally, the data.frame can be saved as a `RDS` or `Rdata` object for future reference, eliminating the need for recomputing on the original data.  
+The *data.frame* of adjusted p-values can be used to compare the methods, either by directly parsing the table or using a framework like `r BiocStyle::Biocpkg("iCOBRA")`. Additionally, the *data.frame* can be saved as a `RDS` or `Rdata` object for future reference, eliminating the need for recomputing on the original data.  
 
-While this approach can work well for smaller comparisons, it can quickly become overwhelming and unweildy as the number of methods and parameters increases. Furthermore, once each method is applied and the final data.frame (`adj`) is constructed, there is no way to determine *how* each adjusted p-value was calculated. While an informative name can be used to "label" each method (as done above), this does not capture the full complexity, e.g. parameters and context, where the function was evaluated. One solution might involve manually recording function calls and parameters in a separate data.frame with the hope of maintaining synchrony with the output data.frame. However, this is prone to errors, e.g. during fast "copy and paste" operations or additions and delations of parameter combinations. An alternative (and hopefully better) solution, is to use the framework of the `SummarizedBenchmark` package.
+While this approach can work well for smaller comparisons, it can quickly become overwhelming and unweildy as the number of methods and parameters increases. Furthermore, once each method is applied and the final *data.frame* (`adj`) is constructed, there is no way to determine *how* each adjusted p-value was calculated. While an informative name can be used to "label" each method (as done above), this does not capture the full complexity, e.g. parameters and context, where the function was evaluated. One solution might involve manually recording function calls and parameters in a separate *data.frame* with the hope of maintaining synchrony with the output *data.frame*. However, this is prone to errors, e.g. during fast "copy and paste" operations or additions and delations of parameter combinations. An alternative (and hopefully better) solution, is to use the framework of the *SummarizedBenchmark* package.
 
-In the `SummarizedBenchmark` approach, a `BenchDesign` is first constructed with the data as the sole input. (A `BenchDesign` can also be constructed without any data input. This approach is described in a later section.)
+In the *SummarizedBenchmark* approach, a *BenchDesign* is first constructed with the data as the sole input. (A *BenchDesign* can also be constructed without any data input. This approach is described in a later section.)
 
 ```{r}
 b <- BenchDesign(tdat)
 ```
 
-Then, each method of interest is added to the `BenchDesign` using `addBMethod()`. 
+Then, each method of interest is added to the *BenchDesign* using `addBMethod()`. 
 
 ```{r}
 b <- addBMethod(b, blabel = "bonf", bfunc = p.adjust,
@@ -113,7 +113,7 @@ At a minimum, `addBMethod()` requires three parameters:
 
 After the minimum parameters are specified, any parameters needed by the `bfunc` method should be passed as named parameters, e.g. `p = pval, method = "bonferroni"`. Notice here that `pval` **does not** need to be called as `tdat$pval`. 
 
-The process of adding methods can be written more concisely using the pipe operators from the `magrittr` package.
+The process of adding methods can be written more concisely using the pipe operators from the `r BiocStyle::CRANpkg("magrittr")` package.
 
 ```{r}
 b <- b %>% 
@@ -125,52 +125,52 @@ b <- b %>%
 
 ```
 
-For some methods, such as the q-value approach above, it may be necessary to call a "post-processing" function on the primary method to extract the desired output (here, the q-values). This should be specified using the optional `bpost` parameter. 
+For some methods, such as the q-value approach above, it may be necessary to call a "post-processing" function on the primary method to extract the desired output (here, the q-values). This should be specified using the optional `bpost =` parameter. 
 
-Now, the `BenchDesign` object contains three methods. This can be verified using the `showBMethods()` function.
+Now, the *BenchDesign* object contains three methods. This can be verified using the `showBMethods()` function.
 
 ```{r}
 showBMethods(b)
 ```
 
-While the bench now includes all the information necessary for performing the benchmarking study, the actual adjusted p-values have not yet been calculated. To do this, we simply call `buildBench()`. While `buildBench()` does not require any inputs other than the `BenchDesign` object, when the corresponding ground truth is known, the `truthCols =` parameter should be specified. In this example, the `H` column of the `tdat` data.frame contains the true null or alternative status of each simulated hypothesis test.
+While the bench now includes all the information necessary for performing the benchmarking study, the actual adjusted p-values have not yet been calculated. To do this, we simply call `buildBench()`. While `buildBench()` does not require any inputs other than the *BenchDesign* object, when the corresponding ground truth is known, the `truthCols =` parameter should be specified. In this example, the `H` column of the `tdat` *data.frame* contains the true null or alternative status of each simulated hypothesis test.
 
 ```{r}
 sb <- buildBench(b, truthCols = "H")
 ```
 
-The returned object is a `SummarizedBenchmark` class. The `SummarizedBenchmark` object is an extension of a `SummarizedExperiment` object. The table of adjusted p-values is contained in a single "assay" of the object with each method added using `addBMethod()` as a column with the corresponding `blabel` as the name.
+The returned object is a *SummarizedBenchmark* class. The *SummarizedBenchmark* object is an extension of a *SummarizedExperiment* object. The table of adjusted p-values is contained in a single "assay" of the object with each method added using `addBMethod()` as a column with the corresponding `blabel` as the name.
 
 ```{r}
 head(assay(sb))
 ```
 
-Metadata for the methods is contained in the `colData` of the same object, with each row corresponding to one method in the comparison.
+Metadata for the methods is contained in the `colData()` of the same object, with each row corresponding to one method in the comparison.
 
 ```{r}
 colData(sb)
 ```
 
-In addition to columns for the functions and parameters specified with `addBMethod` (`bfunc, bpost, blabel, param.*`), the `colData` includes several other columns added during the `buildBench` process. Most notably,  columns for the package name and version of `bfunc` if available (`pkg_name`, `pkg_vers`). 
+In addition to columns for the functions and parameters specified with `addBMethod()` (`bfunc, bpost, blabel, param.*`), the `colData()` includes several other columns added during the `buildBench()` process. Most notably,  columns for the package name and version of `bfunc` if available (`pkg_name`, `pkg_vers`). 
 
-When available, ground truth data is contained in the `rowData` of the `SummarizedBenchmark` object.
+When available, ground truth data is contained in the `rowData()` of the *SummarizedBenchmark* object.
 
 ```{r}
 rowData(sb)
 ```
 
-An important advantage of building on the existing `SummarizedExperiment` class and Bioconductor infrastructure to save the results is that the metadata is tighly linked to the data. Thus, it is possible, for example, to subset the data while keeping the link to its respective metadata in a single step. For example, the code below extracts the data for only the first two methods.
+An important advantage of building on the existing *SummarizedExperiment* class and Bioconductor infrastructure to save the results is that the metadata is tighly linked to the data. Thus, it is possible, for example, to subset the data while keeping the link to its respective metadata in a single step. For example, the code below extracts the data for only the first two methods.
  
 ```{r}
 sbSub <- sb[,1:2]
 colData(sbSub)
 ```
 
-In addition, the `SummarizedBenchmark` class contains an additional slot where users can define performance metrics to evaluate the different methods.
+In addition, the *SummarizedBenchmark* class contains an additional slot where users can define performance metrics to evaluate the different methods.
 
-Since different benchmarking experiments may require the use of different metrics to evaluate the performance of the methods, the `SummarizedBenchmark` class provides a flexible way to define performance metrics. We can define performance metrics using the function `addPerformanceMetric` by providing a `SummarizedBenchmark` object, a name of the metric, an `assay` name, and the function that defines it. Importantly, the function must contain the following two arguments: query (referring to a vector of values being evaluated, i.e. the output of one method) and truth (referring to the vector of ground truths). If further arguments are provided to the performance function, these must contain default values. 
+Since different benchmarking experiments may require the use of different metrics to evaluate the performance of the methods, the *SummarizedBenchmark* class provides a flexible way to define performance metrics. We can define performance metrics using the function `addPerformanceMetric()` by providing a *SummarizedBenchmark* object, a name of the metric, an assay name, and the function that defines it. Importantly, the function must contain the following two arguments: query (referring to a vector of values being evaluated, i.e. the output of one method) and truth (referring to the vector of ground truths). If further arguments are provided to the performance function, these must contain default values. 
 
-For our example, we define the performance metric "TPR" (True Positive Rate) that calculates the fraction of true positives recovered given an alpha value. This performance metric uses the `H` assay of our `SummarizedBenchmark` example.
+For our example, we define the performance metric "TPR" (True Positive Rate) that calculates the fraction of true positives recovered given an alpha value. This performance metric uses the `H` assay of our *SummarizedBenchmark* example object.
 
 ```{r addPerformanceMetric}
 sb <- addPerformanceMetric(
@@ -186,20 +186,20 @@ sb <- addPerformanceMetric(
 performanceMetrics(sb)[["H"]]
 ```
 
-Having defined all the desired performance metrics, the function `estimatePerformanceMetrics` calculates these for each method.  Parameters for the performance functions can be passed here. For example, in the case below, we are specifying the performance functions to be estimated for several `alpha` values.
+Having defined all the desired performance metrics, the function `estimatePerformanceMetrics()` calculates these for each method.  Parameters for the performance functions can be passed here. For example, in the case below, we are specifying the performance functions to be estimated for several `alpha =` values.
 
 ```{r}
 resWide <- estimatePerformanceMetrics(sb, alpha = c(0.05, 0.1, 0.2))
 resWide
 ```
 
-By default, the function above returns a `DataFrame`, where the parameters of the performance function are stored in its `elementMetadata`.
+By default, the function above returns a *DataFrame*, where the parameters of the performance function are stored in its `elementMetadata()`.
 
 ```{r elWide}
 elementMetadata(resWide)
 ```
 
-A second possibility is to set the parameter `addColData = TRUE` for these results to be stored in the `colData` of the `SummarizedBenchmark` object. 
+A second possibility is to set the parameter `addColData = TRUE` for these results to be stored in the `colData()` of the *SummarizedBenchmark* object. 
 
 ```{r}
 sb <- estimatePerformanceMetrics(sb, 
@@ -217,13 +217,13 @@ estimatePerformanceMetrics(sb,
                            tidy = TRUE)
 ```
 
-As an alternative to get the same `data.frame` as the previous chunk, we can call the function `tidyUpMetrics` on the saved results from a `SummarizedBenchmark` object.
+As an alternative to get the same `data.frame` as the previous chunk, we can call the function `tidyUpMetrics()` on the saved results from a *SummarizedBenchmark* object.
 
 ```{r}
 head(tidyUpMetrics(sb))
 ```
 
-For example, the code below extracts the `TPR` for an alpha of 0.1 for the Bonferroni method.
+For example, the code below extracts the TPR for an alpha of 0.1 for the Bonferroni method.
 
 ```{r}
 tidyUpMetrics(sb) %>%
@@ -240,7 +240,7 @@ library("DESeq2")
 library("tximport")
 ```
 
-In this more advanced case study, we use a simulated data set from _Soneson et al. (2016)_ to demonstrate how the `SummarizedBenchmark` package can be used to benchmark methods for differential expression analysis. Namely, we compare the methods implemented in the `DESeq2`, `edgeR`, and `limma` packages. The simulated data set includes 6 samples of three replicates each from two conditions. For each sample, transcript-level expression is provided as transcripts per-million (TPM) values for 15,677 transcripts from human chromosome 1 (Ensembl GRCh37.71). A more complete description of the data, including code for how the data ws generated, is available in the Supplementary Materials of _Soneson et al. (2016)_ [here](http://dx.doi.org/10.5256/f1000research.7563.d114722). We provide precomputed objects containing these count and ground truth data. 
+In this more advanced case study, we use a simulated data set from _Soneson et al. (2016)_ to demonstrate how the *SummarizedBenchmark* package can be used to benchmark methods for differential expression analysis. Namely, we compare the methods implemented in the `r BiocStyle::Biocpkg("DESeq2")`, `r BiocStyle::Biocpkg("edgeR")`, and `r BiocStyle::Biocpkg("limma")` packages. The simulated data set includes 6 samples of three replicates each from two conditions. For each sample, transcript-level expression is provided as transcripts per-million (TPM) values for 15,677 transcripts from human chromosome 1 (Ensembl GRCh37.71). A more complete description of the data, including code for how the data ws generated, is available in the Supplementary Materials of _Soneson et al. (2016)_ [here](http://dx.doi.org/10.5256/f1000research.7563.d114722). We provide precomputed objects containing these count and ground truth data. 
 
 ```{r loadingSoneson}
 data("soneson2016")
@@ -249,7 +249,7 @@ head( truthdat )
 ```
 ## Benchmark Set-Up and Execution
 
-We begin the benchmarking process by creating our `BenchDesign` object with the data set. The `BenchDesign` can be initialized with a data.frame (as in the case study above), or more generally, with a list object. In this case study, since methods for differential expression require more than just the expression counts, e.g. the experimental design, we construct a list containing each of these inputs as a named entry.
+We begin the benchmarking process by creating our *BenchDesign* object with the data set. The *BenchDesign* can be initialized with a *data.frame* (as in the case study above), or more generally, with a list object. In this case study, since methods for differential expression require more than just the expression counts, e.g. the experimental design, we construct a list containing each of these inputs as a named entry.
 
 The scaled TPM values are rounded before passing to the differential expression methods.
 
@@ -257,7 +257,7 @@ The scaled TPM values are rounded before passing to the differential expression 
 mycounts <- round(txi$counts)
 ```
 
-Here, we simply use the the conditions for each sample to define the experimental design. The design matrix is stored as data.frame, `mycoldat`.
+Here, we simply use the the conditions for each sample to define the experimental design. The design matrix is stored as *data.frame*, `mycoldat`.
 
 ```{r}
 mycoldat <- data.frame(condition = factor(rep(c(1, 2), each = 3)))
@@ -273,13 +273,13 @@ mydat <- list(coldat = mycoldat,
               lfc = truthdat$logFC)
 ```
 
-As before, the `BenchDesign` is constructed with the data as the sole input.
+As before, the *BenchDesign* is constructed with the data as the sole input.
 
 ```{r}
 bd <- BenchDesign(mydat)
 ```
 
-For simplicity, here, we focus on comparing only the p-values returned by each method after testing for differential expression between the two conditions across the `r nrow(mycounts)` transcripts. However, later in this vignette, we also show how multiple metrics (p-values and log-fold change) can be compared using a single `BenchDesign` object.
+For simplicity, here, we focus on comparing only the p-values returned by each method after testing for differential expression between the two conditions across the `r nrow(mycounts)` transcripts. However, later in this vignette, we also show how multiple metrics (p-values and log-fold change) can be compared using a single *BenchDesign* object.
 
 Since each method requires running multiple steps, we write wrapper functions which return only the vector p-values for each method. 
 
@@ -313,7 +313,7 @@ voom_pvals <- function(countData, group, design) {
 }
 ```
 
-Next, each method is added to `bd` using `addBMethod`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod`, revisit the **Quickstart Case Study** in the previous section.) We again use the pipe notation for compactness.
+Next, each method is added to `bd` using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit the **Quickstart Case Study** in the previous section.) We again use the pipe notation for compactness.
 
 ```{r}
 bd <- bd %>%
@@ -335,7 +335,7 @@ bd <- bd %>%
                design = ~coldat$condition)
 ```
 
-So far, none of the methods have been executed. The `BenchDesign` object simply serves as a container describing _how_ the methods should be executed. The methods are applied by a simple call to `buildBench()`. Since the ground truth is known and available in `mydat$status`, this is specified to `truthCols=`.
+So far, none of the methods have been executed. The *BenchDesign* object simply serves as a container describing _how_ the methods should be executed. The methods are applied by a simple call to `buildBench()`. Since the ground truth is known and available in `mydat$status`, this is specified to `truthCols=`.
 
 ```{r}
 sb <- buildBench(bd, truthCols = "status")
@@ -349,13 +349,13 @@ sb
 
 ## Benchmark Evaluation
 
-By running the code above, the results of three differential expression methods (`edgeR`, `limma-voom` and `DESeq2`) will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric`, as described before in Section \@ref(performanceMetrics). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics` returns a `data.frame` of these metrics together with their respective assay names and whether they require ground truths.
+By running the code above, the results of three differential expression methods (`r BiocStyle::Biocpkg("edgeR")`, `r BiocStyle::Biocpkg("limma")`-voom and `r BiocStyle::Biocpkg("DESeq2")` will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric()`, as described before in Section \@ref(performanceMetrics). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics()` returns a *data.frame* of these metrics together with their respective assay names and whether they require ground truths.
 
 ```{r availableMetrics}
 availableMetrics()
 ```
 
-For example, if we change the assay name of our object from `H` to `qvalue` and then execute the function `addDefaultMetrics`, the metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` will be added to our object. 
+For example, if we change the assay name of our object from `H` to `qvalue` and then execute the function `addDefaultMetrics()`, the metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` will be added to our object. 
 
 ```{r}
 assayNames(sb) <- "qvalue"
@@ -367,7 +367,7 @@ names(performanceMetrics(sb)[["qvalue"]])
 assay(sb)[,"deseq2"][is.na(assay(sb)[, "deseq2"])] <- 1
 ```
 
-Having defined the desired performance metrics, the function `estimatePerformanceMetrics` will calculate these metrics for each of the three methods. 
+Having defined the desired performance metrics, the function `estimatePerformanceMetrics()` will calculate these metrics for each of the three methods. 
 
 ```{r}
 estimatePerformanceMetrics(sb, 
@@ -377,15 +377,15 @@ estimatePerformanceMetrics(sb,
   tail()
 ```
 
-Furthermore, the functions `plotMethodsOverlap` and `plotROC` are helpful to visualize the performance of the different methods, in case these methods output q-values.
+Furthermore, the functions `plotMethodsOverlap()` and `plotROC()` are helpful to visualize the performance of the different methods, in case these methods output q-values.
 
-`plotMethodsOverlap` is a wrapper for the function `upset` from the `UpSetR` package that is helpful to visualize the overlaps between hits of different methods for a given alpha value. 
+`plotMethodsOverlap()` is a wrapper for the function `upset()` from the `r BiocStyle::CRANpkg("UpSetR")` package that is helpful to visualize the overlaps between hits of different methods for a given alpha value. 
 
 ```{r, fig.width=4.5, fig.height=4}
 plotMethodsOverlap( sb, alpha=0.1, order.by="freq")
 ```
 
-From the plot above, it is evident that there is a large number of transcripts that are detected to be differentially expressed by all three methods. There are also smallers sets of transcripts that are detected uniquely by a single method or subsets of methods. Another typical way to compare the performance of different methods are Receiver Operating Characteristic (ROC) curves. The function `plotROC` inputs a `SummarizeBenchmark` object and draws the ROC curves for all methods contained in it. 
+From the plot above, it is evident that there is a large number of transcripts that are detected to be differentially expressed by all three methods. There are also smallers sets of transcripts that are detected uniquely by a single method or subsets of methods. Another typical way to compare the performance of different methods are Receiver Operating Characteristic (ROC) curves. The function `plotROC()` inputs a *SummarizeBenchmark* object and draws the ROC curves for all methods contained in it. 
 
 ```{r, fig.width=5, fig.height=4}
 plotROC(sb)
@@ -393,13 +393,13 @@ plotROC(sb)
 
 # Advanced Features
 
-Here, we describe several additional features implemented in `SummarizedBenchmark` for building on the standard workflow described in the previous sections. The features are illustrated using the same differential expression example from above.
+Here, we describe several additional features implemented in *SummarizedBenchmark* for building on the standard workflow described in the previous sections. The features are illustrated using the same differential expression example from above.
 
 ## Storing Multiple Outputs
 
-The differential expression case study described above has assumed that we are interested in a single numeric vector for each method, namely, a vector of p-values. These p-values are stored as the sole `assay` in the `SummarizedBenchmark` object returned by `buildBench()`. However, in many cases, there are multiple values of interest to be compared across methods. For example, looking at the estimated log-fold changes in addition to p-values may be informative when comparing methods for differential expression.
+The differential expression case study described above has assumed that we are interested in a single numeric vector for each method, namely, a vector of p-values. These p-values are stored as the sole `assay` in the *SummarizedBenchmark* object returned by `buildBench()`. However, in many cases, there are multiple values of interest to be compared across methods. For example, looking at the estimated log-fold changes in addition to p-values may be informative when comparing methods for differential expression.
 
-The `BenchDesign` framework supports multiple assays with the `bpost =` parameter of the `addBMethod()` call. When zero or one function is specified to `bpost =` for all methods, as in the examples above, the results are stored as a single `assay`. However, if `bpost =` is passed a named list of functions, separate `assay`s will be created using the names and functions in each list. Since the `assay` names are taken from `bpost =`, all entries in the list must be named. Furthermore, if more than one `assay` is desired, the `bpost =` parameter must be specified for all methods. This is strictly enforced to avoid ambiguities when combining results across methods. 
+The *BenchDesign* framework supports multiple assays with the `bpost =` parameter of the `addBMethod()` call. When zero or one function is specified to `bpost =` for all methods, as in the examples above, the results are stored as a single `assay`. However, if `bpost =` is passed a named list of functions, separate `assay`s will be created using the names and functions in each list. Since the `assay` names are taken from `bpost =`, all entries in the list must be named. Furthermore, if more than one `assay` is desired, the `bpost =` parameter must be specified for all methods. This is strictly enforced to avoid ambiguities when combining results across methods. 
 
 To track both p-values and log-fold change values for each method, we write new wrapper functions. Separate wrapper functions are written for first returning the primary analysis results, and separate accessor functions for extracting p-values and log-fold changes from the results. 
 
@@ -473,7 +473,7 @@ bd <- bd %>%
                design = ~coldat$condition)
 ```
 
-When the `BenchDesign` is evaluated using `buildBench()`, the resulting `SummarizedBenchmark` will be generated with two assays: `"pv"` and `"lfc"`. As before, the ground truth can be specified using the `truthCols =` parameter. When multiple assays are used, `truthCols =` expects a named vector of `assay-name = "column-name"` pairs.
+When the *BenchDesign* is evaluated using `buildBench()`, the resulting *SummarizedBenchmark* will be generated with two assays: `"pv"` and `"lfc"`. As before, the ground truth can be specified using the `truthCols =` parameter. When multiple assays are used, `truthCols =` expects a named vector of `assay-name = "column-name"` pairs.
 
 ```{r}
 sb <- buildBench(b = bd, truthCols = c(pv = "status", lfc = "lfc"))
@@ -489,9 +489,9 @@ assay(sb, "lfc") %>% head
 
 ## Parallelizing with BiocParallel
 
-The simple examples considered in this vignette were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Since constructing a `BenchDesign` object requires no computation, the bottleneck only appears at the `buildBench()` step of the process. Parallelization of this step is enabled using the `BiocParallel` package.  
+The simple examples considered in this vignette were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Since constructing a `BenchDesign` object requires no computation, the bottleneck only appears at the `buildBench()` step of the process. Parallelization of this step is enabled using the `r BiocStyle::Biocpkg("BiocParallel")` package.  
 
-By default, parallel evaluation is disabled, but can easily be enabled by setting `parallel = TRUE` and optionally specifying the `BPPARAM` parameter. If `BPPARAM` is not specified, the default back-end will be used. The default back-end can be checked with `bpparam()`.
+By default, parallel evaluation is disabled, but can easily be enabled by setting `parallel = TRUE` and optionally specifying the `BPPARAM =` parameter. If `BPPARAM =` is not specified, the default back-end will be used. The default back-end can be checked with `bpparam()`.
 
 ```{r}
 bpparam()
@@ -499,19 +499,19 @@ sbp <- buildBench(bd, parallel = TRUE)
 sbp
 ```
 
-The results, as expected, are the same as when `buildBench` was called without parallelization.
+The results, as expected, are the same as when `buildBench()` was called without parallelization.
 
 ```{r}
 all(assay(sbp) == assay(sb), na.rm = TRUE)
 ```
 
-Details on how to specify the parallelization back-end can be found in the _Introduction to BiocParallel_ vignette for the [`BiocParallel`](http://bioconductor.org/packages/release/bioc/html/BiocParallel.html) package. Parallelization of `buildBench()` is carried out across the set of methods specified with `addBMethod()`. There is no benefit to specifying more cores than the number of methods.
+Details on how to specify the parallelization back-end can be found in the _Introduction to BiocParallel_ vignette for the `r BiocStyle::Biocpkg("BiocParallel")` package. Parallelization of `buildBench()` is carried out across the set of methods specified with `addBMethod()`. There is no benefit to specifying more cores than the number of methods.
 
 ## Manually Specifying Method Metadata
 
-Metadata for methods are stored in the `colData` of `SummarizedBenchmark` objects. As metioned above, several default metadata columns are populated in the `colData` of the `SummarizedBenchmark` object generated by a call to `buildBench()`. Sometimes it may be useful to include additional metadata columns beyond just the default columns. While this can be accomplished manually by modifying the `colData` of the `SummarizedBenchmark` object post hoc, method metadata can also be specified at the `addBMethod()` step using the `bmeta =` optional parameter. The `bmeta =` parameter accepts a named list of metadata information. Each list entry will be added to the `colData` as a new column. To avoid collisions between metadata columns specified with `bmeta =` and the default set of columns, metadata specified using `bmeta =` will be added to `colData` with `meta.` prefixed to the column name.  
+Metadata for methods are stored in the `colData()` of *SummarizedBenchmark* objects. As metioned above, several default metadata columns are populated in the `colData()` of the *SummarizedBenchmark* object generated by a call to `buildBench()`. Sometimes it may be useful to include additional metadata columns beyond just the default columns. While this can be accomplished manually by modifying the `colData()` of the *SummarizedBenchmark* object post hoc, method metadata can also be specified at the `addBMethod()` step using the `bmeta =` optional parameter. The `bmeta =` parameter accepts a named list of metadata information. Each list entry will be added to the `colData()` as a new column. To avoid collisions between metadata columns specified with `bmeta =` and the default set of columns, metadata specified using `bmeta =` will be added to `colData()` with `meta.` prefixed to the column name.  
 
-As an example, we construct a `BenchDesign` object again using the differential expression example. The `BenchDesign` is created with two methods, `"deseq2"` and `"edgeR"`. Each method is specified with the optional `bmeta =` parameter. We can verify that the manually defined metadata column (`meta.reason`) is available in the `colData` of the generated `SummarizedBenchmark`.
+As an example, we construct a *BenchDesign* object again using the differential expression example. The *BenchDesign* is created with two methods, `r BiocStyle::Biocpkg("DESeq2")` and `r BiocStyle::Biocpkg("edgeR")`. Each method is specified with the optional `bmeta =` parameter. We can verify that the manually defined metadata column (`meta.reason`) is available in the `colData()` of the generated *SummarizedBenchmark*.
 
 ```{r}
 BenchDesign(mydat) %>%
@@ -536,9 +536,9 @@ While all methods in this example had the `bmeta =` option specified, this is no
 
 ## Manually Modifying Version Metadata
 
-Arguably, two of the most important pieces of metadata stored in the `colData` of the `SummarizedBenchmark` returned by `buildBench()` are the relevant package name and version (`pkg_name`, `pkg_vers`). Determining the package name and version requires the primary "workhorse" function of the method be directly specified as `bfunc =` in the `addBMethod()` call. In some cases, this may not be possible, e.g. if the "workhorse" function is a wrapper as in the differential expression example above. However, there still might exist an important function for which we would like to track the package name and version. The `bmeta` parameter can help.  
+Arguably, two of the most important pieces of metadata stored in the `colData()` of the *SummarizedBenchmark* returned by `buildBench()` are the relevant package name and version (`pkg_name`, `pkg_vers`). Determining the package name and version requires the primary "workhorse" function of the method be directly specified as `bfunc =` in the `addBMethod()` call. In some cases, this may not be possible, e.g. if the "workhorse" function is a wrapper as in the differential expression example above. However, there still might exist an important function for which we would like to track the package name and version. The `bmeta` parameter can help.  
 
-The `bmeta =` parameter will handle the following named list entries as special values: `pkg_name`, `pkg_vers`, `pkg_func`. First, if values are specified for `pkg_name` and `pkg_vers` in `bmeta =`, these will overwrite the values determined from `bfunc =`. To trace the source of `pkg_name` and `pkg_vers` information, the `vers_src` column of the `colData` will be set to `"bmeta_manual"` (the default value is `"bfunc"`). Alternatively, a function can be passed to `bmeta =` as `pkg_func`. This function will be used to determine both `pkg_name` and `pkg_vers`, and will take precendence over manually specified `pkg_name` and `pkg_vers` values. If `pkg_func` is specified, it will be included in the `colData` as a new column with the same name, and the `vers_src` column will be set to `"bmeta_func"`. **Note: the function should be wrapped in `rlang::quo` to be properly parsed.  
+The `bmeta =` parameter will handle the following named list entries as special values: `pkg_name`, `pkg_vers`, `pkg_func`. First, if values are specified for `pkg_name` and `pkg_vers` in `bmeta =`, these will overwrite the values determined from `bfunc =`. To trace the source of `pkg_name` and `pkg_vers` information, the `vers_src` column of the `colData` will be set to `"bmeta_manual"` (the default value is `"bfunc"`). Alternatively, a function can be passed to `bmeta =` as `pkg_func`. This function will be used to determine both `pkg_name` and `pkg_vers`, and will take precendence over manually specified `pkg_name` and `pkg_vers` values. If `pkg_func` is specified, it will be included in the `colData()` as a new column with the same name, and the `vers_src` column will be set to `"bmeta_func"`. **Note: the function should be wrapped in `rlang::quo` to be properly parsed.  
 
 The following example illustrates the behavior when using either `pkg_func` or `pkg_name` and `pkg_vers` with the `bmeta` optional parameter.
 
@@ -564,7 +564,7 @@ BenchDesign(mydat) %>%
 
 ## Modifying Methods in a BenchDesign
 
-Modifying the defintion of a method after it has been added to a `BenchDesign` is supported by the `modifyBMethod()` function. The `BenchDesign` object created in the differential expression above includes a method called `"deseq2"`. We can check the definition of this method using `showBMethod()`.
+Modifying the defintion of a method after it has been added to a *BenchDesign* is supported by the `modifyBMethod()` function. The *BenchDesign* object created in the differential expression above includes a method called `r BiocStyle::Biocpkg("DESeq2")`. We can check the definition of this method using `showBMethod()`.
 
 ```{r}
 bd %>%
@@ -581,7 +581,7 @@ bd %>%
     showBMethod("deseq2")
 ```
 
-Sometimes it may be desirable to completely overwrite all function parameters for a method, e.g. `countData`, `colData`, `design`, and `contrast` in the case of `"deseq2"`. This may occur if some parameters were optional and originally specified, but no longer necessary. All function parameters can be overwritten by specifying `.overwrite = TRUE`.
+Sometimes it may be desirable to completely overwrite all function parameters for a method, e.g. `countData`, `colData`, `design`, and `contrast` in the case of `r BiocStyle::Biocpkg("DESeq2")`. This may occur if some parameters were optional and originally specified, but no longer necessary. All function parameters can be overwritten by specifying `.overwrite = TRUE`.
 
 ```{r}
 bd %>%
@@ -596,7 +596,7 @@ Notice that all parameters other than `contrast = c("condition", "1", "2")` have
 
 ## Duplicating Methods in a BenchDesign
 
-In addition to comparing multiple methods, a benchmark study may also involve comparing a single method across several parameter settings. The `expandBMethod()` function provides the capability to take a method already defined in the `BenchDesign`, and _expand_ it to multiple methods with differing parameter values in the `BenchDesign` object. In the following example, `expandBMethod()` is used to duplicate the `"deseq2"` method with only the `"contrast"` parameter modified.
+In addition to comparing multiple methods, a benchmark study may also involve comparing a single method across several parameter settings. The `expandBMethod()` function provides the capability to take a method already defined in the *BenchDesign*, and _expand_ it to multiple methods with differing parameter values in the `BenchDesign` object. In the following example, `expandBMethod()` is used to duplicate the `r BiocStyle::Biocpkg("DESeq2")` method with only the `"contrast"` parameter modified.
 
 ```{r}
 bde <- bd %>%
@@ -623,11 +623,11 @@ showBMethod(bde, "deseq2_v2")
 
 # Related Work
 
-Related frameworks for benchmarking have been proposed in R, notably: [`iCOBRA`](https://github.com/markrobinsonuzh/iCOBRA) (available on Bioconductor) and [`dscr`](https://github.com/stephens999/dscr) (available on GitHub). The `SummarizedBenchmark` package differs from both `iCOBRA` and `dscr` in several important ways.
+Related frameworks for benchmarking have been proposed in R, notably: `r BiocStyle::Biocpkg("iCOBRA")` (available on Bioconductor) and `r BiocStyle::Githubpkg("stephens999/dscr")` (available on GitHub). The *SummarizedBenchmark* package differs from both `r BiocStyle::Biocpkg("iCOBRA")` and `r BiocStyle::Githubpkg("stephens999/dscr")` in several important ways.
 
-First, while the `iCOBRA` package provides support for evaluating the results of a benchmark experiment, it does not include infrastructure for experiment setup and execution. In this way, while no equivalent to the `BenchDesign` class exists as part of the `iCOBRA` package, the `iCOBRA` "`COBRAData`" class is similar to our "`SummarizedBenchmark`" class. However, by extending the standard Bioconductor `SummarizedExperiment` class, the `SummarizedBenchmark` class has the advantage of following a well-known data structure and facilitating easier downstream analyses. Finally, it may not even be reasonable to directly compare `iCOBRA` and `SummarizedBenchmark`, as `iCOBRA` was developed explicitly for the purpose of comparing results of _"binary classification and ranking methods"_ with a web application (Shiny app) for interactive analyses. Our package is designed with the goal of handling a much larger collection of benchmark studies.
+First, while the `r BiocStyle::Biocpkg("iCOBRA")` package provides support for evaluating the results of a benchmark experiment, it does not include infrastructure for experiment setup and execution. In this way, while no equivalent to the *BenchDesign* class exists as part of the `r BiocStyle::Biocpkg("iCOBRA")` package, the `r BiocStyle::Biocpkg("iCOBRA")` *COBRAData* class is similar to our *SummarizedBenchmark* class. However, by extending the standard Bioconductor *SummarizedExperiment* class, the *SummarizedBenchmark* class has the advantage of following a well-known data structure and facilitating easier downstream analyses. Finally, it may not even be reasonable to directly compare `r BiocStyle::Biocpkg("iCOBRA")` and `SummarizedBenchmark`, as `r BiocStyle::Biocpkg("iCOBRA")` was developed explicitly for the purpose of comparing results of _"binary classification and ranking methods"_ with a web application (Shiny app) for interactive analyses. Our package is designed with the goal of handling a much larger collection of benchmark studies.
 
-In both design and structure, the `SummarizedBenchmark` framework is much closer to the `dscr` package. Similar to `Summarizedbenchmark`, the `dscr` framework requires three components: **(1)** data simulators, **(2)** methods, and **(3)** score functions. However, `SummarizedBenchmark` differs from `dscr` notably in implementation. In addition to extending the `SummarizedExperiment` class for the `SummarizedBenchmark` class, the storage and execution of methods in `BenchDesign` makes use of the "**tidy eval**" approach recently proposed and implemented in the `rlang` package. 
+In both design and structure, the *SummarizedBenchmark* framework is much closer to the `dscr` package. Similar to *SummarizedBenchmark*, the `r BiocStyle::Githubpkg("stephens999/dscr")` framework requires three components: **(1)** data simulators, **(2)** methods, and **(3)** score functions. However, *SummarizedBenchmark* differs from `dscr` notably in implementation. In addition to extending the *SummarizedExperiment* class for the *SummarizedBenchmark* class, the storage and execution of methods in *BenchDesign* makes use of the "**tidy eval**" approach recently proposed and implemented in the `rlang` package. 
 
 # References
 
