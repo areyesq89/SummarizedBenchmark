@@ -4,10 +4,12 @@
 \alias{plotROC}
 \title{ROC curve for 'qvalue' assays}
 \usage{
-plotROC(object)
+plotROC(object, assay = "qvalue")
 }
 \arguments{
 \item{object}{A \code{\link{SummarizedBenchmark}} object.}
+
+\item{assay}{An assay name.}
 }
 \value{
 An \code{\link{SummarizedBenchmark}} object with performance functions.
