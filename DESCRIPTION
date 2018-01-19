@@ -29,7 +29,11 @@ Suggests: iCOBRA,
           magrittr,
           IHW,
           qvalue,
-          testthat
+          testthat,
+          DESeq2,
+          edgeR,
+          limma,
+          tximport
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

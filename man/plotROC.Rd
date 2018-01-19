@@ -2,12 +2,14 @@
 % Please edit documentation in R/PlottingFunctions.R
 \name{plotROC}
 \alias{plotROC}
-\title{ROC curve for 'qvalue' assays}
+\title{Plotting ROC curves}
 \usage{
-plotROC(object)
+plotROC(object, assay = "qvalue")
 }
 \arguments{
 \item{object}{A \code{\link{SummarizedBenchmark}} object.}
+
+\item{assay}{An assay name.}
 }
 \value{
 An \code{\link{SummarizedBenchmark}} object with performance functions.

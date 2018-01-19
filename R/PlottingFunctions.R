@@ -1,13 +1,14 @@
 #' @title Calls UpSetR for qvalues of a \code{\link{SummarizedBenchmark}} object.
 #' @aliases plotMethodsOverlap
 #' @description
-#' This function looks for an assay called 'qvalues' and given an alpha threshold,
-#' it binarizes the qvalue matrix depending on whether the qvalues pass the alpha
-#' threshold. Then it uses the function \code{\link{upset}} to plot the overlaps. 
+#' This function looks for an assay, called by default 'qvalue', and given an alpha threshold,
+#' it binarizes the assay matrix depending on whether its values are below the alpha
+#' threshold. Then it uses the function \code{\link{upset}} to plot the overlaps.
 #' The plot is only generated if at least 2 methods have observations that pass
 #' the alpha threshold.
 #'
 #' @param object A \code{\link{SummarizedBenchmark}} object.
+#' @param assay The name of an assay.
 #' @param alpha An alpha value.
 #' @param ... Further arguments passed to \code{\link{upset}}
 #'
@@ -23,21 +24,21 @@
 #' @export
 #' @importFrom UpSetR upset
 #'
-plotMethodsOverlap <- function( object, alpha=0.1, ... ){
+plotMethodsOverlap <- function( object, assay="qvalue", alpha=0.1, ... ){
   stopifnot( is( object, "SummarizedExperiment" ) )
   stopifnot( is( alpha, "numeric") )
   stopifnot( alpha >=0 & alpha <= 1 )
-  if( !( "qvalue" %in% assayNames( object ) ) ){
-    stop("The function 'plotOverlaps' requires an assay names 'qvalue'")
+  if( !( assay %in% assayNames( object ) ) ){
+    stop(sprintf("Assay name '%s' not found", assay) )
   }
-  uobj <- as.data.frame( 1*( assays( object )[["qvalue"]] < alpha) )
+  uobj <- as.data.frame( 1*( assays( object )[[assay]] < alpha) )
   if ( sum(colSums(uobj) > 0) < 2 ){
     stop("To plot overlaps, at least 2 methods must have observations that pass the alpha threshold.")
   }
   upset(uobj , ... )
 }
 
-#' @title ROC curve for 'qvalue' assays
+#' @title Plotting ROC curves
 #' @aliases plotROC
 #' @description
 #' This function inputs a \code{\link{SummarizedBenchmark}} object, looks
@@ -45,6 +46,7 @@ plotMethodsOverlap <- function( object, alpha=0.1, ... ){
 #' for each of the methods to benchmark.
 #'
 #' @param object A \code{\link{SummarizedBenchmark}} object.
+#' @param assay An assay name.
 #'
 #' @examples
 #' \dontrun{
@@ -58,18 +60,18 @@ plotMethodsOverlap <- function( object, alpha=0.1, ... ){
 #' @export
 #' @importFrom ggplot2 ggplot geom_line aes geom_abline xlim ylim
 #'
-plotROC <- function( object ){
+plotROC <- function( object, assay="qvalue" ){
   stopifnot( is( object, "SummarizedBenchmark" ))
-  if( !any( assayNames( object ) %in% "qvalue" ) ){
-    stop("Assay 'qvalue' not found.")
+  if( !any( assayNames( object ) %in% assay ) ){
+    stop(sprintf("Assay '%s' not found.\n", assay) )
   }
-  if( !assayHasTruths( object, "qvalue" ) ){
-    stop("Ground truths not found for assay 'qvalue'")
+  if( !assayHasTruths( object, assay ) ){
+    stop(sprintf("Ground truths not found for assay '%s'", assay))
   }
   metricsDf <- do.call( rbind, lapply( colnames(object), function(method){
-    or <- order( assays(object)[["qvalue"]][,method] )
-    TPR <- cumsum( groundTruths( object )[["qvalue"]][or] ) / sum( groundTruths(object)[["qvalue"]] )
-    FPR <- cumsum( abs(groundTruths( object )[["qvalue"]][or] - 1) ) / seq_along(or)
+    or <- order( assays(object)[[assay]][,method] )
+    TPR <- cumsum( groundTruths( object )[[assay]][or] ) / sum( groundTruths(object)[[assay]] )
+    FPR <- cumsum( abs(groundTruths( object )[[assay]][or] - 1) ) / seq_along(or)
     data.frame( method=method, TPR=TPR, FPR=FPR )
   } ) )
   pl <- ggplot( metricsDf, aes(FPR, TPR, col=method) ) +

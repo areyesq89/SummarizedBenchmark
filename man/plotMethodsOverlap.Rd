@@ -4,19 +4,23 @@
 \alias{plotMethodsOverlap}
 \title{Calls UpSetR for qvalues of a \code{\link{SummarizedBenchmark}} object.}
 \usage{
-plotMethodsOverlap(object, alpha = 0.1, ...)
+plotMethodsOverlap(object, assay = "qvalue", alpha = 0.1, ...)
 }
 \arguments{
 \item{object}{A \code{\link{SummarizedBenchmark}} object.}
+
+\item{assay}{The name of an assay.}
 
 \item{alpha}{An alpha value.}
 
 \item{...}{Further arguments passed to \code{\link{upset}}}
 }
 \description{
-This function looks for an assay called 'qvalues' and given an alpha threshold,
-it binarizes the qvalue matrix depending on whether the qvalues pass the alpha
+This function looks for an assay, called by default 'qvalue', and given an alpha threshold,
+it binarizes the assay matrix depending on whether its values are below the alpha
 threshold. Then it uses the function \code{\link{upset}} to plot the overlaps.
+The plot is only generated if at least 2 methods have observations that pass
+the alpha threshold.
 }
 \examples{
 \dontrun{
