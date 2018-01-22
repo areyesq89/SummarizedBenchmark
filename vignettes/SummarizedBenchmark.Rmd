@@ -217,7 +217,7 @@ estimatePerformanceMetrics(sb,
                            tidy = TRUE)
 ```
 
-As an alternative to get the same `data.frame` as the previous chunk, we can call the function `tidyUpMetrics()` on the saved results from a *SummarizedBenchmark* object.
+As an alternative to get the same *data.frame* as the previous chunk, we can call the function `tidyUpMetrics()` on the saved results from a *SummarizedBenchmark* object.
 
 ```{r}
 head(tidyUpMetrics(sb))
@@ -257,14 +257,14 @@ The scaled TPM values are rounded before passing to the differential expression 
 mycounts <- round(txi$counts)
 ```
 
-Here, we simply use the the conditions for each sample to define the experimental design. The design matrix is stored as *data.frame*, `mycoldat`.
+Here, we simply use the the conditions for each sample to define the experimental design. The design matrix is stored as a *data.frame*, `mycoldat`.
 
 ```{r}
 mycoldat <- data.frame(condition = factor(rep(c(1, 2), each = 3)))
 rownames(mycoldat) <- colnames(mycounts)
 ```
 
-The data object for the benchmark experiment is now constructed with both data objects, along with some ground truth information ("status": the true presence or absense of differential expression between conditions, "lfc": the expected log-fold change between conditions).
+The data object for the benchmark experiment is now constructed with both the counts and the design matrix, along with some ground truth information ("status": the true presence or absense of differential expression between conditions, and "lfc": the expected log-fold change between conditions).
 
 ```{r}
 mydat <- list(coldat = mycoldat,
@@ -279,9 +279,9 @@ As before, the *BenchDesign* is constructed with the data as the sole input.
 bd <- BenchDesign(mydat)
 ```
 
-For simplicity, here, we focus on comparing only the p-values returned by each method after testing for differential expression between the two conditions across the `r nrow(mycounts)` transcripts. However, later in this vignette, we also show how multiple metrics (p-values and log-fold change) can be compared using a single *BenchDesign* object.
+For simplicity, we focus on comparing only the p-values returned by each method after testing for differential expression between the two conditions. However, later in this vignette, we also show how multiple metrics (p-values and log-fold change) can be compared in a single *BenchDesign* object.
 
-Since each method requires running multiple steps, we write wrapper functions which return only the vector p-values for each method. 
+Since each method requires running multiple steps, we write wrapper functions which return only the vector of p-values for each method. 
 
 ```{r}
 deseq2_pvals <- function(countData, colData, design, contrast) {
@@ -313,7 +313,7 @@ voom_pvals <- function(countData, group, design) {
 }
 ```
 
-Next, each method is added to `bd` using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit the **Quickstart Case Study** in the previous section.) We again use the pipe notation for compactness.
+Next, each method is added to the *BenchDesign* using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit the **Quickstart Case Study** in the previous section.) We again use the pipe notation for compactness.
 
 ```{r}
 bd <- bd %>%
@@ -620,6 +620,43 @@ bde <- bd %>%
 showBMethod(bde, "deseq2_v1")
 showBMethod(bde, "deseq2_v2")
 ```
+
+## Removing Methods in a BenchDesign
+
+After constructing a `BenchDesign`, it may become clear that a single method or parameter setting is no longer relevant to the comparison. In this case, the method can be easily dropped from the `BenchDesign` by specifying the `BenchDesign` and method name to `dropBMethod()`.
+
+```{r}
+bd %>%
+    dropBMethod("deseq2") %>%
+    showBMethods()
+```
+
+## Reusing a BenchDesign Across Data Sets
+
+When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single `BenchDesign` object across multiple data sets. While the `BenchDesign` objects in the examples above were all initialized with a data set, this is not necessary. 
+
+```{r}
+bdnull <- BenchDesign()
+bdnull
+```
+
+As before, methods can be added to the `BenchDesign` with `addBMethod()`, and the benchmark experiment run using `buildBench()`.
+
+```{r}
+bdnull <- bdnull %>%
+  addBMethod(blabel = "bonf", bfunc = p.adjust,
+             p = pval, method = "bonferroni") %>%
+  addBMethod(blabel = "BH", bfunc = p.adjust,
+             p = pval, method = "BH")
+```
+
+While not mentioned above, the `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the `BenchDesign` object.
+
+```{r}
+buildBench(bdnull, data = tdat)
+```
+
+By specifying data during the `buildBench()` step the exact same benchmark comparison, as defined in the common `BenchDesign` object, can be carried out consistently across multiple data sets. While this approach works even if the common `BenchDesign` object contains a default data set, it is recommended that the `BenchDesign` be created without any data to avoid errors if the design is going to be reunsed across data sets.
 
 # Related Work
 
