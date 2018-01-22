@@ -12,24 +12,45 @@ availableMetrics <- function(){
   )
 }
 
-TPR <- function( query, truth, alpha=0.1 ){
+sb.TPR <- function( query, truth, alpha=0.1 ){
   sum( query < alpha & truth == 1 ) / sum( truth == 1 )
 }
 
-TNR <- function( query, truth, alpha=0.1 ){
+sb.TNR <- function( query, truth, alpha=0.1 ){
   sum( ( !query < alpha ) & truth == 0 ) / sum( truth == 0 )
 }
 
-FPR <- function( query, truth, alpha=0.1 ){
+sb.FPR <- function( query, truth, alpha=0.1 ){
   sum( query < alpha & truth == 0 ) / sum( query < alpha )
 }
 
-FNR <- function( query, truth, alpha=0.1 ){
+sb.FNR <- function( query, truth, alpha=0.1 ){
   sum( !(query < alpha) & truth == 1 ) / sum( !( query < alpha ) )
 }
 
-rejections <- function( query, truth, alpha=0.1 ){
+sb.rejections <- function( query, truth, alpha=0.1 ){
   sum( query < alpha )
+}
+
+sb.correlation <- function( query, truth, method="pearson" ){
+  cor( query, truth, method=method )
+}
+
+sb.sdad <- function( query, truth ){
+  sd( abs( query - truth ) )
+}
+
+sb.hamming <- function( query, truth ){
+  sum( !query == truth )
+}
+
+sb.Lpnorm <- function( query, truth, p=2 ){
+  sum( abs(query - truth) ^ p ) ^ (1/p)
+}
+
+#' @importFrom mclust adjustedRandIndex
+sb.adjustedRandIndex <- function( query, truth ){
+  adjustedRandIndex( query, truth )
 }
 
 assayHasTruths <- function( object, assay ){
@@ -89,7 +110,7 @@ addDefaultMetrics <- function( object, metrics=NULL ){
         object=object,
         assay=j,
         evalMetric=i,
-        evalFunction = get(i) )
+        evalFunction = get( paste0("sb.", i) )
     }
   }
   object
