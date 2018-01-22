@@ -62,7 +62,7 @@ The data set is a *data.frame* containing the results of 50 two-sample t-tests. 
 head(tdat)
 ```
 
-Several approaches have been proposed and implemented to compute *adjusted p-values* with the goal of controlling the total number of false discoveries across a collection of tests. In this example, we compare three such methods:
+Several approaches have been proposed and implemented to compute *adjusted p-values* and *q-values* with the goal of controlling the total number of false discoveries across a collection of tests. In this example, we compare three such methods:
 
 1. Bonferroni correction (`p.adjust` w/ `method = "bonferroni"`),
 2. Benjamini-Hochberg (`p.adjust` w/ `method = "BH"`), and
@@ -73,24 +73,24 @@ First, consider how benchmarking the three methods might look without the *Summa
 To compare methods, each is applied to `tdat`, and the results are stored in separate variables. 
 
 ```{r}
-adjp_bonf <- p.adjust(p = tdat$pval, method = "bonferroni")
+adj_bonf <- p.adjust(p = tdat$pval, method = "bonferroni")
 
-adjp_bh <- p.adjust(p = tdat$pval, method = "BH")
+adj_bh <- p.adjust(p = tdat$pval, method = "BH")
 
 qv <- qvalue::qvalue(p = tdat$pval)
-adjp_qv <- qv$qvalues
+adj_qv <- qv$qvalues
 ```
 
 Since the output of each method is a vector of length 50 (the number of hypotheses tested), to keep things clean, they can be combined into a single *data.frame*.
 
 ```{r}
-adjp <- cbind.data.frame(adjp_bonf, adjp_bh, adjp_qv)
-head(adjp)
+adj <- cbind.data.frame(adj_bonf, adj_bh, adj_qv)
+head(adj)
 ```
 
-The *data.frame* of adjusted p-values can be used to compare the methods, either by directly parsing the table or using a framework like `r BiocStyle::Biocpkg("iCOBRA")`. Additionally, the *data.frame* can be saved as a `RDS` or `Rdata` object for future reference, eliminating the need for recomputing on the original data.  
+The *data.frame* of adjusted p-values and q-values can be used to compare the methods, either by directly parsing the table or using a framework like `r BiocStyle::Biocpkg("iCOBRA")`. Additionally, the *data.frame* can be saved as a `RDS` or `Rdata` object for future reference, eliminating the need for recomputing on the original data.  
 
-While this approach can work well for smaller comparisons, it can quickly become overwhelming and unweildy as the number of methods and parameters increases. Furthermore, once each method is applied and the final *data.frame* (`adj`) is constructed, there is no way to determine *how* each adjusted p-value was calculated. While an informative name can be used to "label" each method (as done above), this does not capture the full complexity, e.g. parameters and context, where the function was evaluated. One solution might involve manually recording function calls and parameters in a separate *data.frame* with the hope of maintaining synchrony with the output *data.frame*. However, this is prone to errors, e.g. during fast "copy and paste" operations or additions and delations of parameter combinations. An alternative (and hopefully better) solution, is to use the framework of the *SummarizedBenchmark* package.
+While this approach can work well for smaller comparisons, it can quickly become overwhelming and unweildy as the number of methods and parameters increases. Furthermore, once each method is applied and the final *data.frame* (`adj`) is constructed, there is no way to determine *how* each value was calculated. While an informative name can be used to "label" each method (as done above), this does not capture the full complexity, e.g. parameters and context, where the function was evaluated. One solution might involve manually recording function calls and parameters in a separate *data.frame* with the hope of maintaining synchrony with the output *data.frame*. However, this is prone to errors, e.g. during fast "copy and paste" operations or additions and delations of parameter combinations. An alternative (and hopefully better) solution, is to use the framework of the *SummarizedBenchmark* package.
 
 In the *SummarizedBenchmark* approach, a *BenchDesign* is first constructed with the data as the sole input. (A *BenchDesign* can also be constructed without any data input. This approach is described in a later section.)
 
@@ -133,13 +133,13 @@ Now, the *BenchDesign* object contains three methods. This can be verified using
 showBMethods(b)
 ```
 
-While the bench now includes all the information necessary for performing the benchmarking study, the actual adjusted p-values have not yet been calculated. To do this, we simply call `buildBench()`. While `buildBench()` does not require any inputs other than the *BenchDesign* object, when the corresponding ground truth is known, the `truthCols =` parameter should be specified. In this example, the `H` column of the `tdat` *data.frame* contains the true null or alternative status of each simulated hypothesis test.
+While the bench now includes all the information necessary for performing the benchmarking study, the actual adjusted p-values and q-values have not yet been calculated. To do this, we simply call `buildBench()`. While `buildBench()` does not require any inputs other than the *BenchDesign* object, when the corresponding ground truth is known, the `truthCols =` parameter should be specified. In this example, the `H` column of the `tdat` *data.frame* contains the true null or alternative status of each simulated hypothesis test.
 
 ```{r}
 sb <- buildBench(b, truthCols = "H")
 ```
 
-The returned object is a *SummarizedBenchmark* class. The *SummarizedBenchmark* object is an extension of a *SummarizedExperiment* object. The table of adjusted p-values is contained in a single "assay" of the object with each method added using `addBMethod()` as a column with the corresponding `blabel` as the name.
+The returned object is a *SummarizedBenchmark* class. The *SummarizedBenchmark* object is an extension of a *SummarizedExperiment* object. The table of adjusted p-values and q-values is contained in a single "assay" of the object with each method added using `addBMethod()` as a column with the corresponding `blabel` as the name.
 
 ```{r}
 head(assay(sb))
@@ -217,7 +217,7 @@ estimatePerformanceMetrics(sb,
                            tidy = TRUE)
 ```
 
-As an alternative to get the same `data.frame` as the previous chunk, we can call the function `tidyUpMetrics()` on the saved results from a *SummarizedBenchmark* object.
+As an alternative to get the same *data.frame* as the previous chunk, we can call the function `tidyUpMetrics()` on the saved results from a *SummarizedBenchmark* object.
 
 ```{r}
 head(tidyUpMetrics(sb))
@@ -257,14 +257,14 @@ The scaled TPM values are rounded before passing to the differential expression 
 mycounts <- round(txi$counts)
 ```
 
-Here, we simply use the the conditions for each sample to define the experimental design. The design matrix is stored as *data.frame*, `mycoldat`.
+Here, we simply use the the conditions for each sample to define the experimental design. The design matrix is stored as a *data.frame*, `mycoldat`.
 
 ```{r}
 mycoldat <- data.frame(condition = factor(rep(c(1, 2), each = 3)))
 rownames(mycoldat) <- colnames(mycounts)
 ```
 
-The data object for the benchmark experiment is now constructed with both data objects, along with some ground truth information ("status": the true presence or absense of differential expression between conditions, "lfc": the expected log-fold change between conditions).
+The data object for the benchmark experiment is now constructed with both the counts and the design matrix, along with some ground truth information ("status": the true presence or absense of differential expression between conditions, and "lfc": the expected log-fold change between conditions).
 
 ```{r}
 mydat <- list(coldat = mycoldat,
@@ -279,9 +279,9 @@ As before, the *BenchDesign* is constructed with the data as the sole input.
 bd <- BenchDesign(mydat)
 ```
 
-For simplicity, here, we focus on comparing only the p-values returned by each method after testing for differential expression between the two conditions across the `r nrow(mycounts)` transcripts. However, later in this vignette, we also show how multiple metrics (p-values and log-fold change) can be compared using a single *BenchDesign* object.
+For simplicity, we focus on comparing only the p-values returned by each method after testing for differential expression between the two conditions. However, later in this vignette, we also show how multiple metrics (p-values and log-fold change) can be compared in a single *BenchDesign* object.
 
-Since each method requires running multiple steps, we write wrapper functions which return only the vector p-values for each method. 
+Since each method requires running multiple steps, we write wrapper functions which return only the vector of p-values for each method. 
 
 ```{r}
 deseq2_pvals <- function(countData, colData, design, contrast) {
@@ -313,7 +313,7 @@ voom_pvals <- function(countData, group, design) {
 }
 ```
 
-Next, each method is added to `bd` using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit the **Quickstart Case Study** in the previous section.) We again use the pipe notation for compactness.
+Next, each method is added to the *BenchDesign* using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit the **Quickstart Case Study** in the previous section.) We again use the pipe notation for compactness.
 
 ```{r}
 bd <- bd %>%
@@ -621,13 +621,50 @@ showBMethod(bde, "deseq2_v1")
 showBMethod(bde, "deseq2_v2")
 ```
 
+## Removing Methods in a BenchDesign
+
+After constructing a `BenchDesign`, it may become clear that a single method or parameter setting is no longer relevant to the comparison. In this case, the method can be easily dropped from the `BenchDesign` by specifying the `BenchDesign` and method name to `dropBMethod()`.
+
+```{r}
+bd %>%
+    dropBMethod("deseq2") %>%
+    showBMethods()
+```
+
+## Reusing a BenchDesign Across Data Sets
+
+When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single `BenchDesign` object across multiple data sets. While the `BenchDesign` objects in the examples above were all initialized with a data set, this is not necessary. 
+
+```{r}
+bdnull <- BenchDesign()
+bdnull
+```
+
+As before, methods can be added to the `BenchDesign` with `addBMethod()`, and the benchmark experiment run using `buildBench()`.
+
+```{r}
+bdnull <- bdnull %>%
+  addBMethod(blabel = "bonf", bfunc = p.adjust,
+             p = pval, method = "bonferroni") %>%
+  addBMethod(blabel = "BH", bfunc = p.adjust,
+             p = pval, method = "BH")
+```
+
+While not mentioned above, the `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the `BenchDesign` object.
+
+```{r}
+buildBench(bdnull, data = tdat)
+```
+
+By specifying data during the `buildBench()` step the exact same benchmark comparison, as defined in the common `BenchDesign` object, can be carried out consistently across multiple data sets. While this approach works even if the common `BenchDesign` object contains a default data set, it is recommended that the `BenchDesign` be created without any data to avoid errors if the design is going to be reunsed across data sets.
+
 # Related Work
 
 Related frameworks for benchmarking have been proposed in R, notably: `r BiocStyle::Biocpkg("iCOBRA")` (available on Bioconductor) and `r BiocStyle::Githubpkg("stephens999/dscr")` (available on GitHub). The *SummarizedBenchmark* package differs from both `r BiocStyle::Biocpkg("iCOBRA")` and `r BiocStyle::Githubpkg("stephens999/dscr")` in several important ways.
 
 First, while the `r BiocStyle::Biocpkg("iCOBRA")` package provides support for evaluating the results of a benchmark experiment, it does not include infrastructure for experiment setup and execution. In this way, while no equivalent to the *BenchDesign* class exists as part of the `r BiocStyle::Biocpkg("iCOBRA")` package, the `r BiocStyle::Biocpkg("iCOBRA")` *COBRAData* class is similar to our *SummarizedBenchmark* class. However, by extending the standard Bioconductor *SummarizedExperiment* class, the *SummarizedBenchmark* class has the advantage of following a well-known data structure and facilitating easier downstream analyses. Finally, it may not even be reasonable to directly compare `r BiocStyle::Biocpkg("iCOBRA")` and `SummarizedBenchmark`, as `r BiocStyle::Biocpkg("iCOBRA")` was developed explicitly for the purpose of comparing results of _"binary classification and ranking methods"_ with a web application (Shiny app) for interactive analyses. Our package is designed with the goal of handling a much larger collection of benchmark studies.
 
-In both design and structure, the *SummarizedBenchmark* framework is much closer to the `dscr` package. Similar to *SummarizedBenchmark*, the `r BiocStyle::Githubpkg("stephens999/dscr")` framework requires three components: **(1)** data simulators, **(2)** methods, and **(3)** score functions. However, *SummarizedBenchmark* differs from `dscr` notably in implementation. In addition to extending the *SummarizedExperiment* class for the *SummarizedBenchmark* class, the storage and execution of methods in *BenchDesign* makes use of the "**tidy eval**" approach recently proposed and implemented in the `rlang` package. 
+In both design and structure, the *SummarizedBenchmark* framework is much closer to the `dscr` package. Similar to *SummarizedBenchmark*, the `r BiocStyle::Githubpkg("stephens999/dscr")` framework requires three components: data simulators, methods, and score functions. However, *SummarizedBenchmark* differs from `dscr` notably both by supporting the analysis of non-simulated data and again, by extending the *SummarizedExperiment* class and linking benchmark metadata with results. 
 
 # References
 
