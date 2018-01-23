@@ -1,7 +1,7 @@
 context( "plottingFunctions" )
 test_that( "test that 'plotROC' and 'plotOverlaps'  behave as expected", {
   data( sb )
-  sb <- addDefaultMetrics( sb )
+  sb <- addPerformanceMetric( sb, evalMetric=c("rejections", "TPR", "TNR", "FPR", "FNR"), assay="qvalue" )
   expect_error( plotROC( 1:10 ) )
   sb2 <- sb
   groundTruths( sb2 ) <- NULL

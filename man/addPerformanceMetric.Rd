@@ -4,7 +4,7 @@
 \alias{addPerformanceMetric}
 \title{Add a performance metric definition to a \code{\link{SummarizedBenchmark}} object.}
 \usage{
-addPerformanceMetric(object, evalMetric, assay, evalFunction)
+addPerformanceMetric(object, evalMetric, assay, evalFunction = NULL)
 }
 \arguments{
 \item{object}{A \code{\link{SummarizedBenchmark}} object.}
@@ -17,7 +17,8 @@ given as input to this performance metric.}
 \item{evalFunction}{A function that calculates a performance metric. It should
 contain at least two arguments, query and truth, where query is the output vector
 of a method and truth is the vector of true values. If additional parameters
-are specified, they must contain default values.}
+are specified, they must contain default values. If NULL, the 'evalMetric' string must
+be the name of a predefined metric available through 'availableMetrics()$function'.}
 }
 \value{
 A \code{\link{SummarizedBenchmark}} object.

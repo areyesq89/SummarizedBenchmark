@@ -11,7 +11,8 @@
 #' @param evalFunction A function that calculates a performance metric. It should
 #' contain at least two arguments, query and truth, where query is the output vector
 #' of a method and truth is the vector of true values. If additional parameters
-#' are specified, they must contain default values.
+#' are specified, they must contain default values. If NULL, the 'evalMetric' string must
+#' be the name of a predefined metric available through 'availableMetrics()$function'.
 #'
 #' @author Alejandro Reyes
 #'
@@ -32,7 +33,7 @@
 #' @importFrom tidyr gather
 #' @export
 #'
-addPerformanceMetric <- function( object, evalMetric, assay, evalFunction ){
+addPerformanceMetric <- function( object, evalMetric, assay, evalFunction=NULL ){
   stopifnot( is(object, "SummarizedBenchmark") )
   validObject( object )
   if( is.null( evalMetric ) ){
@@ -47,10 +48,17 @@ addPerformanceMetric <- function( object, evalMetric, assay, evalFunction ){
   if( !length( assay ) == 1 ){
     stop("The 'assay' parameter must be of length 1")
   }
-  if( !length( evalMetric ) == 1 ){
-    stop("The 'evalMetric' parameter must be of length 1")
+  if( is( evalFunction, "function" ) ){
+    if( !length( evalMetric ) == 1 ){
+      stop("The 'evalMetric' parameter must be of length 1")
+    }
+    object@performanceMetrics[[assay]][[evalMetric]] <- evalFunction
+  }else if( is.null( evalFunction ) ){
+    stopifnot( all( evalMetric %in% availableMetrics()$functions ) )
+    for( i in evalMetric ){
+      object@performanceMetrics[[assay]][[i]] <- get( paste0( "sb.", i ) )
+    }
   }
-  object@performanceMetrics[[assay]][[evalMetric]] <- evalFunction
   validObject( object )
   object
 }

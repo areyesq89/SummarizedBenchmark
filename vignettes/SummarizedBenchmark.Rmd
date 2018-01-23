@@ -184,6 +184,7 @@ sb <- addPerformanceMetric(
 )
 
 performanceMetrics(sb)[["H"]]
+
 ```
 
 Having defined all the desired performance metrics, the function `estimatePerformanceMetrics()` calculates these for each method.  Parameters for the performance functions can be passed here. For example, in the case below, we are specifying the performance functions to be estimated for several `alpha =` values.
@@ -349,18 +350,19 @@ sb
 
 ## Benchmark Evaluation
 
-By running the code above, the results of three differential expression methods (`r BiocStyle::Biocpkg("edgeR")`, `r BiocStyle::Biocpkg("limma")`-voom and `r BiocStyle::Biocpkg("DESeq2")` will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric()`, as described before in Section \@ref(performanceMetrics). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics()` returns a *data.frame* of these metrics together with their respective assay names and whether they require ground truths.
+By running the code above, the results of three differential expression methods (`r BiocStyle::Biocpkg("edgeR")`, `r BiocStyle::Biocpkg("limma")`-voom and `r BiocStyle::Biocpkg("DESeq2")` will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric()`, as described before in Section \@ref(performanceMetrics). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics()` returns a *data.frame* of these metrics.
 
 ```{r availableMetrics}
 availableMetrics()
 ```
 
-For example, if we change the assay name of our object from `H` to `qvalue` and then execute the function `addDefaultMetrics()`, the metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` will be added to our object. 
+For example, the predefined metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` can be added to the assay `H` of our object using the following code,
 
 ```{r}
-assayNames(sb) <- "qvalue"
-sb <- addDefaultMetrics(sb)
-names(performanceMetrics(sb)[["qvalue"]])
+sb <- addPerformanceMetric( sb, 
+                            evalMetric=c("rejections", "TPR", "TNR", "FPR", "FNR"),
+                            assay="status" )
+names(performanceMetrics(sb)[["status"]])
 ```
 
 ```{r echo=FALSE}
@@ -370,9 +372,10 @@ assay(sb)[,"deseq2"][is.na(assay(sb)[, "deseq2"])] <- 1
 Having defined the desired performance metrics, the function `estimatePerformanceMetrics()` will calculate these metrics for each of the three methods. 
 
 ```{r}
-estimatePerformanceMetrics(sb, 
-                           alpha = c(0.01, 0.05, 0.1, 0.2), 
-                           tidy = TRUE) %>%
+estimatePerformanceMetrics(
+  sb, 
+  alpha = c(0.01, 0.05, 0.1, 0.2), 
+  tidy = TRUE) %>%
   dplyr:::select(blabel, value, performanceMetric, alpha) %>%
   tail()
 ```
@@ -382,13 +385,13 @@ Furthermore, the functions `plotMethodsOverlap()` and `plotROC()` are helpful to
 `plotMethodsOverlap()` is a wrapper for the function `upset()` from the `r BiocStyle::CRANpkg("UpSetR")` package that is helpful to visualize the overlaps between hits of different methods for a given alpha value. 
 
 ```{r, fig.width=4.5, fig.height=4}
-plotMethodsOverlap( sb, alpha=0.1, order.by="freq")
+plotMethodsOverlap( sb, assay="status", alpha=0.1, order.by="freq")
 ```
 
 From the plot above, it is evident that there is a large number of transcripts that are detected to be differentially expressed by all three methods. There are also smallers sets of transcripts that are detected uniquely by a single method or subsets of methods. Another typical way to compare the performance of different methods are Receiver Operating Characteristic (ROC) curves. The function `plotROC()` inputs a *SummarizeBenchmark* object and draws the ROC curves for all methods contained in it. 
 
 ```{r, fig.width=5, fig.height=4}
-plotROC(sb)
+plotROC(sb, assay="status")
 ```
 
 # Advanced Features
