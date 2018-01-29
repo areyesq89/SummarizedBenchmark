@@ -1,0 +1,224 @@
+---
+title: "Benchmarking software not written in R"
+author: "Patrick K. Kimes, Alejandro Reyes"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
+abstract: >
+  "In this vignette, we provide an example of how the *SummarizedBenchmark* framework can be used to benchmark software tools that are not necessarily implemented in R. Note that the objetive of this vignette is **not** to exhaustively benchmark these methods, but rather demonstrate our the usage of our software."
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    toc: true
+    fig_width: 5
+vignette: >
+  %\VignetteIndexEntry{Benchmarking with SummarizedBenchmark}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+To demonstrate the use of *SummarizedBenchmark* to compare software that is not written in *R*, we will compare the output of *sailfish*, *salmon* and *kallisto*, three alignment-free methods for transcript isoform quantification. For running time, disk space and memory issues, some parts of this vignette are not run during the package build. Instead, we provide pre-computed objects containing *SummarizedBenchmark* objects. 
+
+# Data preparation
+
+We start by downloading the fastq files that we will use as input to quantify isoforms. We will two samples from the data described in Bottomly et al, 2011. 
+
+```{r experimentPrep}
+
+dir.create("fastq", showWarnings=FALSE)
+#bottomlyExp <- read.csv("https://pachterlab.github.io/sleuth_walkthroughs/bottomly/metadata/experiment.csv")
+
+extractSRA <- function( sra_accession, exe_path = 'fastq-dump', args = '--split-files --gzip', outdir = 'fastq', dry_run = FALSE) {
+    cmdline = sprintf('%s %s --outdir %s %s', exe_path, args, outdir, sra_accession)
+    if(dry_run) {
+      message("will run with this command line:\n",cmdline)
+    } else {
+      return( system( cmdline ) )
+    }
+} 
+
+samples <- c( "SRR5273705", "SRR5273689" )
+
+sapply( samples, extractSRA )
+samples
+
+```
+
+Each of the three methods (salmon, sailfish and kallisto) require an indexing step for the reference transcriptome. We will use mouse annotations from the Gencode project. The code below downloads the mouse reference transcriptome.
+     
+```{r downloadReference}
+dir.create("reference/raw", recursive=TRUE, showWarnings=FALSE)
+download.file("ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M16/gencode.vM16.transcripts.fa.gz", destfile="reference/raw/transcriptome.fa.gz")
+```
+
+The code below builds the transcriptome indexes for the three different method.
+
+```{r indexBuild}
+
+dir.create("reference/index", showWarnings=FALSE)
+system("kallisto index -i reference/index/kallistoIdx.idx reference/raw/transcriptome.fa.gz")
+system("salmon index -t reference/raw/transcriptome.fa.gz -i reference/index/salmon_index")
+system("gunzip -c reference/raw/transcriptome.fa.gz > reference/raw/transcriptome.fa && sailfish index -t reference/raw/transcriptome.fa -o reference/index/sailfish_index")
+
+library(Biostrings)
+dnSt <- names( readDNAStringSet("reference/raw/transcriptome.fa.gz") )
+dnSt <- sapply( strsplit( dnSt, "\\|" ), "[[", 1 )
+
+```
+
+# Desigining and implementing the benchmark experiment
+
+First, we define three functions to retrieve version numbers for each method. 
+  
+```{r versions}
+  
+library(SummarizedBenchmark)
+
+getKallistoVersion <- function(){
+    vers <- suppressWarnings( system( "kallisto", intern=TRUE )[1] )
+    strsplit( vers, " " )[[1]][2]
+}
+
+getSalmonVersion <- function(){
+    vers <- suppressWarnings( system( "salmon --version 2>&1", intern=TRUE)[1] )
+    strsplit( vers, " " )[[1]][2]
+}
+
+getSailfishVersion <- function(){
+    vers <- suppressWarnings( system( "sailfish --version 2>&1", intern=TRUE)[1] )
+    strsplit( vers, " " )[[1]][3]
+}
+
+```
+
+Similarly, we can define *R* wrapper functions to run the different methods. Note that we can pass arguments to the different methods and keep information of how the methods were run. For example, the code below receives a sample name and a character vector of arguments, and uses *tximport* to import the isoform quantifications into *R*.
+
+```{r}
+
+dir.create("out/kallisto", showWarnings=FALSE)
+dir.create("out/salmon", showWarnings=FALSE)
+dir.create("out/sailfish", showWarnings=FALSE)
+sample
+args <- ""
+
+runKallisto <- function( sample, args="", ids ){
+    fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
+    fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
+    output <- sprintf("out/kallisto/%s.out", sample)
+    cmd <- sprintf( "kallisto quant -i reference/index/kallistoIdx.idx -o %s %s %s %s", output, args, fastqFile1, fastqFile2 )
+    system( cmd )
+    require(tximport)
+    ab <- tximport( file.path(output, "abundance.h5"), type="kallisto", txOut=TRUE )
+    counts <- ab$counts[,1]
+    names(counts) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+    out <- rep( NA, length(ids) )
+    names(out) <- ids
+    out[names(counts)] <- counts
+    out
+}
+
+runSalmon <- function( sample, args="-l A -p 4", ids ){
+    fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
+    fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
+    output <- sprintf("out/salmon/%s.out", sample)
+    cmd <- sprintf("salmon quant -i reference/index/salmon_index %s -o %s -1 %s -2 %s",
+                   args, output, fastqFile1, fastqFile2)
+    system( cmd )
+    require(tximport)
+    counts <- tximport( file.path( output, "quant.sf" ), type="salmon", txOut=TRUE )$counts[,1]
+    names( counts ) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+    out <- rep( NA, length(ids) )
+    names(out) <- ids
+    out[names(counts)] <- counts
+    out
+}
+
+runSailfish <- function( sample, args="-l IU", ids ){
+    fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
+    fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
+    output <- sprintf("out/sailfish/%s.out", sample)
+    cmd <- sprintf( "echo \"sailfish quant -i reference/index/sailfish_index %s -o %s -1 <(zcat %s) -2 <(zcat %s)\" | bash", args, output, fastqFile1, fastqFile2 )
+    cat(cmd)
+    system( cmd )
+    counts <- tximport( file.path(output, "quant.sf"), type="sailfish", txOut=TRUE )$counts[,1]
+    names( counts ) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+    out <- rep( NA, length(ids) )
+    names(out) <- ids
+    out[names(counts)] <- counts
+    out
+}
+
+```
+
+Having defined this functions, we can now design our benchmark experiment. For this specific experiment, we will test the performance of *salmon*, *sailfish* and *kallisto*. In addition, we will run *kallisto* and *salmon* either with default parameters and with their options to model for sequencing biases. To do this, we used the functions `BenchDesign()` and `addBMethod()`. 
+	
+```{r}
+
+library(SummarizedBenchmark)
+
+b <- BenchDesign() %>%
+    addBMethod(
+        blabel="kallisto-default",
+        bfunc=runKallisto,
+        sample=sample,
+        args="",
+        ids=dnSt,
+        bmeta=list( version=getKallistoVersion() )
+    ) %>%
+    addBMethod(
+        blabel="kallisto-bias",
+        bfunc=runKallisto,
+        sample=sample,
+        args="--bias",
+        ids=dnSt,
+        bmeta=list( version=getKallistoVersion() )
+    ) %>%
+    addBMethod(
+        blabel="salmon-default",
+        bfunc=runSalmon,
+        sample=sample,
+        args="-l IU -p 1",
+        ids=dnSt,
+        bmeta=list( version=getSalmonVersion() )
+    ) %>%
+    addBMethod(
+        blabel="salmon-gcBias",
+        bfunc=runSalmon,
+        sample=sample,
+        args="-l IU --gcBias -p 1",
+        ids=dnSt,
+        bmeta=list( version=getSalmonVersion() )
+    ) %>%
+    addBMethod(
+        blabel="sailfish-default",
+        bfunc=runSailfish,
+        sample=sample,
+        args="-l IU -p 1",
+        ids=dnSt,
+        bmeta=list( version=getSailfishVersion() )
+    )
+
+showBMethods( b )
+
+```
+	
+Now, the next step is to run the benchmark experiment. Since we are running the benchmark for two samples, we use *lapply* to loop over the samples and run the benchmark experiment for each of them.
+	
+```{r runBenchmark}
+
+allSB <- lapply( samples, function(sample){
+    dat <- list( sample=sample )
+    sb <- buildBench( b, data=dat, parallel=TRUE, BPPARAM=MulticoreParam(5) )
+    sb
+} )
+names( allSB ) <- samples
+
+colData( allSB[[1]] )$sample <- samples[1]
+colData( allSB[[2]] )$sample <- samples[2]
+
+allSB <- do.call( cbind, allSB )
+saveRDS(allSB, file="sb_object.rds")
+colData(allSB)
+
+```
