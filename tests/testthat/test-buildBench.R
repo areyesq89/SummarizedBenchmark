@@ -1,6 +1,4 @@
 library(SummarizedBenchmark)
-
-devtools::load_all()
 library(BiocParallel)
 context("benchDesign")
 
@@ -60,6 +58,26 @@ test_that("basic buildBench call works", {
     ## check call with data specified at buildBench step
     expect_silent(sb_empty <- buildBench(bd_empty, data = tdat))
     expect_equal(sb, sb_empty)
+
+    ## BenchDesign with keyword metadata
+    devtools::load_all()
+    bd_kw <- BenchDesign(tdat)
+    bd_kw <- addBMethod(bd_kw,
+                        blabel = "bonf",
+                        bfunc = p.adjust,
+                        p = pval, method = "bonferroni",
+                        bmeta = list(pkg_func = rlang::quo(testthat::expect_equal)))
+    bd_kw <- addBMethod(bd_kw,
+                        blabel = "bh",
+                        bfunc = p.adjust,
+                        p = pval, method = "BH",
+                        bmeta = list(purpose = "for comparing",
+                                     pkg_vers = "100", pkg_name = "nothing"))
+
+    expect_silent(sb_kw <- buildBench(bd_kw))
+    expect_equal(colData(outp)$pkg_name, c("testthat", "nothing"))
+    expect_equal(colData(outp)$pkg_vers, c(as.character(packageVersion("testthat")),
+                                           "100"))
 })
 
 

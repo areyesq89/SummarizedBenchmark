@@ -332,6 +332,9 @@ cleanBMethods <- function(b, ptabular) {
 }
 
 cleanBMethod <- function(m, mname, bdata, ptabular) {
+    ## delay evalution of metadata information until buildBench
+    m$meta <- eval_tidy(m$meta, bdata)
+
     ## check if `meta =` is specified for method
     if (!is.null(m$meta)) {
         if (!is(m$meta, "list") ||
@@ -399,7 +402,7 @@ funcMeta <- function(f, meta) {
     vers_src <- "bfunc"
     if ("pkg_func" %in% names(meta)) {
         vers_src <- "bmeta_func"
-        fsrc <- eval_tidy(meta$pkg_func)
+        fsrc <- eval_tidy(rlang::as_quosure(meta$pkg_func))
     } else if ("pkg_name" %in% names(meta) |
                "pkg_name" %in% names(meta)) {
         pkg_name <- ifelse("pkg_name" %in% names(meta),
@@ -422,7 +425,8 @@ funcMeta <- function(f, meta) {
     }
     
     res <- data.frame(bfunc_anon = f_anon, vers_src = vers_src,
-                      pkg_name = pkg_name, pkg_vers = pkg_vers)
+                      pkg_name = pkg_name, pkg_vers = pkg_vers,
+                      stringsAsFactors = FALSE)
 
     ## need to parse and merge manually defined metadata columns 
     if (!is.null(meta)) {
@@ -433,12 +437,12 @@ funcMeta <- function(f, meta) {
         }
         if (!is.null(meta_func)) {
             meta_func <- gsub("\n", ";", quo_text(meta_func))
-            if (nchar(meta_func) > 20) {
-                meta_func <- "omitted (>20 char)"
+            if (nchar(meta_func) > 100) {
+                meta_func <- paste0(substr(meta_func, 1, 97), "...")
             }
             meta <- c(meta, "pkg_func" = meta_func)
         }
-        res <- c(res, meta)
+        res <- cbind(res, meta, stringsAsFactors = FALSE)
     }
 
     res
