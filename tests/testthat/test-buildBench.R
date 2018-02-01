@@ -1,6 +1,8 @@
 library(SummarizedBenchmark)
+
+devtools::load_all()
 library(BiocParallel)
-context("BenchDesign")
+context("benchDesign")
 
 ## sample t-test data set
 data(tdat)
@@ -173,3 +175,61 @@ test_that("errors thrown with inappropriate inputs", {
     expect_error(buildBench(bd, ftCols = "apple"), "Invalid ftCols specification")
 })
 
+
+test_that("buildBench can handle sortIDs", {
+    ## simple data set with index rows
+    newdat <- list(myids = rev(letters[1:5]),
+                   mytru = 1:5)
+    
+    ## basic BenchDesign w/ 1 assay, different length output
+    bd1 <- BenchDesign(newdat)
+    bd1 <- addBMethod(bd1, blabel = "abc",
+                      bfunc = function() { c(a = 1, b = 2, c = 3) })
+    bd1 <- addBMethod(bd1, blabel = "bcef",
+                      bfunc = function() { c(b = 11, c = 12, e = 13, f = 15) })
+    
+    ## check behavior when output has unequal lengths
+    expect_error(buildBench(bd1))
+
+    ## check behavior when sorting without ID column
+    sb1a <- buildBench(bd1, sortIDs = TRUE)
+    expect_is(sb1a, "SummarizedBenchmark")
+    expect_equal(rownames(sb1a), c("a", "b", "c", "e", "f"))
+    expect_true(is.na(assay(sb1a)["a", "bcef"]))
+    expect_error(buildBench(bd1, truthCols = "mytru", sortIDs = TRUE))
+
+    ## check behavior when sorting with ID column
+    sb1b <- buildBench(bd1, sortIDs = "myids")
+    expect_is(sb1b, "SummarizedBenchmark")
+    expect_equal(rownames(assay(sb1b)), newdat$myids)
+    expect_true(is.na(assay(sb1b)["a", "bcef"]))
+
+
+    ## basic BenchDesign w/ 2 assays, different length output
+    bd2 <- BenchDesign(newdat)
+    bd2 <- addBMethod(bd2, blabel = "abc",
+                      bfunc = function() { c(a = 1, b = 2, c = 3) },
+                      bpost = list(o1 = function(x) { x },
+                                   o2 = function(x) { x*2 }))
+    bd2 <- addBMethod(bd2, blabel = "bcef",
+                      bfunc = function() { c(b = 11, c = 12, e = 13, f = 15) },
+                      bpost = list(o1 = function(x) { x },
+                                   o2 = function(x) { x*2 }))
+
+    ## check behavior when output has unequal lengths
+    expect_error(buildBench(bd2))
+
+    ## check behavior when sorting without ID column
+    sb2a <- buildBench(bd2, sortIDs = TRUE)
+    expect_is(sb2a, "SummarizedBenchmark")
+    expect_length(assays(sb2a), 2)
+    expect_equal(rownames(sb2a), c("a", "b", "c", "e", "f"))
+    expect_true(is.na(assay(sb2a, "o2")["a", "bcef"]))
+    expect_error(buildBench(bd2, truthCols = "mytru", sortIDs = TRUE))
+
+    ## check behavior when sorting with ID column
+    sb2b <- buildBench(bd2, sortIDs = "myids")
+    expect_is(sb2b, "SummarizedBenchmark")
+    expect_equal(rownames(sb2b), newdat$myids)
+    expect_true(is.na(assay(sb2b, "o2")["a", "bcef"]))
+})

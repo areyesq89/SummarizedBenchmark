@@ -5,7 +5,8 @@
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
 buildBench(b, data = NULL, truthCols = NULL, ftCols = NULL,
-  ptabular = TRUE, parallel = FALSE, BPPARAM = bpparam())
+  ptabular = TRUE, sortIDs = FALSE, parallel = FALSE,
+  BPPARAM = bpparam())
 }
 \arguments{
 \item{b}{\code{BenchDesign} object.}
@@ -31,6 +32,15 @@ object. (default = NULL)}
 separate column of the \code{colData} for the returned SummarizedBenchmark
 object, i.e. in tabular form. If FALSE, method parameters are returned
 as a single column with comma-delimited "key=value" pairs. (default = TRUE)}
+
+\item{sortIDs}{Whether the output of each method should be merged using IDs.
+If TRUE, each method must return a named vector or list. The names will be
+used to align the output of each method in the returned SummarizedBenchmark.
+Missing values will be set to NA. This can be useful if the different methods
+return overlapping, but not identical, results. If \code{truthCols} is also
+specified, and sorting by IDs is necessary, rather than specifying 'TRUE',
+specify the string name of a column in the \code{data} to use to sort the
+method output to match the order of  \code{truthCols}. (default = FALSE)}
 
 \item{parallel}{Whether to use parallelization for evaluating each method.
 Parallel execution is performed using \code{BiocParallel}. Parameters for
