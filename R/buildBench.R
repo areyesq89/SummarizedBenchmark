@@ -22,6 +22,14 @@
 #'        separate column of the \code{colData} for the returned SummarizedBenchmark
 #'        object, i.e. in tabular form. If FALSE, method parameters are returned
 #'        as a single column with comma-delimited "key=value" pairs. (default = TRUE)
+#' @param sortIDs Whether the output of each method should be merged using IDs.
+#'        If TRUE, each method must return a named vector or list. The names will be
+#'        used to align the output of each method in the returned SummarizedBenchmark.
+#'        Missing values will be set to NA. This can be useful if the different methods
+#'        return overlapping, but not identical, results. If \code{truthCols} is also
+#'        specified, and sorting by IDs is necessary, rather than specifying 'TRUE',
+#'        specify the string name of a column in the \code{data} to use to sort the
+#'        method output to match the order of  \code{truthCols}. (default = FALSE) 
 #' @param parallel Whether to use parallelization for evaluating each method.
 #'        Parallel execution is performed using \code{BiocParallel}. Parameters for
 #'        parallelization should be specified with \code{BiocParallel::register} or
@@ -39,12 +47,12 @@
 #' \code{SummarizedBenchmark} object with single assay
 #'
 #' @import BiocParallel
-#' @importFrom data.table rbindlist
+#' @importFrom dplyr bind_rows
 #' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes
-buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
-                       ptabular = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
+buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL, ptabular = TRUE,
+                       sortIDs = FALSE, parallel = FALSE, BPPARAM = bpparam()) {
 
     if (!is.null(data)) {
         b$bdata <- data
@@ -98,6 +106,20 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
             assay_names <- truthCols
         }
     }
+    
+    ## check validity of sortIDs value (unit logical or data column name)
+    stopifnot(length(sortIDs) == 1)
+    stopifnot(is.logical(sortIDs) || is.character(sortIDs))
+    if (is.character(sortIDs)) {
+        if (sortIDs %in% names(b$bdata)) {
+            sortID_col <- sortIDs
+            sortIDs <- TRUE
+        } else {
+            stop("Specified 'sortIDs' column is not in the specified data set.")
+        }
+    } else {
+        sortID_col <- NULL
+    }
 
     ## check if truthCols is in bdata and 1-dim vector
     if (!is.null(truthCols)) {
@@ -105,9 +127,14 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
                   length(truthCols) == nassays)
         if (assay_aslist &&
             (!all(names(truthCols) %in% assay_names) || is.null(names(truthCols)))) {
-            stop("Invalid truthCols specification. ",
-                 "If bpost is specified as a list and truthCols is also specified, ",
-                 "truthCols must be a named list with the same names as bpost.")
+            stop("Invalid 'truthCols' specification. ",
+                 "If 'bpost' is specified as a list and 'truthCols' is also specified, ",
+                 "'truthCols' must be a list with names matching 'bpost'.")
+        }
+        if (sortIDs && is.null(sortID_col)) {
+            stop("If 'truthCols' is specified, 'sortIDs' can not simply be 'TRUE'.\n",
+                 "Instead, specify a column in the data to use for sorting the output to ",
+                 "match the order of the 'truthCols'.")
         }
     }
     
@@ -116,7 +143,7 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
         stop("Invalid ftCols specification. ",
              "ftCols must be a subset of the column names of the input data.")
     }
-
+        
     ## check validity of ptabular, parallel values (unit logical value) 
     stopifnot((length(ptabular) == 1) && is.logical(ptabular))
     stopifnot((length(parallel) == 1) && is.logical(parallel))
@@ -128,13 +155,41 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
         a <- evalBMethods(b)
     }
 
-    ## handle mult-assay separately
+    ## handle multi-assay separately
     if (assay_aslist) {
-        a <- lapply(assay_names, function(x) { sapply(a, `[[`, x) })
+        if (sortIDs) {
+            if (any(unlist(lapply(a, function(x) { lapply(x, function(y) { is.null(names(y)) }) })))) {
+                stop("If sortIDs = TRUE, all methods must return a named list or vector.")
+            }
+            a <- lapply(assay_names, function(x) { lapply(a, `[[`, x) })
+            a <- .list2mat(a)
+            if (!is.null(sortID_col)) {
+                ## reorder by specified ID column
+                a <- lapply(a, .expandrows, rid = b$bdata[[sortID_col]])
+            }
+        } else {
+            ## note difference in lapply vs. sapply
+            a <- lapply(assay_names, function(x) { sapply(a, `[[`, x) })
+        }
         names(a) <- assay_names
     } else {
-        a <- do.call(cbind, a)
-        a <- list("bench" = a)
+        if (sortIDs) {
+            if (any(unlist(lapply(a, function(x) { is.null(names(x)) })))) {
+                stop("If sortIDs = TRUE, all methods must return a named list or vector.")
+            }
+            a <- .list2mat(list("bench" = a))
+            if (!is.null(sortID_col)) {
+                ## reorder by specified ID column
+                a$bench <- .expandrows(a$bench, rid = b$bdata[[sortID_col]])
+            }
+        } else {
+            if (length(unique(sapply(a, length))) > 1) {
+                stop("Not all methods returned list or vector of same length.\n",
+                     "If this is expected, consider setting sortIDs = TRUE and ",
+                     "requiring all methods to return names lists or vectors.")
+            }
+            a <- list("bench" = do.call(cbind, a))
+        }
     }
     
     ## colData: method information
@@ -162,13 +217,40 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL,
             names(sbParams[["performanceMetrics"]]) <- truthCols
         }
     }
-    
+
     ## add feature columns if specified
     if (!is.null(ftCols)) {
         sbParams[["ftData"]] <- DataFrame(b$bdata[ftCols])
     }
     
     do.call(SummarizedBenchmark, sbParams)
+}
+
+
+## helper function to take list of "method = value-vector" pairs,
+## match on value names and return as single data.frame
+.list2mat <- function(x) {
+    lapply(x, function(z) {
+        z <- dplyr::tibble(.method = names(z),
+                           .id = lapply(z, names),
+                           .val = z)
+        z <- tidyr::unnest(z)
+        z <- tidyr::spread(z, .method, .val)
+        z <- data.frame(dplyr::select(z, -.id),
+                        row.names = z$.id)
+        as(z, "matrix")
+    })
+}
+
+
+## helper function to take list of matrices and expand rows to
+## include only rows in specified 'rid' (row ID set)
+.expandrows <- function(x, rid) {
+    xnew <- matrix(nrow = length(rid), ncol = ncol(x),
+                   dimnames = list(rid, colnames(x)))
+    ovnames <- intersect(rid, rownames(x))
+    xnew[ovnames, ] <- x[ovnames, ]
+    xnew
 }
 
 
@@ -244,12 +326,15 @@ cleanBMethods <- function(b, ptabular) {
     df <- mapply(cleanBMethod, m = b$methods, mname = names(b$methods), 
                  MoreArgs = list(bdata = b$bdata, ptabular = ptabular),
                  SIMPLIFY = FALSE)
-    df <- data.table::rbindlist(df, fill=TRUE)
-    df$blabel <- names(b$methods)
+    df <- dplyr::bind_rows(df)
+    rownames(df) <- names(b$methods)
     df
 }
 
 cleanBMethod <- function(m, mname, bdata, ptabular) {
+    ## delay evalution of metadata information until buildBench
+    m$meta <- eval_tidy(m$meta, bdata)
+
     ## check if `meta =` is specified for method
     if (!is.null(m$meta)) {
         if (!is(m$meta, "list") ||
@@ -272,18 +357,6 @@ cleanBMethod <- function(m, mname, bdata, ptabular) {
     } else {
         bfunc <- quo_text(m$func)
     }
-
-    ## parse method parameters
-    if (ptabular) {
-        bparams <- sapply(m$dparams, quo_text)
-        names(bparams) <- paste0("param.", names(bparams))
-        bparams <- data.frame(t(bparams))
-    } else {
-        bparams <- paste(names(m$dparams), "=",
-                         sapply(m$dparams, quo_text),
-                         collapse=", ")
-        bparams <- data.frame(bparams)
-    }
     
     ## parse postprocessing method
     has_post <- is.function(eval_tidy(m$post, bdata))
@@ -292,8 +365,25 @@ cleanBMethod <- function(m, mname, bdata, ptabular) {
     } else {
         bpost <- NA_character_
     }
+    
+    res <- cbind(data.frame(bfunc, bpost, stringsAsFactors = FALSE), bmeta)
 
-    cbind(data.frame(bfunc, bpost), bparams, bmeta)
+    ## parse method parameters
+    if (length(m$dparams) > 0) {
+        if (ptabular) {
+            bparams <- sapply(m$dparams, quo_text)
+            names(bparams) <- paste0("param.", names(bparams))
+            bparams <- data.frame(t(bparams), stringsAsFactors = FALSE)
+        } else {
+            bparams <- paste(names(m$dparams), "=",
+                             sapply(m$dparams, quo_text),
+                             collapse=", ")
+            bparams <- data.frame(bparams, stringsAsFactors = FALSE)
+        }
+        res <- cbind(res, bparams)
+    }
+
+    res
 }
 
 
@@ -312,7 +402,7 @@ funcMeta <- function(f, meta) {
     vers_src <- "bfunc"
     if ("pkg_func" %in% names(meta)) {
         vers_src <- "bmeta_func"
-        fsrc <- eval_tidy(meta$pkg_func)
+        fsrc <- eval_tidy(rlang::as_quosure(meta$pkg_func))
     } else if ("pkg_name" %in% names(meta) |
                "pkg_name" %in% names(meta)) {
         pkg_name <- ifelse("pkg_name" %in% names(meta),
@@ -335,7 +425,8 @@ funcMeta <- function(f, meta) {
     }
     
     res <- data.frame(bfunc_anon = f_anon, vers_src = vers_src,
-                      pkg_name = pkg_name, pkg_vers = pkg_vers)
+                      pkg_name = pkg_name, pkg_vers = pkg_vers,
+                      stringsAsFactors = FALSE)
 
     ## need to parse and merge manually defined metadata columns 
     if (!is.null(meta)) {
@@ -346,12 +437,12 @@ funcMeta <- function(f, meta) {
         }
         if (!is.null(meta_func)) {
             meta_func <- gsub("\n", ";", quo_text(meta_func))
-            if (nchar(meta_func) > 20) {
-                meta_func <- "omitted (>20 char)"
+            if (nchar(meta_func) > 100) {
+                meta_func <- paste0(substr(meta_func, 1, 97), "...")
             }
             meta <- c(meta, "pkg_func" = meta_func)
         }
-        res <- c(res, meta)
+        res <- cbind(res, meta, stringsAsFactors = FALSE)
     }
 
     res
