@@ -38,10 +38,14 @@ extractSRA <- function( sra_accession, exe_path = 'fastq-dump', args = '--split-
     }
 } 
 
-samples <- c( "SRR5273705", "SRR5273689" )
+samples <- c( "SRR5273705", "SRR5273689", "SRR5273699", "SRR5273683" )
 
 sapply( samples, extractSRA )
-samples
+
+annotation <-
+    data.frame(
+        samples,
+        tissue=c("brain", "brain", "heart", "heart" ) )
 
 ```
 
@@ -57,6 +61,7 @@ Finally, we use the code below builds the transcriptome indexes for the three di
 ```{r indexBuild, eval=FALSE}
 
 dir.create("reference/index", showWarnings=FALSE)
+
 system("kallisto index -i reference/index/kallistoIdx.idx reference/raw/transcriptome.fa.gz")
 system("salmon index -t reference/raw/transcriptome.fa.gz -i reference/index/salmon_index")
 system("gunzip -c reference/raw/transcriptome.fa.gz > reference/raw/transcriptome.fa && sailfish index -t reference/raw/transcriptome.fa -o reference/index/sailfish_index")
