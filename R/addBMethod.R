@@ -85,9 +85,10 @@ addBMethod.BenchDesign <- function(b, blabel, bfunc, bpost = NULL, bmeta = NULL,
     qf <- enquo(bfunc)
     qd <- quos(...)
     qp <- enquo(bpost)
+    qm <- enquo(bmeta)
     
     ## add to bench
     b$methods[[blabel]] <- list(func = qf, dparams = qd, 
-                                post = qp, meta = bmeta)
+                                post = qp, meta = qm)
     b
 }

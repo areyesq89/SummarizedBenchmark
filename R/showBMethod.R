@@ -35,8 +35,9 @@ showBMethod <- function(b, n) {
 
     cat("bmeta:\n")
     if (!is.null(m$meta)) {
-        meta_n <- names(m$meta)
-        meta_q <- sapply(m$meta, quo_text)
+        mmeta <- eval_tidy(m$meta)
+        meta_n <- names(mmeta)
+        meta_q <- sapply(mmeta, quo_text)
         for (i in seq(meta_n))
             cat(stringr::str_trunc(paste("    ", meta_n[i], ":", meta_q[i]), 60), "\n")
     } else {
