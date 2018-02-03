@@ -361,8 +361,11 @@ cleanBMethod <- function(m, mname, bdata, ptabular) {
     
     ## parse postprocessing method
     has_post <- is.function(eval_tidy(m$post, bdata))
-    if (has_post) {
+    has_postlist <- is.list(eval_tidy(m$post, bdata))
+    if (has_post & !has_postlist) {
         bpost <- gsub("\n", ";", quo_text(m$post))
+    } else if (has_postlist) {
+        bpost <- paste(names(eval_tidy(m$post, bdata)), collapse = ";")
     } else {
         bpost <- NA_character_
     }
@@ -424,7 +427,7 @@ funcMeta <- function(f, meta) {
             pkg_vers <- as(packageVersion(pkg_name), "character")
         }
     }
-    
+
     res <- data.frame(bfunc_anon = f_anon, vers_src = vers_src,
                       pkg_name = pkg_name, pkg_vers = pkg_vers,
                       stringsAsFactors = FALSE)
@@ -443,7 +446,9 @@ funcMeta <- function(f, meta) {
             }
             meta <- c(meta, "pkg_func" = meta_func)
         }
-        res <- cbind(res, meta, stringsAsFactors = FALSE)
+        if (length(meta) > 0) {
+            res <- cbind(res, meta, stringsAsFactors = FALSE)
+        }
     }
 
     res
