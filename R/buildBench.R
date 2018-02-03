@@ -327,7 +327,8 @@ cleanBMethods <- function(b, ptabular) {
                  MoreArgs = list(bdata = b$bdata, ptabular = ptabular),
                  SIMPLIFY = FALSE)
     df <- dplyr::bind_rows(df)
-    rownames(df) <- names(b$methods)
+    df$blabel <- names(b$methods)
+    ## rownames(df) <- names(b$methods)
     df
 }
 
