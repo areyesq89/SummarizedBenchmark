@@ -454,7 +454,7 @@ voom_lfc <- function(x) {
 The primary wrapper function and a list of accessor functions are passed to `bfunc =` and `bpost =` respectively.
 
 ```{r}
-bd <- bd %>%
+bd <- BenchDesign(mydat) %>%
     addBMethod(blabel = "deseq2",
                bfunc = deseq2_run,
                bpost = list(pv = deseq2_pv, lfc = deseq2_lfc),
