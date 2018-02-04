@@ -19,7 +19,6 @@ Depends: tidyr,
          UpSetR,
          rlang,
          stringr,
-         data.table,
          utils,
          BiocParallel,
          ggplot2,
@@ -35,7 +34,8 @@ Suggests: iCOBRA,
           DESeq2,
           edgeR,
           limma,
-          tximport
+          tximport,
+          readr
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
