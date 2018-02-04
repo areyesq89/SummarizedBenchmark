@@ -23,7 +23,8 @@ Depends: tidyr,
          utils,
          BiocParallel,
          ggplot2,
-         mclust
+         mclust,
+         dplyr
 Suggests: iCOBRA,
           BiocStyle,
           knitr,
