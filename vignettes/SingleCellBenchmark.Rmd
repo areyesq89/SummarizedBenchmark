@@ -82,6 +82,8 @@ bd <- BenchDesign() %>%
 
 Each simulator returns a single _SingleCellExperiment_ object containing the simulated scRNA-seq counts. However, to fit the _SummarizedBenchmark_ structure, each method in the _BenchDesign_ must return a vector or a list. To handle the non-standard output of the methods, we add `bpost = list` in each `addBMethod` call to wrap each _SingleCellExperiment_ object in a list. 
 
+# Running the Benchmark Experiment
+
 Using the `"counts"` assay of the `fluidigm` data set as input, we generate simulated data with the four methods.
 
 ```{r}
@@ -98,6 +100,8 @@ The simulated data sets are returned as a single row in the assay of the _Summar
 assay(sb)
 sapply(assay(sb), class)
 ```
+
+# Comparing the Results
 
 Now that we have our set of simulated data sets, we can compare the behavior of each simulator. Fortunately, the `r BiocStyle::Biocpkg("splatter")` package includes two useful functions for comparing _SingleCellExperiment_ objects (`compareSCEs` and `diffSCEs`). The assay of the _SummarizedBenchmark_ can be passed directly to these functions. Here, we concatenate the original data set, `sce`, with the simulated data sets for comparison.
 
@@ -158,6 +162,8 @@ ggplot(sbmets, aes(x = blabel, y = value,
     facet_grid(performanceMetric ~ .) +
     theme_bw()
 ```
+
+# New Data Sets
 
 An advantage of the _SummarizedBenchmark_ framework is that rerunning the comparisons with a new data set is as simple as calling `buildBench` with the same BenchDesign object paired with new `data =` input. To illustrate this, we run the same simulators, but with simulation parameters estimated using the example single-cell count data included with the `r BiocStyle::Biocpkg("scater")` package.
 
