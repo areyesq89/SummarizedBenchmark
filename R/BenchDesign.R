@@ -6,17 +6,15 @@
 #'        used in the benchmark. (default = NULL)
 #'
 #' @return
-#' a BenchDesign object
+#' BenchDesign object
 #'
 #' @examples
-#' \dontrun{
 #' ## with no input
 #' bd <- BenchDesign()
 #'
 #' ## with toy data.frame
-#' sim_df <- as.data.frame(matrix(rnorm(20), 10, 2))
-#' bd <- BenchDesign(sim_df)
-#' }
+#' df <- as.data.frame(matrix(rnorm(20), 10, 2))
+#' bd <- BenchDesign(df)
 #'
 #' @import rlang
 #' @export
@@ -29,9 +27,14 @@ BenchDesign <- function(bdata = NULL) {
 }
 
 
-#' Reports whether x is a BenchDesign object
+#' Check if object is a BenchDesign
+#'
+#' Check whether an object is a BenchDesign.
 #' 
 #' @param x object to test
+#'
+#' @return
+#' Logical whether object is a BenchDesign
 #' 
 #' @keywords internal
 #' @export
@@ -46,6 +49,14 @@ is.BenchDesign <- function(x) {
 #' @param x BenchDesign object.
 #' @param ... other parameters.
 #'
+#' @return
+#' Prints summary of BenchDesign object
+#' 
+#' @examples
+#' ## print an empty BenchDesign
+#' bd <- BenchDesign()
+#' bd
+#' 
 #' @keywords internal
 #' @importFrom stringr str_pad str_trunc
 #' @export

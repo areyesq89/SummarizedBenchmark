@@ -11,20 +11,18 @@ BenchDesign(bdata = NULL)
 used in the benchmark. (default = NULL)}
 }
 \value{
-a BenchDesign object
+BenchDesign object
 }
 \description{
 Initializes a new BenchDesign object for benchmarking methods.
 }
 \examples{
-\dontrun{
 ## with no input
 bd <- BenchDesign()
 
 ## with toy data.frame
-sim_df <- as.data.frame(matrix(rnorm(20), 10, 2))
-bd <- BenchDesign(sim_df)
-}
+df <- as.data.frame(matrix(rnorm(20), 10, 2))
+bd <- BenchDesign(df)
 
 }
 \author{

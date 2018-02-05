@@ -28,6 +28,10 @@ information. Ignored if NULL. (default = NULL)}
 \item{...}{Named \code{parameter = value} pairs to be passed to
 \code{bfunc}.}
 }
+\value{
+A copy of the originally supplied BenchDesign with the
+new method added.
+}
 \description{
 This function takes a BenchDesign object and returns a
 modified object with the specified method included. At a
@@ -66,9 +70,8 @@ with the name \code{pkg_func} and first quoted using \code{rlang::quo}, e.g.
 \code{list(pkg_func = quo(p.adjust))}.
 }
 \examples{
-\dontrun{
-## assume sim_df is a data.frame with column: pval 
-bd <- BenchDesign(sim_df)
+## create example data set of p-values
+df <- data.frame(pval = runif(100))
 
 ## example calculating qvalue from pvalues
 
@@ -77,12 +80,11 @@ qv <- qvalue::qvalue(p = sim_df$pval)
 qv <- qv$qvalue
 
 ## adding same method to BenchDesign
-bd <- bd \%>\%
-    addBMethod("qv",
-               bfunc = qvalue::qvalue,
-               bpost = function(x) { x$qvalue },
-               p = pval)
-}
+bd <- BenchDesign(df)
+bd <- addBMethod(bd, "qv",
+                 bfunc = qvalue::qvalue,
+                 bpost = function(x) { x$qvalue },
+                 p = pval)
 
 }
 \author{

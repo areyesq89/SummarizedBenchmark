@@ -33,6 +33,10 @@
 #' @param ... Named `parameter = value` pairs to be passed to
 #'        `bfunc`.
 #'
+#' @return
+#' A copy of the originally supplied BenchDesign with the
+#' new method added.
+#' 
 #' @details
 #' The optional `bmeta` parameter accepts a named list of metadata
 #' tags to be included for the method in the resulting `SummarizedBenchmark`
@@ -53,9 +57,8 @@
 #' `list(pkg_func = quo(p.adjust))`.
 #' 
 #' @examples
-#' \dontrun{
-#' ## assume sim_df is a data.frame with column: pval 
-#' bd <- BenchDesign(sim_df)
+#' ## create example data set of p-values
+#' df <- data.frame(pval = runif(100))
 #'
 #' ## example calculating qvalue from pvalues
 #'
@@ -64,12 +67,11 @@
 #' qv <- qv$qvalue
 #'
 #' ## adding same method to BenchDesign
-#' bd <- bd %>%
-#'     addBMethod("qv",
-#'                bfunc = qvalue::qvalue,
-#'                bpost = function(x) { x$qvalue },
-#'                p = pval)
-#' }
+#' bd <- BenchDesign(df)
+#' bd <- addBMethod(bd, "qv",
+#'                  bfunc = qvalue::qvalue,
+#'                  bpost = function(x) { x$qvalue },
+#'                  p = pval)
 #'
 #' @md
 #' @import rlang
