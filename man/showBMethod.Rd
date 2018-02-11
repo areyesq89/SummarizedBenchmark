@@ -30,8 +30,8 @@ bd <- BenchDesign()
 showBMethods(bd)
 
 ## add method
-bd <- addBMethd(bd, blabel = "method_a", p.adjust)
-bd <- addBMethd(bd, blabel = "method_b", qvalue::qvalue)
+bd <- addBMethod(bd, blabel = "method_a", p.adjust)
+bd <- addBMethod(bd, blabel = "method_b", qvalue::qvalue)
 
 ## show a single method
 showBMethod(bd, "method_a")
