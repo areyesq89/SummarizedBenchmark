@@ -28,6 +28,28 @@
 #' @return
 #' Modified BenchDesign object.
 #'
+#' @examples
+#' ## with toy data.frame
+#' df <- data.frame(pval = rnorm(100))
+#' bd <- BenchDesign(df)
+#'
+#' ## add basic 'padjust' method
+#' bd <- addBMethod(bd, blabel = "padjust", bfunc = p.adjust,
+#'                  p = pval)
+#'
+#' ## "expand" 'padjust' by adding "method" parameters
+#' bd <- expandBMethod(bd, blabel = "padjust",
+#'                     param = "method",
+#'                     bonf = "bonferonni", BH = "BH",
+#'                     .replace = TRUE)
+#'
+#' ## resulting BenchDesign has same methods as following set of calls
+#' bd_alt <- BenchDesign(df)
+#' bd <- addBMethod(bd_alt, blabel = "bonf", bfunc = p.adjust,
+#'                  p = pval, method = "bonferroni")
+#' bd <- addBMethod(bd_alt, blabel = "BH", bfunc = p.adjust,
+#'                  p = pval, method = "BH")
+#' 
 #' @export
 #' @author Patrick Kimes
 expandBMethod <- function(b, blabel, param = NULL, ...,

@@ -21,7 +21,7 @@ Initializes a new BenchDesign object for benchmarking methods.
 bd <- BenchDesign()
 
 ## with toy data.frame
-df <- as.data.frame(matrix(rnorm(20), 10, 2))
+df <- data.frame(x1 = rnorm(20), y1 = rnorm(20))
 bd <- BenchDesign(df)
 
 }

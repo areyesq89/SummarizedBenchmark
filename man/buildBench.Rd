@@ -63,6 +63,24 @@ Parallelization is performed across methods. Therefore, there is no benefit to
 specifying more cores than the total number of methods in the \code{BenchDesign}
 object.
 }
+\examples{
+## with toy data.frame
+df <- data.frame(pval = rnorm(100))
+bd <- BenchDesign(df)
+
+## add methods
+bd <- addBMethod(bd, blabel = "bonf", bfunc = p.adjust,
+                 p = pval, method = "bonferroni")
+bd <- addBMethod(bd, blabel = "BH", bfunc = p.adjust,
+                 p = pval, method = "BH")
+
+## evaluate benchmark experiment
+sb <- buildBench(bd)
+
+## evaluate benchmark experiment w/ data sepecified
+sb <- buildBench(bd, data = df)
+
+}
 \author{
 Patrick Kimes
 }

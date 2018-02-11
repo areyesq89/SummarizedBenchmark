@@ -33,32 +33,23 @@ At a minimum, a string name for the method, \code{blabel}, must be
 specified in addition to the primary BenchDesign object.
 }
 \examples{
-\dontrun{
-## assume sim_df is a data.frame with column: pval 
-bd <- BenchDesign(sim_df)
+## with toy data.frame
+df <- data.frame(pval = runif(100))
+bd <- BenchDesign(df)
 
-## example calculating qvalue from pvalues
-
-## using standard call
-qv <- qvalue::qvalue(p = sim_df$pval)
-qv <- qv$qvalue
-
-## adding same method to BenchDesign
-bd <- bd \%>\%
-    addBMethod("qv",
-               bfunc = qvalue::qvalue,
-               bpost = function(x) { x$qvalue },
-               bmeta = list(note = "storey's q-value"),
-               p = pval)
+## add method
+bd <- addBMethod(bd, blabel = "qv",
+                 bfunc = qvalue::qvalue,
+                 bpost = function(x) { x$qvalue },
+                 bmeta = list(note = "storey's q-value"),
+                 p = pval)
 
 ## modify method 'bmeta' property of 'qv' method
-bd <- bd \%>\%
-    modifyBMethod("qv",
-                  bmeta = list(note = "Storey's q-value"))
+bd <- modifyBMethod(bd, blabel = "qv",
+                    bmeta = list(note = "Storey's q-value"))
 
 ## verify that method has been updated
 showBMethod(bd, "qv")
-}
 
 }
 \author{

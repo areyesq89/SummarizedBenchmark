@@ -46,6 +46,23 @@
 #' @return
 #' \code{SummarizedBenchmark} object with single assay
 #'
+#' @examples
+#' ## with toy data.frame
+#' df <- data.frame(pval = rnorm(100))
+#' bd <- BenchDesign(df)
+#'
+#' ## add methods
+#' bd <- addBMethod(bd, blabel = "bonf", bfunc = p.adjust,
+#'                  p = pval, method = "bonferroni")
+#' bd <- addBMethod(bd, blabel = "BH", bfunc = p.adjust,
+#'                  p = pval, method = "BH")
+#'
+#' ## evaluate benchmark experiment
+#' sb <- buildBench(bd)
+#'
+#' ## evaluate benchmark experiment w/ data sepecified
+#' sb <- buildBench(bd, data = df)
+#' 
 #' @import BiocParallel
 #' @importFrom dplyr bind_rows
 #' @importFrom utils packageName packageVersion
