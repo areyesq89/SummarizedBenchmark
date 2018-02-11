@@ -4,7 +4,7 @@ author: "Patrick K. Kimes, Alejandro Reyes"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
 abstract: >
-  "When performing a data analysis in R, users are often presented with multiple packages and methods for accomplishing the same task. Benchmarking the performance of these different methods on real and simulated data sets is a common way of learning the relative strengths and weaknesses of each approach. However, as the number of tools and parameters increases, keeping track of output and how it was generated can quickly becomes messy. The `SummarizedBenchmark` package provides a framework for organizing benchmark comparisons. This vignette introduces the general approach and features of the package using two examples. SummarizedBenchmark package version: `r packageVersion("SummarizedBenchmark")`"
+  "When performing a data analysis in R, users are often presented with multiple packages and methods for accomplishing the same task. Benchmarking the performance of these different methods on real and simulated data sets is a common way of learning the relative strengths and weaknesses of each approach. However, as the number of tools and parameters increases, keeping track of output and how it was generated can quickly becomes messy. The `SummarizedBenchmark` package provides a framework for organizing benchmark comparisons, making it easier to both reproduce the original benchmark and replicate the comparison with new data. This vignette introduces the general approach and features of the package using two examples. SummarizedBenchmark package version: `r packageVersion("SummarizedBenchmark")`"
 output:
   BiocStyle::html_document:
     highlight: pygments
@@ -28,8 +28,6 @@ knitr::opts_chunk$set(tidy = FALSE,
 ```
 
 # Introduction
-
-
 
 With `SummarizedBenchmark`, a complete benchmarking workflow is comprised of three primary components:
 
