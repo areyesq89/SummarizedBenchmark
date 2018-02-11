@@ -76,7 +76,7 @@ df <- data.frame(pval = runif(100))
 ## example calculating qvalue from pvalues
 
 ## using standard call
-qv <- qvalue::qvalue(p = sim_df$pval)
+qv <- qvalue::qvalue(p = df$pval)
 qv <- qv$qvalue
 
 ## adding same method to BenchDesign
