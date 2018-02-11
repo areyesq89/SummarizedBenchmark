@@ -37,7 +37,10 @@ Suggests: iCOBRA,
           edgeR,
           limma,
           tximport,
-          readr
+          readr,
+          scRNAseq,
+          splatter,
+          scater
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
