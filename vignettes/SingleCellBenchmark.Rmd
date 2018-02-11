@@ -52,10 +52,11 @@ assays(se) <- assays(se)["rsem_counts"]
 assayNames(se) <- "counts"
 ```
 
-For the purposes of this vignette, we only use a subset of the samples.
+For the purposes of this vignette, we only use a subset of the samples and genes.
 
 ```{r subset-data}
-se <- se[, seq(2, 60, by = 2)]
+set.seed(1912)
+se <- se[sample(nrow(se), 1e4), sample(ncol(se), 20)]
 ```
 
 To make comparisons with the simulated data sets easier, we convert the _SummarizedExperiment_ object to the _SingleCellExperiment_ class.
