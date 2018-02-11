@@ -35,6 +35,14 @@ BenchDesign <- function(bdata = NULL) {
 #'
 #' @return
 #' Logical whether object is a BenchDesign
+#'
+#' @examples
+#' ## with toy data.frame
+#' df <- data.frame(x1 = rnorm(20), y1 = rnorm(20))
+#' bd <- BenchDesign(df)
+#'
+#' ## check if actually BenchDesign
+#' is.BenchDesign(bd)
 #' 
 #' @keywords internal
 #' @export

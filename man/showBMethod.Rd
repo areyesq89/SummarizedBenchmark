@@ -23,10 +23,21 @@ the BenchDesign. The \code{showBMethods} function is just a wrapper
 to call \code{showBMethod} on all methods in the BenchDesign.
 }
 \examples{
-\dontrun{
+## create empty BenchDesign
 bd <- BenchDesign()
+
+## currently no methods
 showBMethods(bd)
-}
+
+## add method
+bd <- addBMethd(bd, blabel = "method_a", p.adjust)
+bd <- addBMethd(bd, blabel = "method_b", qvalue::qvalue)
+
+## show a single method
+showBMethod(bd, "method_a")
+
+## show all methods
+showBMethods(bd)
 
 }
 \author{
