@@ -53,6 +53,7 @@ download.file(url = paste0("https://www.ebi.ac.uk/arrayexpress/files/",
               destfile = file.path(d, "truth.zip"))
 unzip(file.path(d, "truth.zip"), exdir = d)
 
+library(readr)
 truthdat <- readr::read_tsv(file.path(d, "truth_transcript.txt"))
 #save( txi, truthdat, file="../data/soneson2016.rda" )
 ```

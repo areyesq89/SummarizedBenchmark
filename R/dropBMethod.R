@@ -9,6 +9,20 @@
 #'
 #' @return
 #' Modified BenchDesign object.
+#'
+#' @examples
+#' ## with toy data.frame
+#' df <- data.frame(pval = rnorm(100))
+#' bd <- BenchDesign(df)
+#'
+#' ## add methods
+#' bd <- addBMethod(bd, blabel = "bonf", bfunc = p.adjust,
+#'                  p = pval, method = "bonferroni")
+#' bd <- addBMethod(bd, blabel = "BH", bfunc = p.adjust,
+#'                  p = pval, method = "BH")
+#'
+#' ## remove methods
+#' bd <- dropBMethod(bd, blabel = "bonf")
 #' 
 #' @md
 #' @export

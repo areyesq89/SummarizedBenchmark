@@ -11,8 +11,17 @@
 
 \item{...}{other parameters.}
 }
+\value{
+Prints summary of BenchDesign object
+}
 \description{
 Pretty print BenchDesign
+}
+\examples{
+## print an empty BenchDesign
+bd <- BenchDesign()
+bd
+
 }
 \author{
 Patrick Kimes

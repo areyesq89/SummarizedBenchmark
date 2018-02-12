@@ -11,7 +11,9 @@ Description: This package defines the SummarizedBenchmarck class, which extends
     versions as well as ground truths (in case these are available) and evaluation 
     metrics. It also provides an flexible way to define and evaluate new
     performance metrics.
-Depends: tidyr,
+biocViews: Software, Infrastructure
+Depends: R (>= 3.4),
+         tidyr,
          SummarizedExperiment,
          S4Vectors,
          BiocGenerics,
@@ -19,11 +21,11 @@ Depends: tidyr,
          UpSetR,
          rlang,
          stringr,
-         data.table,
          utils,
          BiocParallel,
          ggplot2,
-         mclust
+         mclust,
+         dplyr
 Suggests: iCOBRA,
           BiocStyle,
           knitr,
@@ -34,7 +36,11 @@ Suggests: iCOBRA,
           DESeq2,
           edgeR,
           limma,
-          tximport
+          tximport,
+          readr,
+          scRNAseq,
+          splatter,
+          scater
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

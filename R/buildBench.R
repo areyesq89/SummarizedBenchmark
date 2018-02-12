@@ -46,6 +46,23 @@
 #' @return
 #' \code{SummarizedBenchmark} object with single assay
 #'
+#' @examples
+#' ## with toy data.frame
+#' df <- data.frame(pval = rnorm(100))
+#' bd <- BenchDesign(df)
+#'
+#' ## add methods
+#' bd <- addBMethod(bd, blabel = "bonf", bfunc = p.adjust,
+#'                  p = pval, method = "bonferroni")
+#' bd <- addBMethod(bd, blabel = "BH", bfunc = p.adjust,
+#'                  p = pval, method = "BH")
+#'
+#' ## evaluate benchmark experiment
+#' sb <- buildBench(bd)
+#'
+#' ## evaluate benchmark experiment w/ data sepecified
+#' sb <- buildBench(bd, data = df)
+#' 
 #' @import BiocParallel
 #' @importFrom dplyr bind_rows
 #' @importFrom utils packageName packageVersion
@@ -327,7 +344,8 @@ cleanBMethods <- function(b, ptabular) {
                  MoreArgs = list(bdata = b$bdata, ptabular = ptabular),
                  SIMPLIFY = FALSE)
     df <- dplyr::bind_rows(df)
-    rownames(df) <- names(b$methods)
+    df$blabel <- names(b$methods)
+    ## rownames(df) <- names(b$methods)
     df
 }
 
@@ -360,8 +378,11 @@ cleanBMethod <- function(m, mname, bdata, ptabular) {
     
     ## parse postprocessing method
     has_post <- is.function(eval_tidy(m$post, bdata))
-    if (has_post) {
+    has_postlist <- is.list(eval_tidy(m$post, bdata))
+    if (has_post & !has_postlist) {
         bpost <- gsub("\n", ";", quo_text(m$post))
+    } else if (has_postlist) {
+        bpost <- paste(names(eval_tidy(m$post, bdata)), collapse = ";")
     } else {
         bpost <- NA_character_
     }
@@ -423,7 +444,7 @@ funcMeta <- function(f, meta) {
             pkg_vers <- as(packageVersion(pkg_name), "character")
         }
     }
-    
+
     res <- data.frame(bfunc_anon = f_anon, vers_src = vers_src,
                       pkg_name = pkg_name, pkg_vers = pkg_vers,
                       stringsAsFactors = FALSE)
@@ -442,7 +463,9 @@ funcMeta <- function(f, meta) {
             }
             meta <- c(meta, "pkg_func" = meta_func)
         }
-        res <- cbind(res, meta, stringsAsFactors = FALSE)
+        if (length(meta) > 0) {
+            res <- cbind(res, meta, stringsAsFactors = FALSE)
+        }
     }
 
     res

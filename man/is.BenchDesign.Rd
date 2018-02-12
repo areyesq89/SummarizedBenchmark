@@ -2,15 +2,27 @@
 % Please edit documentation in R/BenchDesign.R
 \name{is.BenchDesign}
 \alias{is.BenchDesign}
-\title{Reports whether x is a BenchDesign object}
+\title{Check if object is a BenchDesign}
 \usage{
 is.BenchDesign(x)
 }
 \arguments{
 \item{x}{object to test}
 }
+\value{
+Logical whether object is a BenchDesign
+}
 \description{
-Reports whether x is a BenchDesign object
+Check whether an object is a BenchDesign.
+}
+\examples{
+## with toy data.frame
+df <- data.frame(x1 = rnorm(20), y1 = rnorm(20))
+bd <- BenchDesign(df)
+
+## check if actually BenchDesign
+is.BenchDesign(bd)
+
 }
 \author{
 Patrick Kimes

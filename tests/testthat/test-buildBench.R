@@ -60,7 +60,6 @@ test_that("basic buildBench call works", {
     expect_equal(sb, sb_empty)
 
     ## BenchDesign with keyword metadata
-    devtools::load_all()
     bd_kw <- BenchDesign(tdat)
     bd_kw <- addBMethod(bd_kw,
                         blabel = "bonf",
@@ -75,9 +74,9 @@ test_that("basic buildBench call works", {
                                      pkg_vers = "100", pkg_name = "nothing"))
 
     expect_silent(sb_kw <- buildBench(bd_kw))
-    expect_equal(colData(outp)$pkg_name, c("testthat", "nothing"))
-    expect_equal(colData(outp)$pkg_vers, c(as.character(packageVersion("testthat")),
-                                           "100"))
+    expect_equal(colData(sb_kw)$pkg_name, c("testthat", "nothing"))
+    expect_equal(colData(sb_kw)$pkg_vers, c(as.character(packageVersion("testthat")),
+                                            "100"))
 })
 
 

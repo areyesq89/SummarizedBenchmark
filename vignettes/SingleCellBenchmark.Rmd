@@ -1,0 +1,189 @@
+---
+title: "Case Study: Single-Cell RNA-Seq Simulation"
+author: "Patrick K. Kimes, Alejandro Reyes"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
+abstract: >
+  "In this vignette, we illustrate a simple approach to using the *SummarizedBenchmark* framework for organizing benchmarks with complex outputs, i.e. when methods return non-vector-like objects. This approach is demonstrated with a comparison of simulators for single-cell RNA-seq data implemented in the `r BiocStyle::Biocpkg("splatter")` package. SummarizedBenchmark package version: `r packageVersion("SummarizedBenchmark")`"
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    toc: true
+    fig_width: 5
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Case Study: Single-Cell RNA-Seq Simulation}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE,
+                      cache = TRUE,
+                      dev = "png",
+                      message = FALSE,
+                      error = FALSE,
+                      warning = TRUE)
+```
+
+# Introduction
+
+Simulated data sets with known ground truths are often used for developing and comparing computational tools for genomic studies. However, the methods and approaches for simulating complex genomic data are rarely unified across studies. Recognizing this problem in the area of single-cell RNA-sequencing (scRNA-seq), the `r BiocStyle::Biocpkg("splatter")` package provides a uniform API for several "simulators" of scRNA-seq data, including the authors' own "Splat" simulator (_Zappia et al., 2017_). In the `r BiocStyle::Biocpkg("splatter")` package, given a set of simulation parameters, each method returns a _SingleCellExperiment_ object of simulated scRNA-seq counts. 
+
+Using comparisons presented in _Zappia et al. (2017)_, we illustrate how the _SummarizedBenchmark_ framework can be used to perform comparisons when the output of each method is more complex than a vector of numbers (e.g. a _SingleCellExperiment_).
+
+# Building the BenchDesign
+
+```{r}
+library("SummarizedBenchmark")
+library("magrittr")
+```
+
+Parameters for the simulators implemented in `r BiocStyle::Biocpkg("splatter")` can either be manually specified or estimated using existing data. Here, we use RSEM counts for a subset of high coverage samples in the `fluidigm` data set included in the `r BiocStyle::Biocpkg("scRNAseq")` package. The data is made available as a _SummarizedExperiment_ object.
+
+```{r load-fluidigm-data}
+library("splatter")
+library("scRNAseq")
+
+data("fluidigm")
+se <- fluidigm[, colData(fluidigm)[, "Coverage_Type"] == "High"]
+assays(se) <- assays(se)["rsem_counts"]
+assayNames(se) <- "counts"
+```
+
+For the purposes of this vignette, we only use a subset of the samples and genes.
+
+```{r subset-data}
+set.seed(1912)
+se <- se[sample(nrow(se), 1e4), sample(ncol(se), 20)]
+```
+
+To make comparisons with the simulated data sets easier, we convert the _SummarizedExperiment_ object to the _SingleCellExperiment_ class.
+
+```{r convert-to-sce}
+sce <- as(se, "SingleCellExperiment")
+```
+
+Each of the simulators in the `r BiocStyle::Biocpkg("splatter")` package follow the `[prefix]Simulate` naming convention, with the corresponding parameter estimation function, `[prefix]Estimate`. Here, we use four methods included in the comparisons of _Zappia et al. (2017)_.
+
+```{r construct-sim-benchdesign}
+bd <- BenchDesign() %>%
+    addBMethod("splat", splatSimulate,
+               params = splatEstimate(in_data), dropout.present = FALSE,
+               verbose = in_verbose, seed = in_seed,
+               bpost = list) %>% 
+    addBMethod("splat.drop", splatSimulate,
+               params = splatEstimate(in_data), dropout.present = TRUE, 
+               verbose = in_verbose, seed = in_seed,
+               bpost = list) %>% 
+    addBMethod("simple", simpleSimulate,
+               params = simpleEstimate(in_data),
+               verbose = in_verbose, seed = in_seed, 
+               bpost = list) %>%
+    addBMethod("lun", lunSimulate,
+               params = lunEstimate(in_data),
+               verbose = in_verbose, seed = in_seed,
+               bpost = list)
+```
+
+Each simulator returns a single _SingleCellExperiment_ object containing the simulated scRNA-seq counts. However, to fit the _SummarizedBenchmark_ structure, each method in the _BenchDesign_ must return a vector or a list. To handle the non-standard output of the methods, we add `bpost = list` in each `addBMethod` call to wrap each _SingleCellExperiment_ object in a list. 
+
+# Running the Benchmark Experiment
+
+Using the `"counts"` assay of the `fluidigm` data set as input, we generate simulated data with the four methods.
+
+```{r run-sim-buildbench}
+sb <- buildBench(bd,
+                 list(in_data = assay(sce, "counts"),
+                      in_verbose = FALSE,
+                      in_seed = 19120128))
+sb
+```
+
+The simulated data sets are returned as a single row in the assay of the _SummarizedBenchmark_ object, with each column containing a list with a single _SingleCellExperiment_ object.
+
+```{r check-buildbench-results}
+assay(sb)
+sapply(assay(sb), class)
+```
+
+# Comparing the Results
+
+Now that we have our set of simulated data sets, we can compare the behavior of each simulator. Fortunately, the `r BiocStyle::Biocpkg("splatter")` package includes two useful functions for comparing _SingleCellExperiment_ objects (`compareSCEs` and `diffSCEs`). The assay of the _SummarizedBenchmark_ can be passed directly to these functions. We also concatenate the original `fluidigm` data set, `sce`, with the simulated data sets for comparison.
+
+```{r compute-sim-result-comparison}
+res_compare <- compareSCEs(c(ref = sce, assay(sb)[1, ]))
+res_diff <- diffSCEs(c(ref = sce, assay(sb)[1, ]), ref = "ref")
+```
+
+While these functions produce several metrics and plots, we only include two for illustration. More details on the output of these functions can be found in the documentation of the `r BiocStyle::Biocpkg("splatter")` package.
+
+```{r plot-sim-result-comparison}
+res_compare$Plots$MeanVar
+
+res_diff$Plots$MeanVar
+```
+
+While (conveniently) functions already existed for comparing the simulated data sets, we can also define comparison metrics using the _SummarizedBenchmark_ framework with `addPerformanceMetrics()`. We illustrate this feature using the "zeros per cell" and "zeros per gene" metrics shown in Figure 3 of _Zappia et al. (2017)_. Since the metric for each method is a vector (e.g. of zeros per cell) and not a single value, we again use `list` to wrap the output in the `evalFunction`. 
+
+```{r add-performance-metrics}
+sb <- sb %>%
+    addPerformanceMetric(
+        assay = "bench",
+        evalMetric = "zerosPerCell",
+        evalFunction = function(query, truth) {
+            list(colMeans(assay(query[[1]], "counts") == 0))
+        }) %>%
+    addPerformanceMetric(
+        assay = "bench",
+        evalMetric = "zerosPerGene",
+        evalFunction = function(query, truth) {
+            list(rowMeans(assay(query[[1]], "counts") == 0))
+        })
+```
+
+Next, the metrics are calculated using `estimatePerformanceMetrics`. For plotting, we only keep the `blabel`, `value`, and `performanceMetric` columns of the returned table.
+
+```{r compute-performance-metrics}
+sbmets <- estimatePerformanceMetrics(sb, tidy = TRUE)
+sbmets  <- dplyr::select(sbmets, blabel, value, performanceMetric)
+head(sbmets)
+```
+
+Notice that the `value` is a list for each method and metric. These vectors can be expanded using `tidyr::unnest`.
+
+```{r check-performance-metrics}
+sbmets <- tidyr::unnest(sbmets)
+head(sbmets)
+```
+
+Finally, the performance metrics can be explored using standard plotting functions.
+
+```{r plot-performace-metrics}
+ggplot(sbmets, aes(x = blabel, y = value,
+                   color = blabel, fill = blabel)) +
+    geom_boxplot(alpha = 1/2) +
+    xlab("method") +
+    scale_color_discrete("method") + 
+    facet_grid(performanceMetric ~ .) +
+    theme_bw()
+```
+
+# New Data Sets
+
+An advantage of the _SummarizedBenchmark_ framework is that rerunning the comparisons with a new data set is as simple as calling `buildBench` with the same BenchDesign object paired with new `data =` input. To illustrate this, we run the same simulators again, but with simulation parameters estimated using the example single-cell count data included with the `r BiocStyle::Biocpkg("scater")` package.
+
+```{r analyze-new-data}
+data(sc_example_counts, package = "scater")
+scec <- SingleCellExperiment(assays = list(counts = sc_example_counts))
+
+buildBench(bd, 
+           data = list(in_data = scec,
+                       in_verbose = FALSE,
+                       in_seed = 19120128))
+```
+
+# References
+
+- [Zappia L, Phipson B, Oshlack A. 2017. Splatter: Simulation Of Single-Cell RNA Sequencing Data. Genome Biology. (doi:10.1186/s13059-017-1305-0)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-017-1305-0)

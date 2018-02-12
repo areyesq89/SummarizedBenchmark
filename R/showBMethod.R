@@ -11,10 +11,21 @@
 #' Brief description is returned to console.
 #'
 #' @examples
-#' \dontrun{
+#' ## create empty BenchDesign
 #' bd <- BenchDesign()
+#'
+#' ## currently no methods
 #' showBMethods(bd)
-#' }
+#'
+#' ## add method
+#' bd <- addBMethod(bd, blabel = "method_a", p.adjust)
+#' bd <- addBMethod(bd, blabel = "method_b", qvalue::qvalue)
+#'
+#' ## show a single method
+#' showBMethod(bd, "method_a")
+#'
+#' ## show all methods
+#' showBMethods(bd)
 #' 
 #' @md
 #' @import rlang
