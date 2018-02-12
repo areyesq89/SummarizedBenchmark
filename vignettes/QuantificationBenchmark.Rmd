@@ -107,7 +107,8 @@ dir.create("out/kallisto", showWarnings=FALSE)
 dir.create("out/salmon", showWarnings=FALSE)
 dir.create("out/sailfish", showWarnings=FALSE)
 
-runKallisto <- function( sample, args="", ids ){
+runKallisto <- function( sample, args=""#, ids
+                        ){
     fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
     fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
     output <- sprintf("out/kallisto/%s.out", sample)
@@ -117,13 +118,15 @@ runKallisto <- function( sample, args="", ids ){
     ab <- tximport( file.path(output, "abundance.h5"), type="kallisto", txOut=TRUE )
     counts <- ab$counts[,1]
     names(counts) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
-    out <- rep( NA, length(ids) )
-    names(out) <- ids
-    out[names(counts)] <- counts
-    out
+    counts
+#    out <- rep( NA, length(ids) )
+#    names(out) <- ids
+#    out[names(counts)] <- counts
+#    out
 }
 
-runSalmon <- function( sample, args="-l A -p 4", ids ){
+runSalmon <- function( sample, args="-l A -p 4"#,ids
+                      ){
     fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
     fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
     output <- sprintf("out/salmon/%s.out", sample)
@@ -133,13 +136,15 @@ runSalmon <- function( sample, args="-l A -p 4", ids ){
     require(tximport)
     counts <- tximport( file.path( output, "quant.sf" ), type="salmon", txOut=TRUE )$counts[,1]
     names( counts ) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
-    out <- rep( NA, length(ids) )
-    names(out) <- ids
-    out[names(counts)] <- counts
-    out
+    counts
+#    out <- rep( NA, length(ids) )
+#    names(out) <- ids
+#    out[names(counts)] <- counts
+#    out
 }
 
-runSailfish <- function( sample, args="-l IU", ids ){
+runSailfish <- function( sample, args="-l IU"#, ids
+                        ){
     fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
     fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
     output <- sprintf("out/sailfish/%s.out", sample)
@@ -148,10 +153,11 @@ runSailfish <- function( sample, args="-l IU", ids ){
     system( cmd )
     counts <- tximport( file.path(output, "quant.sf"), type="sailfish", txOut=TRUE )$counts[,1]
     names( counts ) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
-    out <- rep( NA, length(ids) )
-    names(out) <- ids
-    out[names(counts)] <- counts
-    out
+    counts
+#    out <- rep( NA, length(ids) )
+#    names(out) <- ids
+#    out[names(counts)] <- counts
+#    out
 }
 
 ```
@@ -169,7 +175,7 @@ b <- BenchDesign() %>%
         bfunc=runKallisto,
         sample=sample,
         args="-t 16",
-        ids=dnSt,
+#        ids=dnSt,
         bmeta=list( version=getKallistoVersion() )
     ) %>%
     addBMethod(
@@ -177,7 +183,7 @@ b <- BenchDesign() %>%
         bfunc=runKallisto,
         sample=sample,
         args="--bias -t 16",
-        ids=dnSt,
+#        ids=dnSt,
         bmeta=list( version=getKallistoVersion() )
     ) %>%
     addBMethod(
@@ -185,7 +191,7 @@ b <- BenchDesign() %>%
         bfunc=runSalmon,
         sample=sample,
         args="-l IU -p 16",
-        ids=dnSt,
+#        ids=dnSt,
         bmeta=list( version=getSalmonVersion() )
     ) %>%
     addBMethod(
@@ -193,7 +199,7 @@ b <- BenchDesign() %>%
         bfunc=runSalmon,
         sample=sample,
         args="-l IU --gcBias -p 16",
-        ids=dnSt,
+#        ids=dnSt,
         bmeta=list( version=getSalmonVersion() )
     ) %>%
     addBMethod(
@@ -201,7 +207,7 @@ b <- BenchDesign() %>%
         bfunc=runSailfish,
         sample=sample,
         args="-l IU -p 16",
-        ids=dnSt,
+#        ids=dnSt,
         bmeta=list( version=getSailfishVersion() )
     )
 
@@ -214,8 +220,8 @@ Now, the next step is to run the benchmark experiment. Since we are running the 
 ```{r runBenchmark, eval=FALSE}
 
 allSB <- lapply( samples, function(sample){
-    dat <- list( sample=sample )
-    sb <- buildBench( b, data=dat )
+    dat <- list( sample=sample, txIDs=dnSt )
+    sb <- buildBench( b, data=dat, sortIDs="txIDs")
     colData( sb )$sample <- sample
     sb
 } )
