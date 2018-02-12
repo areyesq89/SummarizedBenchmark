@@ -208,7 +208,7 @@ allSB <- do.call( cbind, allSB )
 
 colData( allSB )$tissue <- annotation$tissue[match( colData( allSB )$sample, annotation$sample )]
 
-save(allSB, file="../data/quantSB.rda" )
+#save(allSB, file="../data/quantSB.rda", compress="xz", compression_level=9 )
 
 ```
 
