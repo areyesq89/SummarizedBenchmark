@@ -30,8 +30,12 @@ We start by downloading the fastq files that we will use as input to quantify is
 library(BiocParallel)
 dir.create("fastq", showWarnings=FALSE)
 
-extractSRA <- function( sra_accession, exe_path = 'fastq-dump', args = '--split-3 --gzip', outdir = 'fastq', dry_run = FALSE) {
-    cmdline = sprintf('%s %s --outdir %s %s', exe_path, args, outdir, sra_accession)
+extractSRA <- function( sra_accession, exe_path = 'fastq-dump', 
+                        args = '--split-3 --gzip', outdir = 'fastq', 
+                        dry_run = FALSE) 
+{
+    cmdline = sprintf('%s %s --outdir %s %s', 
+                      exe_path, args, outdir, sra_accession)
     if(dry_run) {
       message("will run with this command line:\n",cmdline)
     } else {
@@ -54,7 +58,8 @@ Each of the three methods (*salmon*, *sailfish* and *kallisto*) require an index
      
 ```{r downloadReference, eval=FALSE}
 dir.create("reference/raw", recursive=TRUE, showWarnings=FALSE)
-download.file("ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M16/gencode.vM16.transcripts.fa.gz", destfile="reference/raw/transcriptome.fa.gz")
+download.file("ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M16/gencode.vM16.transcripts.fa.gz", 
+              destfile="reference/raw/transcriptome.fa.gz")
 ```
 
 Finally, we use the code below builds the transcriptome indexes for the three different methods.
@@ -82,17 +87,20 @@ If we want to use the *BenchDesign* infrastructure to compare tools that are run
 library(SummarizedBenchmark)
 
 getKallistoVersion <- function(){
-    vers <- suppressWarnings( system( "kallisto", intern=TRUE )[1] )
+    vers <- 
+      suppressWarnings( system( "kallisto", intern=TRUE )[1] )
     strsplit( vers, " " )[[1]][2]
 }
 
 getSalmonVersion <- function(){
-    vers <- suppressWarnings( system( "salmon --version 2>&1", intern=TRUE)[1] )
+    vers <- 
+      suppressWarnings( system( "salmon --version 2>&1", intern=TRUE)[1] )
     strsplit( vers, " " )[[1]][2]
 }
 
 getSailfishVersion <- function(){
-    vers <- suppressWarnings( system( "sailfish --version 2>&1", intern=TRUE)[1] )
+    vers <- 
+      suppressWarnings( system( "sailfish --version 2>&1", intern=TRUE)[1] )
     strsplit( vers, " " )[[1]][3]
 }
 
@@ -110,12 +118,16 @@ runKallisto <- function( sample, args="" ){
     fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
     fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
     output <- sprintf("out/kallisto/%s.out", sample)
-    cmd <- sprintf( "kallisto quant -i reference/index/kallistoIdx.idx -o %s %s %s %s", output, args, fastqFile1, fastqFile2 )
+    cmd <- sprintf( "kallisto quant -i reference/index/kallistoIdx.idx -o %s %s %s %s", 
+                    output, args, fastqFile1, fastqFile2 )
     system( cmd )
     require(tximport)
-    ab <- tximport( file.path(output, "abundance.h5"), type="kallisto", txOut=TRUE )
+    ab <- 
+      tximport( file.path(output, "abundance.h5"), 
+                type="kallisto", txOut=TRUE )
     counts <- ab$counts[,1]
-    names(counts) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+    names(counts) <- 
+      sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
     counts
 }
 
@@ -127,8 +139,11 @@ runSalmon <- function( sample, args="-l A -p 4" ){
                    args, output, fastqFile1, fastqFile2)
     system( cmd )
     require(tximport)
-    counts <- tximport( file.path( output, "quant.sf" ), type="salmon", txOut=TRUE )$counts[,1]
-    names( counts ) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+    counts <- 
+      tximport( file.path( output, "quant.sf" ), 
+                type="salmon", txOut=TRUE )$counts[,1]
+    names( counts ) <- 
+      sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
     counts
 }
 
@@ -136,11 +151,15 @@ runSailfish <- function( sample, args="-l IU" ){
     fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
     fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
     output <- sprintf("out/sailfish/%s.out", sample)
-    cmd <- sprintf( "echo \"sailfish quant -i reference/index/sailfish_index %s -o %s -1 <(zcat %s) -2 <(zcat %s)\" | bash", args, output, fastqFile1, fastqFile2 )
+    cmd <- sprintf( "echo \"sailfish quant -i reference/index/sailfish_index %s -o %s -1 <(zcat %s) -2 <(zcat %s)\" | bash", 
+                    args, output, fastqFile1, fastqFile2 )
     cat(cmd)
     system( cmd )
-    counts <- tximport( file.path(output, "quant.sf"), type="sailfish", txOut=TRUE )$counts[,1]
-    names( counts ) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+    counts <- 
+      tximport( file.path(output, "quant.sf"), 
+                type="sailfish", txOut=TRUE )$counts[,1]
+    names( counts ) <- 
+      sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
     counts
 }
 
@@ -206,59 +225,103 @@ allSB <- lapply( samples, function(sample){
 } )
 allSB <- do.call( cbind, allSB )
 
-colData( allSB )$tissue <- annotation$tissue[match( colData( allSB )$sample, annotation$sample )]
-
+colData( allSB )$tissue <- 
+  annotation$tissue[match( colData( allSB )$sample, 
+                           annotation$sample )]
 #save(allSB, file="../data/quantSB.rda", compress="xz", compression_level=9 )
 
 ```
 
-The `allSB` object has been precomputed and can be loaded by doing
+The resulting `allSB` object has been precomputed and can be loaded by doing
 
-```{r loadSB, echo=TRUE}
-suppressPackageStartupMessages(library(SummarizedBenchmark))
+```{r loadSB, message=FALSE}
+library(SummarizedBenchmark)
 data("quantSB")
+allSB
 ```
 
-## Exploring the output of the isoform quantifications
+Notice that this object contains both the software versions and used parameters.
 
-The code above returns a *SummarizedBenchmark* object containing the transcript isoform quantification results for the two samples. In this comparison, however, we don't have a ground truth. However, having all the results in a single *SummarizedBenchmark* container facilitates the exploration of these results.
+```{r metadata}
+colData(allSB)
+```
 
-For example, using a few lines of code, we can explore the similarity of the three methods by using a standard dimensionality reduction technique (PCA).  
+# Exploring the output of the isoform quantifications
+
+The code above returns a *SummarizedBenchmark* object containing the transcript isoform quantification results for the two samples. In this comparison, however, we don't have a ground truth. However, having all the results in a single *SummarizedBenchmark* container facilitates the exploration of these results. For example, using a few lines of code, we can explore the similarity of the three methods by using a standard dimensionality reduction technique (PCA).  
 
 ```{r pcaPlot}
 
+sampleIndexes <- which( colData( allSB )$sample %in% "SRR5273689" )
 keep <- !rowSums( is.na( assays( allSB )[["bench"]] ) ) > 0
-pcaRes <- prcomp(  log10( t( assays( allSB )[["bench"]][keep,] ) + 1 ) )
+pcaRes <- 
+  prcomp(  log10( t( assays( allSB )[["bench"]][keep,sampleIndexes] ) + 1 ) )
 varExp <- round( 100*(pcaRes$sdev/sum( pcaRes$sdev )), 2)
 
 tidyData <- data.frame( 
   PC1=pcaRes$x[,"PC1"], 
   PC2=pcaRes$x[,"PC2"], 
-  sample=colData( allSB )$sample, 
-  blabel=colData( allSB )$blabel )
+  sample=colData( allSB )$sample[sampleIndexes], 
+  blabel=colData( allSB )$blabel[sampleIndexes] )
 
 tidyData <- tidyData %>%
   dplyr::mutate( 
     method=gsub( "-.*$", "", blabel) )
 
 tidyData %>%
-  ggplot( aes( PC1, PC2, colour=blabel, shape=sample ) ) +
+  ggplot( aes( PC1, PC2, colour=blabel ) ) +
   geom_point() + coord_fixed() +
   ylab(sprintf( "PC2 (%0.2f %%)", varExp[2]) ) +
   xlab(sprintf( "PC1 (%0.2f %%)", varExp[1]) ) +
   theme(legend.pos="top") +
-  guides(col = guide_legend(nrow = 5), shape = guide_legend(nrow = 2))
+  guides(col = guide_legend(nrow = 5), 
+         shape = guide_legend(nrow = 4))
 
 ```
 
-Similarly, it becomes easy to compare the quantifications from the different methods. For example, the code below calculates the Pearson correlation coefficients of the isoform quantifications from *salmon* and *kallisto* when both are run in default modes.
+# Building an *rnaseqcomp* object
 
-```{r cors}
-corMat <- 
-  cor( 
-    assay(allSB)[,colData(allSB)$sample == "SRR5273705"], 
-    use="complete.obs", method="spearman")
-corMat
+For a more exhaustive benchmark of isoform quantification results, we refer the reader to the paper by [@Teng_2016], which describes several metrics to evaluate the performance of isoform quantification pipelines. These metrics are implemented in the `r BiocStyle::Biocpkg("rnaseqcomp")`. The code below follows the steps from the `r BiocStyle::Biocpkg("rnaseqcomp")` package to create an *rnaseqcomp* object. We recommend the readers to follow the vignette of the `r BiocStyle::Biocpkg("rnaseqcomp")` package for an exhaustive benchmark of isoform quantification benchmarks.
+
+```{r rnaseqcomp, message=FALSE}
+library( rnaseqcomp )
+library( biomaRt )
+data( simdata )
+houseHuman <- simdata$meta$gene[simdata$meta$house]
+houseHuman <- gsub("\\.\\d+", "", houseHuman )
+
+mart <- useMart( "ensembl", "mmusculus_gene_ensembl" )
+geneMap <- getBM( c( "ensembl_transcript_id", 
+                     "hsapiens_homolog_ensembl_gene", 
+                     "hsapiens_homolog_orthology_type" ), 
+                  mart=mart )
+geneMap <- 
+  geneMap[geneMap$`hsapiens_homolog_orthology_type` == "ortholog_one2one",]
+houseMouse <- 
+  geneMap$ensembl_transcript_id[geneMap$hsapiens_homolog_ensembl_gene %in% 
+                                  houseHuman]
+
+condInfo <- 
+  colData( allSB )[colData( allSB )$blabel == "kallisto-default","tissue"]
+replicateInfo <- condInfo
+evaluationFeature <- rep( TRUE, length.out = nrow( allSB ) )
+calibrationFeature <- 
+  gsub( "\\.\\d+", "", rownames(allSB) ) %in% houseMouse
+unitReference <- 1
+quantificationList <- lapply( 
+  split( seq_along( colnames( allSB ) ), colData( allSB )$blabel ), 
+  function(x){
+    assay( allSB )[,x]
+  } )
+
+compObject <- signalCalibrate( 
+  quantificationList, 
+  condInfo, replicateInfo, 
+  evaluationFeature, calibrationFeature, unitReference, 
+  calibrationFeature2 = calibrationFeature)
+
+compObject
+
 ```
 
-For sample *SRR5273705*, the correlation coefficient between *salmon* and *kallisto* is `r corMat["kallisto-default","salmon-default"]`. For a more exhaustive benchmark of isoform quantification results, please check the paper by [@Teng_2016], which described several metrics to evaluate the performance of isoform quantification pipelines. These metrics are implemented in the `r BiocStyle::Biocpkg("rnaseqcomp")`. 
+# References
