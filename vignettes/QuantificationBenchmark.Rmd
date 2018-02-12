@@ -29,7 +29,7 @@ We start by downloading the fastq files that we will use as input to quantify is
 
 dir.create("fastq", showWarnings=FALSE)
 
-extractSRA <- function( sra_accession, exe_path = 'fastq-dump', args = '--split-files --gzip', outdir = 'fastq', dry_run = FALSE) {
+extractSRA <- function( sra_accession, exe_path = 'fastq-dump', args = '--split-3 --gzip', outdir = 'fastq', dry_run = FALSE) {
     cmdline = sprintf('%s %s --outdir %s %s', exe_path, args, outdir, sra_accession)
     if(dry_run) {
       message("will run with this command line:\n",cmdline)
@@ -40,7 +40,8 @@ extractSRA <- function( sra_accession, exe_path = 'fastq-dump', args = '--split-
 
 samples <- c( "SRR5273705", "SRR5273689", "SRR5273699", "SRR5273683" )
 
-sapply( samples, extractSRA )
+library(BiocParallel)
+bplapply( samples, extractSRA, BPPARAM=MulticoreParam(4) )
 
 annotation <-
     data.frame(
@@ -101,6 +102,7 @@ Similarly, we can define *R* wrapper functions to run the different methods. Not
 
 ```{r, eval=FALSE}
 
+
 dir.create("out/kallisto", showWarnings=FALSE)
 dir.create("out/salmon", showWarnings=FALSE)
 dir.create("out/sailfish", showWarnings=FALSE)
@@ -159,13 +161,14 @@ Having defined this functions, we can now design our benchmark experiment using 
 ```{r, eval=FALSE}
 
 library(SummarizedBenchmark)
+library(tximport)
 
 b <- BenchDesign() %>%
     addBMethod(
         blabel="kallisto-default",
         bfunc=runKallisto,
         sample=sample,
-        args="",
+        args="-t 16",
         ids=dnSt,
         bmeta=list( version=getKallistoVersion() )
     ) %>%
@@ -173,7 +176,7 @@ b <- BenchDesign() %>%
         blabel="kallisto-bias",
         bfunc=runKallisto,
         sample=sample,
-        args="--bias",
+        args="--bias -t 16",
         ids=dnSt,
         bmeta=list( version=getKallistoVersion() )
     ) %>%
@@ -181,7 +184,7 @@ b <- BenchDesign() %>%
         blabel="salmon-default",
         bfunc=runSalmon,
         sample=sample,
-        args="-l IU -p 1",
+        args="-l IU -p 16",
         ids=dnSt,
         bmeta=list( version=getSalmonVersion() )
     ) %>%
@@ -189,7 +192,7 @@ b <- BenchDesign() %>%
         blabel="salmon-gcBias",
         bfunc=runSalmon,
         sample=sample,
-        args="-l IU --gcBias -p 1",
+        args="-l IU --gcBias -p 16",
         ids=dnSt,
         bmeta=list( version=getSalmonVersion() )
     ) %>%
@@ -197,7 +200,7 @@ b <- BenchDesign() %>%
         blabel="sailfish-default",
         bfunc=runSailfish,
         sample=sample,
-        args="-l IU -p 1",
+        args="-l IU -p 16",
         ids=dnSt,
         bmeta=list( version=getSailfishVersion() )
     )
@@ -212,15 +215,13 @@ Now, the next step is to run the benchmark experiment. Since we are running the 
 
 allSB <- lapply( samples, function(sample){
     dat <- list( sample=sample )
-    sb <- buildBench( b, data=dat, parallel=TRUE, BPPARAM=MulticoreParam(5) )
+    sb <- buildBench( b, data=dat )
+    colData( sb )$sample <- sample
     sb
 } )
-names( allSB ) <- samples
-
-colData( allSB[[1]] )$sample <- samples[1]
-colData( allSB[[2]] )$sample <- samples[2]
+    
 allSB <- do.call( cbind, allSB )
-#save(allSB, file="../data/quantSB.rda" )
+save(allSB, file="../data/quantSB.rda" )
 
 ```
 

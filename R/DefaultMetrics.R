@@ -2,7 +2,11 @@
 #' @aliases availableMetrics
 #' @description
 #' List default performance metrics available in this package.
+#' @examples
+#' availableMetrics()
 #'
+#' @return A data.frame with available performance metrics.
+#' 
 #' @export
 availableMetrics <- function(){
   data.frame(

@@ -200,6 +200,8 @@ performanceMetricsSB <- function( object, assay=NULL ){
 #'
 #' @author Alejandro Reyes
 #'
+#' @return A SimpleList with one element for each assay. Each element of the list contains a list of performance functions. 
+#'
 #' @export
 setMethod( "performanceMetrics",
   signature( object = "SummarizedBenchmark" ), performanceMetricsSB )
@@ -231,6 +233,8 @@ setReplaceMethod( "performanceMetrics",
 #' @param ... Futher arguments, perhaps used by methods
 #' @seealso \code{\link{performanceMetrics}}
 #'
+#' @return Either a \code{SummarizedBenchmark} object or a slot of the \code{SummarizedBenchmark} object.
+#' 
 #' @examples
 #'
 #' data( sb )
