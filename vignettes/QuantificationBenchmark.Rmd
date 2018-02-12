@@ -27,6 +27,7 @@ We start by downloading the fastq files that we will use as input to quantify is
 
 ```{r experimentPrep, eval=FALSE}
 
+library(BiocParallel)
 dir.create("fastq", showWarnings=FALSE)
 
 extractSRA <- function( sra_accession, exe_path = 'fastq-dump', args = '--split-3 --gzip', outdir = 'fastq', dry_run = FALSE) {
@@ -40,7 +41,6 @@ extractSRA <- function( sra_accession, exe_path = 'fastq-dump', args = '--split-
 
 samples <- c( "SRR5273705", "SRR5273689", "SRR5273699", "SRR5273683" )
 
-library(BiocParallel)
 bplapply( samples, extractSRA, BPPARAM=MulticoreParam(4) )
 
 annotation <-
@@ -102,13 +102,11 @@ Similarly, we can define *R* wrapper functions to run the different methods. Not
 
 ```{r, eval=FALSE}
 
-
 dir.create("out/kallisto", showWarnings=FALSE)
 dir.create("out/salmon", showWarnings=FALSE)
 dir.create("out/sailfish", showWarnings=FALSE)
 
-runKallisto <- function( sample, args=""#, ids
-                        ){
+runKallisto <- function( sample, args="" ){
     fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
     fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
     output <- sprintf("out/kallisto/%s.out", sample)
@@ -119,14 +117,9 @@ runKallisto <- function( sample, args=""#, ids
     counts <- ab$counts[,1]
     names(counts) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
     counts
-#    out <- rep( NA, length(ids) )
-#    names(out) <- ids
-#    out[names(counts)] <- counts
-#    out
 }
 
-runSalmon <- function( sample, args="-l A -p 4"#,ids
-                      ){
+runSalmon <- function( sample, args="-l A -p 4" ){
     fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
     fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
     output <- sprintf("out/salmon/%s.out", sample)
@@ -137,14 +130,9 @@ runSalmon <- function( sample, args="-l A -p 4"#,ids
     counts <- tximport( file.path( output, "quant.sf" ), type="salmon", txOut=TRUE )$counts[,1]
     names( counts ) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
     counts
-#    out <- rep( NA, length(ids) )
-#    names(out) <- ids
-#    out[names(counts)] <- counts
-#    out
 }
 
-runSailfish <- function( sample, args="-l IU"#, ids
-                        ){
+runSailfish <- function( sample, args="-l IU" ){
     fastqFile1 <- sprintf( "fastq/%s_1.fastq.gz", sample )
     fastqFile2 <- gsub( "_1", "_2", fastqFile1 )
     output <- sprintf("out/sailfish/%s.out", sample)
@@ -154,10 +142,6 @@ runSailfish <- function( sample, args="-l IU"#, ids
     counts <- tximport( file.path(output, "quant.sf"), type="sailfish", txOut=TRUE )$counts[,1]
     names( counts ) <- sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
     counts
-#    out <- rep( NA, length(ids) )
-#    names(out) <- ids
-#    out[names(counts)] <- counts
-#    out
 }
 
 ```
@@ -175,7 +159,6 @@ b <- BenchDesign() %>%
         bfunc=runKallisto,
         sample=sample,
         args="-t 16",
-#        ids=dnSt,
         bmeta=list( version=getKallistoVersion() )
     ) %>%
     addBMethod(
@@ -183,7 +166,6 @@ b <- BenchDesign() %>%
         bfunc=runKallisto,
         sample=sample,
         args="--bias -t 16",
-#        ids=dnSt,
         bmeta=list( version=getKallistoVersion() )
     ) %>%
     addBMethod(
@@ -191,7 +173,6 @@ b <- BenchDesign() %>%
         bfunc=runSalmon,
         sample=sample,
         args="-l IU -p 16",
-#        ids=dnSt,
         bmeta=list( version=getSalmonVersion() )
     ) %>%
     addBMethod(
@@ -199,7 +180,6 @@ b <- BenchDesign() %>%
         bfunc=runSalmon,
         sample=sample,
         args="-l IU --gcBias -p 16",
-#        ids=dnSt,
         bmeta=list( version=getSalmonVersion() )
     ) %>%
     addBMethod(
@@ -207,7 +187,6 @@ b <- BenchDesign() %>%
         bfunc=runSailfish,
         sample=sample,
         args="-l IU -p 16",
-#        ids=dnSt,
         bmeta=list( version=getSailfishVersion() )
     )
 
@@ -225,8 +204,10 @@ allSB <- lapply( samples, function(sample){
     colData( sb )$sample <- sample
     sb
 } )
-    
 allSB <- do.call( cbind, allSB )
+
+colData( allSB )$tissue <- annotation$tissue[match( colData( allSB )$sample, annotation$sample )]
+
 save(allSB, file="../data/quantSB.rda" )
 
 ```
