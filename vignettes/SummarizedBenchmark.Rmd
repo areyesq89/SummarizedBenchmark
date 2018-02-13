@@ -314,7 +314,7 @@ voom_pvals <- function(countData, group, design) {
 }
 ```
 
-Next, each method is added to the *BenchDesign* using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit the **Quickstart Case Study** in the previous section.) We again use the pipe notation for compactness.
+Next, each method is added to the *BenchDesign* using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit Section \@ref(quickstart-case-study).) We again use the pipe notation for compactness.
 
 ```{r}
 bd <- bd %>%
@@ -350,7 +350,7 @@ sb
 
 ## Benchmark Evaluation
 
-By running the code above, the results of three differential expression methods (`r BiocStyle::Biocpkg("edgeR")`, `r BiocStyle::Biocpkg("limma")`-voom and `r BiocStyle::Biocpkg("DESeq2")` will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric()`, as described before in Section \@ref(performanceMetrics). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics()` returns a *data.frame* of these metrics.
+By running the code above, the results of three differential expression methods (`r BiocStyle::Biocpkg("edgeR")`, `r BiocStyle::Biocpkg("limma")`-voom and `r BiocStyle::Biocpkg("DESeq2")` will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric()`, as described before in Section \@ref(quickstart-case-study). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics()` returns a *data.frame* of these metrics.
 
 ```{r availableMetrics}
 availableMetrics()
