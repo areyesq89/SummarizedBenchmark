@@ -234,7 +234,7 @@ colData( allSB )$tissue <-
 
 To keep the pre-computed object small, we will save the quantifications for only 50,000 randomly sampled transcripts.
 
-```{r subsample}
+```{r subsample, eval=FALSE}
 allSB <- allSB[rowSums( is.na( assay( allSB ) ) ) == 0,]
 set.seed(12)
 allSB <- allSB[sample( seq_along(allSB), 50000 ),]
