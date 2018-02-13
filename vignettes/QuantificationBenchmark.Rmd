@@ -1,5 +1,5 @@
 ---
-title: "Benchmarking Software Not Written in R"
+title: "Benchmarking Methods Not Written in R"
 author: "Alejandro Reyes, Patrick K. Kimes"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
@@ -12,12 +12,14 @@ output:
     fig_width: 5
 bibliography: library.bib
 vignette: >
-  %\VignetteIndexEntry{Case Study: Benchmarking Software Not Written in R}
+  %\VignetteIndexEntry{Case Study: Benchmarking Methods Not Written in R}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---
+
+# Introduction
 
 To demonstrate the use of *SummarizedBenchmark* to compare software that is not written in *R*, we will compare the output of *sailfish*, *salmon* and *kallisto*, three alignment-free methods for transcript isoform quantification. Due to running time, disk space, and memory issues, some parts of this vignette are not run during the package build. Instead, we provide pre-computed objects containing the final *SummarizedBenchmark* object. 
 
