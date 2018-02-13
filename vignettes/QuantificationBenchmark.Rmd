@@ -228,10 +228,18 @@ allSB <- do.call( cbind, allSB )
 colData( allSB )$tissue <- 
   annotation$tissue[match( colData( allSB )$sample, 
                            annotation$sample )]
-#save(allSB, file="../data/quantSB.rda", compress="xz", compression_level=9 )
+#
 
 ```
 
+To keep the pre-computed object small, we will save the quantifications for only 50,000 randomly sampled transcripts.
+
+```{r subsample}
+allSB <- allSB[rowSums( is.na( assay( allSB ) ) ) == 0,]
+set.seed(12)
+allSB <- allSB[sample( seq_along(allSB), 50000 ),]
+#save(allSB, file="../data/quantSB.rda", compress="xz", compression_level=9 )
+```
 The resulting `allSB` object has been precomputed and can be loaded by doing
 
 ```{r loadSB, message=FALSE}

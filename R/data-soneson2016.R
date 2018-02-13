@@ -1,7 +1,15 @@
-#' Data objects containing counts and ground truths of the simulations from Soneson et al., 2016.
+#' SummarizedBenchmark example
 #'
-#' @name truthdat
+#' @name sb
 #' @aliases truthdat txi
+#' @docType data
+#' @keywords data SummarizedBenchmark
+NULL
+
+#' SummarizedBenchmark object of isoform quantification results
+#'
+#' @name allSB
+#' @aliases allSB
 #' @docType data
 #' @keywords data
 NULL
