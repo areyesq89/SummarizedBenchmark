@@ -1,10 +1,10 @@
 ---
-title: "Benchmarking software not written in R"
-author: "Patrick K. Kimes, Alejandro Reyes"
+title: "Benchmarking Software Not Written in R"
+author: "Alejandro Reyes, Patrick K. Kimes"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
 abstract: >
-  "In this vignette, we provide an example of how the *SummarizedBenchmark* framework can be used to benchmark software tools that are not necessarily implemented in R. Note that the objetive of this vignette is **not** to exhaustively benchmark these methods, but rather demonstrate our the usage of SummarizedBenchmark when the methods are not implemented in *R*."
+  "In this vignette, we provide an example of how the *SummarizedBenchmark* framework can be used to benchmark software tools that are not necessarily implemented in R. Note that the objetive of this vignette is **not** to exhaustively benchmark these methods, but rather demonstrate the usage of SummarizedBenchmark when the methods are not implemented in *R*."
 output:
   BiocStyle::html_document:
     highlight: pygments
@@ -12,18 +12,18 @@ output:
     fig_width: 5
 bibliography: library.bib
 vignette: >
-  %\VignetteIndexEntry{Benchmarking with SummarizedBenchmark}
+  %\VignetteIndexEntry{Case Study: Benchmarking Software Not Written in R}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---
 
-To demonstrate the use of *SummarizedBenchmark* to compare software that is not written in *R*, we will compare the output of *sailfish*, *salmon* and *kallisto*, three alignment-free methods for transcript isoform quantification. For running times, disk space and memory issues, some parts of this vignette are not run during the package build. Instead, we provide pre-computed objects containing the final *SummarizedBenchmark* object. 
+To demonstrate the use of *SummarizedBenchmark* to compare software that is not written in *R*, we will compare the output of *sailfish*, *salmon* and *kallisto*, three alignment-free methods for transcript isoform quantification. Due to running time, disk space, and memory issues, some parts of this vignette are not run during the package build. Instead, we provide pre-computed objects containing the final *SummarizedBenchmark* object. 
 
 # Data preparation
 
-We start by downloading the fastq files that we will use as input to quantify isoforms. We will two samples from two brain replicates from the Mouse BodyMap [@Li_2017]. 
+We start by downloading the fastq files that we will use as input to quantify isoforms. We will use two samples from two brain replicates from the Mouse BodyMap [@Li_2017]. 
 
 ```{r experimentPrep, eval=FALSE}
 
@@ -62,7 +62,7 @@ download.file("ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M16/genc
               destfile="reference/raw/transcriptome.fa.gz")
 ```
 
-Finally, we use the code below builds the transcriptome indexes for the three different methods.
+Finally, we use the code below to build the transcriptome indices for the three different methods.
 
 ```{r indexBuild, eval=FALSE}
 
@@ -80,7 +80,7 @@ dnSt <- sapply( strsplit( dnSt, "\\|" ), "[[", 1 )
 
 # Preparing functions with system calls to run the different methods
 
-If we want to use the *BenchDesign* infrastructure to compare tools that are run via the command line, we need to implement functions in *R* that containing system calls to the command line. Such functions must also collect the output of the methods and import them into *R*. To begin, we implement three functions that enable us to retrieve the version of the software that we will be running.
+If we want to use the *BenchDesign* infrastructure to compare tools that are run via the command line, we need to implement functions in *R* containing the system calls to the command line. Such functions must also collect the output of the methods and import them into *R*. To begin, we implement three functions that enable us to retrieve the version of the software that we will be running.
   
 ```{r versions, eval=FALSE}
   
@@ -106,7 +106,7 @@ getSailfishVersion <- function(){
 
 ```
 
-Similarly, we can define *R* wrapper functions to run the different methods. Note that the functions below have three important characteristics. (1) They receive as input the arguments to the different methods such that *buildBench* can keep track of these, (2) they contain system calls that run the different methods and (3) they import the output of the different methods into *R* (in this case, using the package `r BiocStyle::Biocpkg("tximport")`).
+Similarly, we can define *R* wrapper functions to run the different methods. Note that the functions below have three important characteristics. (1) They receive as input the arguments to the different methods such that *buildBench* can keep track of these, (2) they contain system calls that run the different methods and (3) they import the output of the different methods into *R* (in this case, using the `r BiocStyle::Biocpkg("tximport")` package).
 
 ```{r, eval=FALSE}
 
@@ -165,7 +165,7 @@ runSailfish <- function( sample, args="-l IU" ){
 
 ```
 
-Having defined this functions, we can now design our benchmark experiment using the functions the functions `BenchDesign()` and `addBMethod()`. For this specific experiment, we will run *salmon*, *sailfish* and *kallisto*. In addition, we will run *kallisto* and *salmon* both with default parameters and with their respective options to model for sequencing bias.
+Having defined these functions, we can now design our benchmark experiment using the `BenchDesign()` and `addBMethod()` functions. For this specific experiment, we will run *salmon*, *sailfish* and *kallisto*. In addition, we will run *kallisto* and *salmon* both with default parameters and with their respective options to model for sequencing bias.
 	
 ```{r, eval=FALSE}
 
@@ -213,7 +213,7 @@ showBMethods( b )
 
 ```
 	
-Now, the next step is to run the benchmark experiment. Since we are running the benchmark for two samples, we use an `lapply()` to loop over the sample names, run the benchmark experiment for each of them and combine them using `cbind()`.
+Now, the next step is to run the benchmark experiment. Since we are running the benchmark for two samples, we use an `lapply()` to loop over the sample names, run the benchmark experiment for each of them, and combine them using `cbind()`.
 	
 ```{r runBenchmark, eval=FALSE}
 
@@ -228,8 +228,6 @@ allSB <- do.call( cbind, allSB )
 colData( allSB )$tissue <- 
   annotation$tissue[match( colData( allSB )$sample, 
                            annotation$sample )]
-#
-
 ```
 
 To keep the pre-computed object small, we will save the quantifications for only 50,000 randomly sampled transcripts.
@@ -256,7 +254,7 @@ colData(allSB)
 
 # Exploring the output of the isoform quantifications
 
-The code above returns a *SummarizedBenchmark* object containing the transcript isoform quantification results for the two samples. In this comparison, however, we don't have a ground truth. However, having all the results in a single *SummarizedBenchmark* container facilitates the exploration of these results. For example, using a few lines of code, we can explore the similarity of the three methods by using a standard dimensionality reduction technique (PCA).  
+The code above returns a *SummarizedBenchmark* object containing the transcript isoform quantification results for the two samples. In this comparison, however, we don't have a ground truth. However, having all the results in a single *SummarizedBenchmark* container facilitates the exploration of these results. For example, using a few lines of code, we can explore the similarity of the three methods using a standard dimensionality reduction technique (PCA).  
 
 ```{r pcaPlot}
 
@@ -289,7 +287,7 @@ tidyData %>%
 
 # Building an *rnaseqcomp* object
 
-For a more exhaustive benchmark of isoform quantification results, we refer the reader to the paper by [@Teng_2016], which describes several metrics to evaluate the performance of isoform quantification pipelines. These metrics are implemented in the `r BiocStyle::Biocpkg("rnaseqcomp")`. The code below follows the steps from the `r BiocStyle::Biocpkg("rnaseqcomp")` package to create an *rnaseqcomp* object. We recommend the readers to follow the vignette of the `r BiocStyle::Biocpkg("rnaseqcomp")` package for an exhaustive benchmark of isoform quantification benchmarks.
+For a more exhaustive benchmark of isoform quantification results, we refer the reader to the paper by [@Teng_2016], which describes several metrics to evaluate the performance of isoform quantification pipelines. These metrics are implemented in `r BiocStyle::Biocpkg("rnaseqcomp")`. The code below follows the steps from the `r BiocStyle::Biocpkg("rnaseqcomp")` package to create an *rnaseqcomp* object. We recommend the readers to follow the vignette of the `r BiocStyle::Biocpkg("rnaseqcomp")` package for an exhaustive benchmark of isoform quantification methods.
 
 ```{r rnaseqcomp, message=FALSE}
 library( rnaseqcomp )
