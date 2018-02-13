@@ -10,6 +10,7 @@ output:
     highlight: pygments
     toc: true
     fig_width: 5
+bibliography: library.bib
 vignette: >
   %\VignetteIndexEntry{Benchmarking with SummarizedBenchmark}
   %\VignetteEncoding{UTF-8}
