@@ -41,7 +41,8 @@ Suggests: iCOBRA,
           scRNAseq,
           splatter,
           scater,
-          rnaseqcomp
+          rnaseqcomp,
+          biomaRt
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
