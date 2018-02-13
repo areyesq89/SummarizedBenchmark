@@ -15,6 +15,9 @@ plotMethodsOverlap(object, assay = "qvalue", alpha = 0.1, ...)
 
 \item{...}{Further arguments passed to \code{\link{upset}}}
 }
+\value{
+An upseR plot.
+}
 \description{
 This function looks for an assay, called by default 'qvalue', and given an alpha threshold,
 it binarizes the assay matrix depending on whether its values are below the alpha
@@ -23,11 +26,11 @@ The plot is only generated if at least 2 methods have observations that pass
 the alpha threshold.
 }
 \examples{
-\dontrun{
+
 data( sb )
+\dontrun{
 plotMethodsOverlap(sb)
 }
-
 
 }
 \author{

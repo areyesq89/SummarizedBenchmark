@@ -36,6 +36,9 @@ groundTruths(object, ...) <- value
 
 \item{object}{a \code{SummarizedBenchmark} object.}
 }
+\value{
+Either a \code{SummarizedBenchmark} object or a slot of the \code{SummarizedBenchmark} object.
+}
 \description{
 Accessor and replacement functions for the slots of a SummarizedBenchmark object.
 }

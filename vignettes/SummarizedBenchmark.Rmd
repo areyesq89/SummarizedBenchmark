@@ -391,7 +391,7 @@ plotMethodsOverlap( sb, assay="status", alpha=0.1, order.by="freq")
 From the plot above, it is evident that there is a large number of transcripts that are detected to be differentially expressed by all three methods. There are also smallers sets of transcripts that are detected uniquely by a single method or subsets of methods. Another typical way to compare the performance of different methods are Receiver Operating Characteristic (ROC) curves. The function `plotROC()` inputs a *SummarizeBenchmark* object and draws the ROC curves for all methods contained in it. 
 
 ```{r, fig.width=5, fig.height=4}
-plotROC(sb, assay="status")
+SummarizedBenchmark::plotROC(sb, assay="status")
 ```
 
 # Advanced Features

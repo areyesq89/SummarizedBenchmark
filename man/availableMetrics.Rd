@@ -6,6 +6,13 @@
 \usage{
 availableMetrics()
 }
+\value{
+A data.frame with available performance metrics.
+}
 \description{
 List default performance metrics available in this package.
+}
+\examples{
+availableMetrics()
+
 }

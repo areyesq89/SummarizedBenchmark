@@ -28,6 +28,9 @@ performanceMetrics(object, ...) <- value
 
 \item{value}{A SimpleList of the same length as the number of assays}
 }
+\value{
+A SimpleList with one element for each assay. Each element of the list contains a list of performance functions.
+}
 \description{
 Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.
 }

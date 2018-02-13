@@ -12,7 +12,7 @@ plotROC(object, assay = "qvalue")
 \item{assay}{An assay name.}
 }
 \value{
-An \code{\link{SummarizedBenchmark}} object with performance functions.
+A ggplot object.
 }
 \description{
 This function inputs a \code{\link{SummarizedBenchmark}} object, looks
@@ -20,8 +20,9 @@ for an assay called 'qvalue' and plots receiver operating characteristic curves
 for each of the methods to benchmark.
 }
 \examples{
-\dontrun{
+
 data( sb )
+\dontrun{
 plotROC( sb )
 }
 
