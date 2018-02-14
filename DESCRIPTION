@@ -40,7 +40,9 @@ Suggests: iCOBRA,
           readr,
           scRNAseq,
           splatter,
-          scater
+          scater,
+          rnaseqcomp,
+          biomaRt
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

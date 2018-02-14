@@ -13,11 +13,13 @@
 #' @param ... Further arguments passed to \code{\link{upset}}
 #'
 #' @examples
-#' \dontrun{
+#'
 #' data( sb )
+#' \dontrun{
 #' plotMethodsOverlap(sb)
 #' }
 #'
+#' @return An upseR plot.
 #'
 #' @author Alejandro Reyes
 #'
@@ -49,12 +51,13 @@ plotMethodsOverlap <- function( object, assay="qvalue", alpha=0.1, ... ){
 #' @param assay An assay name.
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' data( sb )
+#' \dontrun{
 #' plotROC( sb )
 #' }
 #'
-#' @return An \code{\link{SummarizedBenchmark}} object with performance functions.
+#' @return A ggplot object.
 #'
 #' @author Alejandro Reyes
 #' @export

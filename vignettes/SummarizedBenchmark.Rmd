@@ -10,6 +10,7 @@ output:
     highlight: pygments
     toc: true
     fig_width: 5
+bibliography: library.bib
 vignette: >
   %\VignetteIndexEntry{Benchmarking with SummarizedBenchmark}
   %\VignetteEncoding{UTF-8}
@@ -64,9 +65,9 @@ head(tdat)
 
 Several approaches have been proposed and implemented to compute *adjusted p-values* and *q-values* with the goal of controlling the total number of false discoveries across a collection of tests. In this example, we compare three such methods:
 
-1. Bonferroni correction (`p.adjust` w/ `method = "bonferroni"`) (_Dunn, 1961_),
-2. Benjamini-Hochberg (`p.adjust` w/ `method = "BH"`) (_Benjamini and Hochberg, 1995_), and
-3. Storey's FDR q-value (`qvalue::qvalue`) (_Storey, 2002_).
+1. Bonferroni correction (`p.adjust` w/ `method = "bonferroni"`) [@Dunn_1961],
+2. Benjamini-Hochberg (`p.adjust` w/ `method = "BH"`) [@Benjamini_1995], and
+3. Storey's FDR q-value (`qvalue::qvalue`) [@Storey_2002].
 
 First, consider how benchmarking the three methods might look without the *SummarizedBenchmark* framework.  
 
@@ -241,7 +242,7 @@ library("DESeq2")
 library("tximport")
 ```
 
-In this more advanced case study, we use a simulated data set from _Soneson et al. (2016)_ to demonstrate how the *SummarizedBenchmark* package can be used to benchmark methods for differential expression analysis. Namely, we compare the methods implemented in the `r BiocStyle::Biocpkg("DESeq2")`, `r BiocStyle::Biocpkg("edgeR")`, and `r BiocStyle::Biocpkg("limma")` packages. The simulated data set includes 6 samples of three replicates each from two conditions. For each sample, transcript-level expression is provided as transcripts per-million (TPM) values for 15,677 transcripts from human chromosome 1 (Ensembl GRCh37.71). A more complete description of the data, including code for how the data ws generated, is available in the Supplementary Materials of _Soneson et al. (2016)_ [here](http://dx.doi.org/10.5256/f1000research.7563.d114722). We provide precomputed objects containing these count and ground truth data. 
+In this more advanced case study, we use a simulated data set from [@Soneson_2016] to demonstrate how the *SummarizedBenchmark* package can be used to benchmark methods for differential expression analysis. Namely, we compare the methods implemented in the `r BiocStyle::Biocpkg("DESeq2")`, `r BiocStyle::Biocpkg("edgeR")`, and `r BiocStyle::Biocpkg("limma")` packages. The simulated data set includes 6 samples of three replicates each from two conditions. For each sample, transcript-level expression is provided as transcripts per-million (TPM) values for 15,677 transcripts from human chromosome 1 (Ensembl GRCh37.71). A more complete description of the data, including code for how the data ws generated, is available in the Supplementary Materials of [@Soneson_2016] [here](http://dx.doi.org/10.5256/f1000research.7563.d114722). We provide precomputed objects containing these count and ground truth data. 
 
 ```{r loadingSoneson}
 data("soneson2016")
@@ -314,7 +315,7 @@ voom_pvals <- function(countData, group, design) {
 }
 ```
 
-Next, each method is added to the *BenchDesign* using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit the **Quickstart Case Study** in the previous section.) We again use the pipe notation for compactness.
+Next, each method is added to the *BenchDesign* using `addBMethod()`, and the corresponding wrapper function passed as `bfunc`. (For a review of the basic usage of `addBMethod()`, revisit Section \@ref(quickstart-case-study).) We again use the pipe notation for compactness.
 
 ```{r}
 bd <- bd %>%
@@ -350,7 +351,7 @@ sb
 
 ## Benchmark Evaluation
 
-By running the code above, the results of three differential expression methods (`r BiocStyle::Biocpkg("edgeR")`, `r BiocStyle::Biocpkg("limma")`-voom and `r BiocStyle::Biocpkg("DESeq2")` will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric()`, as described before in Section \@ref(performanceMetrics). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics()` returns a *data.frame* of these metrics.
+By running the code above, the results of three differential expression methods (`r BiocStyle::Biocpkg("edgeR")`, `r BiocStyle::Biocpkg("limma")`-voom and `r BiocStyle::Biocpkg("DESeq2")` will be stored in a `SummarizedBenchmark` container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function `addPerformanceMetric()`, as described before in Section \@ref(quickstart-case-study). However, in this package there are implementations for several 'default' metrics that are commonly used to evaluate methods. The function `availableMetrics()` returns a *data.frame* of these metrics.
 
 ```{r availableMetrics}
 availableMetrics()
@@ -391,7 +392,7 @@ plotMethodsOverlap( sb, assay="status", alpha=0.1, order.by="freq")
 From the plot above, it is evident that there is a large number of transcripts that are detected to be differentially expressed by all three methods. There are also smallers sets of transcripts that are detected uniquely by a single method or subsets of methods. Another typical way to compare the performance of different methods are Receiver Operating Characteristic (ROC) curves. The function `plotROC()` inputs a *SummarizeBenchmark* object and draws the ROC curves for all methods contained in it. 
 
 ```{r, fig.width=5, fig.height=4}
-plotROC(sb, assay="status")
+SummarizedBenchmark::plotROC(sb, assay="status")
 ```
 
 # Advanced Features
@@ -670,9 +671,4 @@ First, while the `r BiocStyle::Biocpkg("iCOBRA")` package provides support for e
 In both design and structure, the *SummarizedBenchmark* framework is much closer to the `dscr` package. Similar to *SummarizedBenchmark*, the `r BiocStyle::Githubpkg("stephens999/dscr")` framework requires three components: data simulators, methods, and score functions. However, *SummarizedBenchmark* differs from `dscr` notably both by supporting the analysis of non-simulated data and again, by extending the *SummarizedExperiment* class and linking benchmark metadata with results. 
 
 # References
-
-- Dunn OJ. 1961. Multiple Comparisons Among Means. Journal of the American Statistical Association, 56(293):52-64.
-- Benjamini Y and Hochberg Y. 1995. Controlling the false discovery rate: a practical and powerful approach to multiple testing. Journal of the Royal Statistical Society: Series B, 57(1):289-300.
-- Storey JD. 2002. A direct approach to false discovery rates. Journal of the Royal Statistical Society: Series B, 64(3):479-498.
-- [Soneson C, Love MI and Robinson MD. 2016. Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. F1000Research, 4:1521. (doi: 10.12688/f1000research.7563.2)](https://f1000research.com/articles/4-1521/v2)
 

@@ -10,6 +10,7 @@ output:
     highlight: pygments
     toc: true
     fig_width: 5
+bibliography: library.bib
 vignette: >
   %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{Case Study: Single-Cell RNA-Seq Simulation}
@@ -29,9 +30,9 @@ knitr::opts_chunk$set(tidy = FALSE,
 
 # Introduction
 
-Simulated data sets with known ground truths are often used for developing and comparing computational tools for genomic studies. However, the methods and approaches for simulating complex genomic data are rarely unified across studies. Recognizing this problem in the area of single-cell RNA-sequencing (scRNA-seq), the `r BiocStyle::Biocpkg("splatter")` package provides a uniform API for several "simulators" of scRNA-seq data, including the authors' own "Splat" simulator (_Zappia et al., 2017_). In the `r BiocStyle::Biocpkg("splatter")` package, given a set of simulation parameters, each method returns a _SingleCellExperiment_ object of simulated scRNA-seq counts. 
+Simulated data sets with known ground truths are often used for developing and comparing computational tools for genomic studies. However, the methods and approaches for simulating complex genomic data are rarely unified across studies. Recognizing this problem in the area of single-cell RNA-sequencing (scRNA-seq), the `r BiocStyle::Biocpkg("splatter")` package provides a uniform API for several "simulators" of scRNA-seq data, including the authors' own "Splat" simulator [@Zappia_2017]. In the `r BiocStyle::Biocpkg("splatter")` package, given a set of simulation parameters, each method returns a _SingleCellExperiment_ object of simulated scRNA-seq counts. 
 
-Using comparisons presented in _Zappia et al. (2017)_, we illustrate how the _SummarizedBenchmark_ framework can be used to perform comparisons when the output of each method is more complex than a vector of numbers (e.g. a _SingleCellExperiment_).
+Using comparisons presented in [@Zappia_2017], we illustrate how the *SummarizedBenchmark* framework can be used to perform comparisons when the output of each method is more complex than a vector of numbers (e.g. a *SingleCellExperiment*).
 
 # Building the BenchDesign
 
@@ -65,7 +66,7 @@ To make comparisons with the simulated data sets easier, we convert the _Summari
 sce <- as(se, "SingleCellExperiment")
 ```
 
-Each of the simulators in the `r BiocStyle::Biocpkg("splatter")` package follow the `[prefix]Simulate` naming convention, with the corresponding parameter estimation function, `[prefix]Estimate`. Here, we use four methods included in the comparisons of _Zappia et al. (2017)_.
+Each of the simulators in the `r BiocStyle::Biocpkg("splatter")` package follow the `[prefix]Simulate` naming convention, with the corresponding parameter estimation function, `[prefix]Estimate`. Here, we use four methods included in the comparisons of [@Zappia_2017].
 
 ```{r construct-sim-benchdesign}
 bd <- BenchDesign() %>%
@@ -125,7 +126,7 @@ res_compare$Plots$MeanVar
 res_diff$Plots$MeanVar
 ```
 
-While (conveniently) functions already existed for comparing the simulated data sets, we can also define comparison metrics using the _SummarizedBenchmark_ framework with `addPerformanceMetrics()`. We illustrate this feature using the "zeros per cell" and "zeros per gene" metrics shown in Figure 3 of _Zappia et al. (2017)_. Since the metric for each method is a vector (e.g. of zeros per cell) and not a single value, we again use `list` to wrap the output in the `evalFunction`. 
+While (conveniently) functions already existed for comparing the simulated data sets, we can also define comparison metrics using the _SummarizedBenchmark_ framework with `addPerformanceMetrics()`. We illustrate this feature using the "zeros per cell" and "zeros per gene" metrics shown in Figure 3 of [@Zappia_2017]. Since the metric for each method is a vector (e.g. of zeros per cell) and not a single value, we again use `list` to wrap the output in the `evalFunction`. 
 
 ```{r add-performance-metrics}
 sb <- sb %>%
@@ -185,5 +186,3 @@ buildBench(bd,
 ```
 
 # References
-
-- [Zappia L, Phipson B, Oshlack A. 2017. Splatter: Simulation Of Single-Cell RNA Sequencing Data. Genome Biology. (doi:10.1186/s13059-017-1305-0)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-017-1305-0)
