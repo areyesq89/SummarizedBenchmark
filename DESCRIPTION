@@ -12,7 +12,7 @@ Description: This package defines the SummarizedBenchmarck class, which extends
     metrics. It also provides an flexible way to define and evaluate new
     performance metrics.
 biocViews: Software, Infrastructure
-Depends: R (>= 3.5),
+Depends: R (>= 3.4),
          tidyr,
          SummarizedExperiment,
          S4Vectors,
