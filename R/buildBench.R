@@ -200,10 +200,10 @@ buildBench <- function(b, data = NULL, truthCols = NULL, ftCols = NULL, ptabular
                 a$bench <- .expandrows(a$bench, rid = b$bdata[[sortID_col]])
             }
         } else {
-            if (length(unique(sapply(a, length))) > 1) {
+            if (length(unique(sapply(a[!is.na(a)], length))) > 1) {
                 stop("Not all methods returned list or vector of same length.\n",
                      "If this is expected, consider setting sortIDs = TRUE and ",
-                     "requiring all methods to return names lists or vectors.")
+                     "requiring all methods to return named lists or vectors.")
             }
             a <- list("bench" = do.call(cbind, a))
         }
