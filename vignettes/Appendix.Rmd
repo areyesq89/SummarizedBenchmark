@@ -36,13 +36,17 @@ unzip(file.path(d, "samples.zip"), exdir = d)
 fl <- list.files(d, pattern = "*_rsem.txt", full.names=TRUE)
 names(fl) <- gsub("sample(.*)_rsem.txt", "\\1", basename(fl))
 library(tximport)
+library(readr)
+
 txi <- tximport(fl, txIn = TRUE, txOut = TRUE,
                 geneIdCol = "gene_id",
                 txIdCol = "transcript_id",
                 countsCol = "expected_count",
                 lengthCol = "effective_length",
                 abundanceCol = "TPM",
-                countsFromAbundance = "scaledTPM")
+                countsFromAbundance = "scaledTPM",
+                importer = function(x){ read_tsv(x) })
+
 ```
 
 Next, we obtain and load the ground truth information that can be used for evaluating the results of the differential expression analysis.
@@ -53,8 +57,7 @@ download.file(url = paste0("https://www.ebi.ac.uk/arrayexpress/files/",
               destfile = file.path(d, "truth.zip"))
 unzip(file.path(d, "truth.zip"), exdir = d)
 
-library(readr)
-truthdat <- readr::read_tsv(file.path(d, "truth_transcript.txt"))
+truthdat <- read_tsv(file.path(d, "truth_transcript.txt"))
 #save( txi, truthdat, file="../data/soneson2016.rda" )
 ```
 

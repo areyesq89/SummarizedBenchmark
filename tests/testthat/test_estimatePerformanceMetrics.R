@@ -3,7 +3,7 @@ test_that("test='estimatePerformanceMetrics' returns informative messages", {
   data( sb )
   expect_error( estimatePerformanceMetrics( 1:10 ) )
   expect_error( estimatePerformanceMetrics( sb ) )
-  sb <- addPerformanceMetric( sb, evalMetric=c("rejections", "TPR", "TNR", "FPR", "FNR"), assay="qvalue" )
+  sb <- addPerformanceMetric( sb, evalMetric=c("rejections", "TPR", "TNR", "FDR", "FNR"), assay="qvalue" )
   expect_s4_class( estimatePerformanceMetrics( sb ), "DataFrame" )
   tidyRes1 <- estimatePerformanceMetrics( sb, tidy=TRUE )
   expect_s3_class( tidyRes1, "data.frame" )

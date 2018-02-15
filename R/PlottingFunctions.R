@@ -74,10 +74,10 @@ plotROC <- function( object, assay="qvalue" ){
   metricsDf <- do.call( rbind, lapply( colnames(object), function(method){
     or <- order( assays(object)[[assay]][,method] )
     TPR <- cumsum( groundTruths( object )[[assay]][or] ) / sum( groundTruths(object)[[assay]] )
-    FPR <- cumsum( abs(groundTruths( object )[[assay]][or] - 1) ) / seq_along(or)
-    data.frame( method=method, TPR=TPR, FPR=FPR )
+    FDR <- cumsum( abs(groundTruths( object )[[assay]][or] - 1) ) / seq_along(or)
+    data.frame( method=method, TPR=TPR, FDR=FDR )
   } ) )
-  pl <- ggplot( metricsDf, aes(FPR, TPR, col=method) ) +
+  pl <- ggplot( metricsDf, aes(FDR, TPR, col=method) ) +
     geom_line(size=1.2, alpha=.6) + xlim(0, 1) + ylim(0, 1) + geom_abline(linetype="dashed")
   pl
 }

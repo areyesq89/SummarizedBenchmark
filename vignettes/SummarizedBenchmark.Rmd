@@ -357,11 +357,11 @@ By running the code above, the results of three differential expression methods 
 availableMetrics()
 ```
 
-For example, the predefined metrics `rejections`, `TPR`, `TNR`, `FPR` and `FNR` can be added to the assay `H` of our object using the following code,
+For example, the predefined metrics `rejections`, `TPR`, `TNR`, `FDR` and `FNR` can be added to the assay `H` of our object using the following code,
 
 ```{r}
 sb <- addPerformanceMetric( sb, 
-                            evalMetric=c("rejections", "TPR", "TNR", "FPR", "FNR"),
+                            evalMetric=c("rejections", "TPR", "TNR", "FDR", "FNR"),
                             assay="status" )
 names(performanceMetrics(sb)[["status"]])
 ```

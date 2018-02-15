@@ -10,11 +10,11 @@
 #' @export
 availableMetrics <- function(){
   data.frame(
-    functions=c( "rejections", "TPR", "TNR", "FPR", "FNR",
+    functions=c( "rejections", "TPR", "TNR", "FDR", "FNR",
                  "correlation", "sdad", "hamming", "LPnorm",
                  "adjustedRandIndex" ),
     description=c("Number of rejections", "True Positive Rate", "True Negative Rate",
-                  "False Positive Rate", "False Negative Rate", "Pearson correlation",
+                  "False Discovery Rate (estimated)", "False Negative Rate", "Pearson correlation",
                   "Standard Deviation of the Absolute Difference", "Hamming distance",
                   "L_{p} norm", "Adjusted Rand Index"),
     requiresTruth=rep( c(FALSE, TRUE), c( 1, 9 ) ) )
@@ -28,7 +28,7 @@ sb.TNR <- function( query, truth, alpha=0.1 ){
   sum( ( !query < alpha ) & truth == 0 ) / sum( truth == 0 )
 }
 
-sb.FPR <- function( query, truth, alpha=0.1 ){
+sb.FDR <- function( query, truth, alpha=0.1 ){
   sum( query < alpha & truth == 0 ) / sum( query < alpha )
 }
 

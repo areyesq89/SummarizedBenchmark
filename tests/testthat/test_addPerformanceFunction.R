@@ -28,7 +28,7 @@ test_that("test='addPerformanceMetrics' returns correct error messages", {
   expect_error( addPerformanceMetric(
     sb,
     assay="notexisting",
-    evalMetric=c("TPR", "FPR"),
+    evalMetric=c("TPR", "FDR"),
     evalFunction=fun) )
   expect_error( addPerformanceMetric(
     sb,
