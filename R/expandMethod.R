@@ -5,8 +5,8 @@
 #' object with multiple copies of the method differing by the specified
 #' parameter sets.
 #' 
-#' @param b BenchDesign object.
-#' @param blabel Character name of method to be modified.
+#' @param bd BenchDesign object.
+#' @param label Character name of method to be modified.
 #' @param param Character name of parameter to be modified. Should only be
 #'        specified if only one parameter should be replaced in original
 #'        method definition. Only one of `param` or `list` should be
@@ -19,7 +19,7 @@
 #'        Names will be used as the new method names in the BenchDesign object.
 #'        An error will be returned if an existing method name is used.
 #'        (defualt = NULL) 
-#' @param .replace Logical whether original `blabel` object should be removed
+#' @param .replace Logical whether original `label` object should be removed
 #'        if method expansion is successful. (default = FALSE)
 #' @param .overwrite Logical whether to overwrite the existing list of
 #'        parameters (TRUE) or to simply add the new parameters to the existing
@@ -31,34 +31,34 @@
 #' @examples
 #' ## with toy data.frame
 #' df <- data.frame(pval = rnorm(100))
-#' bd <- BenchDesign(df)
+#' bench <- BenchDesign(df)
 #'
 #' ## add basic 'padjust' method
-#' bd <- addBMethod(bd, blabel = "padjust", bfunc = p.adjust,
-#'                  p = pval)
+#' bench <- addMethod(bench, label = "padjust", func = p.adjust,
+#'                    p = pval)
 #'
 #' ## "expand" 'padjust' by adding "method" parameters
-#' bd <- expandBMethod(bd, blabel = "padjust",
-#'                     param = "method",
-#'                     bonf = "bonferonni", BH = "BH",
-#'                     .replace = TRUE)
+#' bench <- expandMethod(bench, label = "padjust",
+#'                       param = "method",
+#'                       bonf = "bonferonni", BH = "BH",
+#'                       .replace = TRUE)
 #'
 #' ## resulting BenchDesign has same methods as following set of calls
-#' bd_alt <- BenchDesign(df)
-#' bd <- addBMethod(bd_alt, blabel = "bonf", bfunc = p.adjust,
-#'                  p = pval, method = "bonferroni")
-#' bd <- addBMethod(bd_alt, blabel = "BH", bfunc = p.adjust,
-#'                  p = pval, method = "BH")
+#' bench_alt <- BenchDesign(df)
+#' bench <- addMethod(bench_alt, label = "bonf", func = p.adjust,
+#'                    p = pval, method = "bonferroni")
+#' bench <- addMethod(bench_alt, label = "BH", func = p.adjust,
+#'                    p = pval, method = "BH")
 #' 
 #' @export
 #' @author Patrick Kimes
-expandBMethod <- function(b, blabel, param = NULL, ...,
+expandMethod <- function(bd, label, param = NULL, ...,
                           .replace = FALSE, .overwrite = FALSE) {
-    UseMethod("expandBMethod")
+    UseMethod("expandMethod")
 }
 
 #' @export
-expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
+expandMethod.BenchDesign <- function(bd, label, param = NULL, ...,
                                       .replace = FALSE, .overwrite = FALSE) { 
     ## capture new parameter sets
     qd <- quos(...)
@@ -67,7 +67,7 @@ expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
     if (any(nchar(names(qd)) == 0)) {
         stop("New parameter values must be named.")
     }
-    if (any(names(qd) %in% names(b$methods))) {
+    if (any(names(qd) %in% names(bd$methods))) {
         stop("New method names should not overlap with names of current methods.")
     }
     if (any(duplicated(names(qd)))) {
@@ -75,10 +75,10 @@ expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
     }
     
     ## verify that method definition already exists
-    if(!(blabel %in% names(b$methods))) {
+    if(!(label %in% names(bd$methods))) {
         stop("Specified method is not defined in BenchDesign.")
     }
-    bm <- b$methods[[blabel]]
+    bm <- bd$methods[[label]]
 
     ## convert new params to named list of quosures
     new_names <- names(qd)
@@ -98,9 +98,9 @@ expandBMethod.BenchDesign <- function(b, blabel, param = NULL, ...,
 
     ## drop source method
     if (.replace) {
-        b$methods <- b$methods[names(b$methods) != blabel]
+        bd$methods <- bd$methods[names(bd$methods) != label]
     }
     
-    b$methods <- c(b$methods, zl)
-    b
+    bd$methods <- c(bd$methods, zl)
+    bd
 } 

@@ -3,39 +3,39 @@
 #' This function takes a BenchDesign object and the name of a method
 #' already defined in the object, and returns a modified BenchDesign
 #' object with the specified changes made only to the named method.
-#' At a minimum, a string name for the method, `blabel`, must be
+#' At a minimum, a string name for the method, `label`, must be
 #' specified in addition to the primary BenchDesign object.
 #' 
-#' @param b BenchDesign object.
-#' @param blabel Character name of method to be modified.
+#' @param bd BenchDesign object.
+#' @param label Character name of method to be modified.
 #' @param ... Named parameter, value pairs to overwrite 
-#'        in method definition. This can include `bfunc`,
-#'        `bpost`, and `bmeta` parameters. All other named parameters
+#'        in method definition. This can include `func`,
+#'        `post`, and `meta` parameters. All other named parameters
 #'        will be added to the list of parameters to be passed to
-#'        `bfunc`.
+#'        `func`.
 #' @param .overwrite Logical whether to overwrite the existing list of
-#'        parameters to be passed to `bfunc` (TRUE), or to simply add
+#'        parameters to be passed to `func` (TRUE), or to simply add
 #'        the new parameters to the existing list (FALSE).
 #'        (default = FALSE) 
 #'        
 #' @examples
 #' ## with toy data.frame
 #' df <- data.frame(pval = runif(100))
-#' bd <- BenchDesign(df)
+#' bench <- BenchDesign(df)
 #'
 #' ## add method
-#' bd <- addBMethod(bd, blabel = "qv",
-#'                  bfunc = qvalue::qvalue,
-#'                  bpost = function(x) { x$qvalue },
-#'                  bmeta = list(note = "storey's q-value"),
+#' bench <- addMethod(bench, label = "qv",
+#'                  func = qvalue::qvalue,
+#'                  post = function(x) { x$qvalue },
+#'                  meta = list(note = "storey's q-value"),
 #'                  p = pval)
 #'
-#' ## modify method 'bmeta' property of 'qv' method
-#' bd <- modifyBMethod(bd, blabel = "qv",
-#'                     bmeta = list(note = "Storey's q-value"))
+#' ## modify method 'meta' property of 'qv' method
+#' bench <- modifyMethod(bench, label = "qv",
+#'                     meta = list(note = "Storey's q-value"))
 #' 
 #' ## verify that method has been updated
-#' showBMethod(bd, "qv")
+#' printMethod(bench, "qv")
 #'
 #' @return
 #' Modified BenchDesign object.
@@ -44,25 +44,25 @@
 #' @import rlang
 #' @export
 #' @author Patrick Kimes
-modifyBMethod <- function(b, blabel, ..., .overwrite = FALSE) {
-    UseMethod("modifyBMethod")
+modifyMethod <- function(bd, label, ..., .overwrite = FALSE) {
+    UseMethod("modifyMethod")
 }
 
 #' @export
-modifyBMethod.BenchDesign <- function(b, blabel, ..., .overwrite = FALSE) {
+modifyMethod.BenchDesign <- function(bd, label, ..., .overwrite = FALSE) {
     ## capture input
     qd <- quos(...)
 
     ## verify that method definition already exists
-    if(!(blabel %in% names(b$methods))) {
+    if(!(label %in% names(bd$methods))) {
         stop("Specified method is not defined in BenchDesign.")
     }
 
     ## modify and add to bench
-    bm <- b$methods[[blabel]]
-    b$methods[[blabel]] <- .modmethod(bm, qd, .overwrite)
+    bm <- bd$methods[[label]]
+    bd$methods[[label]] <- .modmethod(bm, qd, .overwrite)
 
-    return(b)
+    return(bd)
 }
 
 
@@ -83,19 +83,19 @@ modifyBMethod.BenchDesign <- function(b, blabel, ..., .overwrite = FALSE) {
 #' @keywords internal
 #' @author Patrick Kimes
 .modmethod <- function(m, q, .overwrite) {
-    ## parse out bfunc, bpost, bmeta
-    if ("bfunc" %in% names(q)) {
-        m$func <- q$bfunc
+    ## parse out func, post, meta
+    if ("func" %in% names(q)) {
+        m$func <- q$func
     }
-    if ("bpost" %in% names(q)) {
-        m$post <- q$bpost
+    if ("post" %in% names(q)) {
+        m$post <- q$post
     }
-    if ("bmeta" %in% names(q)) {
-        m$meta <- eval_tidy(q$bmeta)
+    if ("meta" %in% names(q)) {
+        m$meta <- eval_tidy(q$meta)
     }
 
-    ## process named parameters to be used for bfunc
-    q <- q[! names(q) %in% c("bfunc", "bpost", "bmeta")]
+    ## process named parameters to be used for func
+    q <- q[! names(q) %in% c("func", "post", "meta")]
     if (.overwrite) {
         m$dparams <- q
     } else {

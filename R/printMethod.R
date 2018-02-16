@@ -1,10 +1,10 @@
 #' Pretty print methods in a BenchDesign
 #'
 #' Print out details about a method included in
-#' the BenchDesign. The `showBMethods` function is just a wrapper
-#' to call `showBMethod` on all methods in the BenchDesign.
+#' the BenchDesign. The `printMethods` function is just a wrapper
+#' to call `printMethod` on all methods in the BenchDesign.
 #' 
-#' @param b BenchDesign object.
+#' @param bd BenchDesign object.
 #' @param n name of a method in the BenchDesign to show.
 #'
 #' @return
@@ -12,39 +12,39 @@
 #'
 #' @examples
 #' ## create empty BenchDesign
-#' bd <- BenchDesign()
+#' bench <- BenchDesign()
 #'
 #' ## currently no methods
-#' showBMethods(bd)
+#' printMethods(bench)
 #'
 #' ## add method
-#' bd <- addBMethod(bd, blabel = "method_a", p.adjust)
-#' bd <- addBMethod(bd, blabel = "method_b", qvalue::qvalue)
+#' bench <- addMethod(bench, label = "method_a", p.adjust)
+#' bench <- addMethod(bench, label = "method_b", qvalue::qvalue)
 #'
 #' ## show a single method
-#' showBMethod(bd, "method_a")
+#' printMethod(bench, "method_a")
 #'
 #' ## show all methods
-#' showBMethods(bd)
+#' printMethods(bench)
 #' 
 #' @md
 #' @import rlang
 #' @importFrom stringr str_trunc str_pad
 #' @export
 #' @author Patrick Kimes
-showBMethod <- function(b, n) {
-    stopifnot(n %in% names(b$methods))
+printMethod <- function(bd, n) {
+    stopifnot(n %in% names(bd$methods))
 
     cat(stringr::str_pad(paste0(n, " "), 60, "right", pad = "-"), "\n")
 
-    m <- b$methods[[n]]
-    cat("bfunc:\n")
+    m <- bd$methods[[n]]
+    cat("func:\n")
     cat("    ", quo_text(m$func), "\n")
 
-    cat("bpost:\n")
+    cat("post:\n")
     cat("    ", quo_text(m$post), "\n")
 
-    cat("bmeta:\n")
+    cat("meta:\n")
     if (!is.null(m$meta)) {
         mmeta <- eval_tidy(m$meta)
         meta_n <- names(mmeta)
@@ -67,11 +67,11 @@ showBMethod <- function(b, n) {
 }
 
 
-#' @rdname showBMethod
+#' @rdname printMethod
 #' @export
 #' @author Patrick Kimes
-showBMethods <- function(b) {
-    for (n in names(b$methods)) {
-        showBMethod(b, n)
+printMethods <- function(bd) {
+    for (n in names(bd$methods)) {
+        printMethod(bd, n)
     }
 }

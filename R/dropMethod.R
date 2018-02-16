@@ -4,8 +4,8 @@
 #' already defined in the object, and returns a reduced BenchDesign
 #' object with the specified method removed.
 #'
-#' @param b BenchDesign object.
-#' @param blabel Character name of method to be modified.
+#' @param bd BenchDesign object.
+#' @param label Character name of method to be modified.
 #'
 #' @return
 #' Modified BenchDesign object.
@@ -13,32 +13,32 @@
 #' @examples
 #' ## with toy data.frame
 #' df <- data.frame(pval = rnorm(100))
-#' bd <- BenchDesign(df)
+#' bench <- BenchDesign(df)
 #'
 #' ## add methods
-#' bd <- addBMethod(bd, blabel = "bonf", bfunc = p.adjust,
-#'                  p = pval, method = "bonferroni")
-#' bd <- addBMethod(bd, blabel = "BH", bfunc = p.adjust,
-#'                  p = pval, method = "BH")
+#' bench <- addMethod(bench, label = "bonf", func = p.adjust,
+#'                    p = pval, method = "bonferroni")
+#' bench <- addMethod(bench, label = "BH", func = p.adjust,
+#'                    p = pval, method = "BH")
 #'
 #' ## remove methods
-#' bd <- dropBMethod(bd, blabel = "bonf")
+#' bench <- dropMethod(bench, label = "bonf")
 #' 
 #' @md
 #' @export
 #' @author Patrick Kimes
-dropBMethod <- function(b, blabel) {
-    UseMethod("dropBMethod")
+dropMethod <- function(bd, label) {
+    UseMethod("dropMethod")
 }
 
 #' @export
-dropBMethod.BenchDesign <- function(b, blabel) {
+dropMethod.BenchDesign <- function(bd, label) {
     ## verify that method definition already exists
-    if(!(blabel %in% names(b$methods))) {
+    if(!(label %in% names(bd$methods))) {
         stop("Specified method is not defined in BenchDesign.")
     }
 
-    b$methods[blabel] <- NULL
-    return(b)
+    bd$methods[label] <- NULL
+    return(bd)
 }
 
