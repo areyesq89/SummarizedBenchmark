@@ -9,16 +9,16 @@ data(tdat)
 test_that("basic buildBench call works", {
     ## basic BenchDesign
     bd <- BenchDesign(tdat)
-    bd <- addBMethod(bd,
-                     blabel = "bonf",
-                     bfunc = p.adjust,
-                     p = pval, method = "bonferroni",
-                     bmeta = list(purpose = "for testing"))
-    bd <- addBMethod(bd,
-                     blabel = "bh",
-                     bfunc = p.adjust,
-                     p = pval, method = "BH",
-                     bmeta = list(purpose = "for comparing"))
+    bd <- addMethod(bd,
+                    label = "bonf",
+                    func = p.adjust,
+                    p = pval, method = "bonferroni",
+                    meta = list(purpose = "for testing"))
+    bd <- addMethod(bd,
+                    label = "bh",
+                    func = p.adjust,
+                    p = pval, method = "BH",
+                    meta = list(purpose = "for comparing"))
 
     ## check simplest call returns SummarizedBenchmark with an assay
     expect_silent(sb <- buildBench(bd))
@@ -44,16 +44,16 @@ test_that("basic buildBench call works", {
 
     ## empty BenchDesign
     bd_empty <- BenchDesign()
-    bd_empty <- addBMethod(bd_empty,
-                           blabel = "bonf",
-                           bfunc = p.adjust,
-                           p = pval, method = "bonferroni",
-                           bmeta = list(purpose = "for testing"))
-    bd_empty <- addBMethod(bd_empty,
-                           blabel = "bh",
-                           bfunc = p.adjust,
-                           p = pval, method = "BH",
-                           bmeta = list(purpose = "for comparing"))
+    bd_empty <- addMethod(bd_empty,
+                          label = "bonf",
+                          func = p.adjust,
+                          p = pval, method = "bonferroni",
+                          meta = list(purpose = "for testing"))
+    bd_empty <- addMethod(bd_empty,
+                          label = "bh",
+                          func = p.adjust,
+                          p = pval, method = "BH",
+                          meta = list(purpose = "for comparing"))
 
     ## check call with data specified at buildBench step
     expect_silent(sb_empty <- buildBench(bd_empty, data = tdat))
@@ -61,17 +61,17 @@ test_that("basic buildBench call works", {
 
     ## BenchDesign with keyword metadata
     bd_kw <- BenchDesign(tdat)
-    bd_kw <- addBMethod(bd_kw,
-                        blabel = "bonf",
-                        bfunc = p.adjust,
-                        p = pval, method = "bonferroni",
-                        bmeta = list(pkg_func = rlang::quo(testthat::expect_equal)))
-    bd_kw <- addBMethod(bd_kw,
-                        blabel = "bh",
-                        bfunc = p.adjust,
-                        p = pval, method = "BH",
-                        bmeta = list(purpose = "for comparing",
-                                     pkg_vers = "100", pkg_name = "nothing"))
+    bd_kw <- addMethod(bd_kw,
+                       label = "bonf",
+                       func = p.adjust,
+                       p = pval, method = "bonferroni",
+                       meta = list(pkg_func = rlang::quo(testthat::expect_equal)))
+    bd_kw <- addMethod(bd_kw,
+                       label = "bh",
+                       func = p.adjust,
+                       p = pval, method = "BH",
+                       meta = list(purpose = "for comparing",
+                                   pkg_vers = "100", pkg_name = "nothing"))
 
     expect_silent(sb_kw <- buildBench(bd_kw))
     expect_equal(colData(sb_kw)$pkg_name, c("testthat", "nothing"))
@@ -83,26 +83,26 @@ test_that("basic buildBench call works", {
 test_that("multi-assay BenchDesigns are handled", {
     ## multi-assay BenchDesign
     bd <- BenchDesign(tdat)
-    bd <- addBMethod(bd,
-                     blabel = "bonf",
-                     bfunc = p.adjust,
-                     p = pval, method = "bonferroni",
-                     bpost = list(a1 = function(x) { x * 1 },
-                                  a2 = function(x) { x * 2 }),
-                     bmeta = list(purpose = "for testing"))
-    bd <- addBMethod(bd,
-                     blabel = "bh",
-                     bfunc = p.adjust,
-                     p = pval, method = "BH",
-                     bpost = list(a1 = function(x) { x },
-                                  a2 = function(x) { x / 2 }),
-                     bmeta = list(purpose = "for comparing"))
+    bd <- addMethod(bd,
+                    label = "bonf",
+                    func = p.adjust,
+                    p = pval, method = "bonferroni",
+                    post = list(a1 = function(x) { x * 1 },
+                                a2 = function(x) { x * 2 }),
+                    meta = list(purpose = "for testing"))
+    bd <- addMethod(bd,
+                    label = "bh",
+                    func = p.adjust,
+                    p = pval, method = "BH",
+                    post = list(a1 = function(x) { x },
+                                a2 = function(x) { x / 2 }),
+                    meta = list(purpose = "for comparing"))
 
     ## check returns SummarizedBenchmark with 2 assays
     expect_silent(sb <- buildBench(bd, truthCols = c(a1 = "H", a2 = "effect_size")))
     expect_equal(colnames(sb), c("bonf", "bh"))
     expect_equal(names(assays(sb)), c("a1", "a2"))
-    ## check bpost functions evaluated as defined
+    ## check post functions evaluated as defined
     expect_equal(assay(sb, "a1")[, "bonf"] * 2,
                  assay(sb, "a2")[, "bonf"])
     expect_equal(assay(sb, "a1")[, "bh"] / 2,
@@ -116,20 +116,20 @@ test_that("multi-assay BenchDesigns are handled", {
 test_that("parallelization is accepted", {
     ## multi-assay BenchDesign
     bd <- BenchDesign(tdat)
-    bd <- addBMethod(bd,
-                     blabel = "bonf",
-                     bfunc = p.adjust,
-                     p = pval, method = "bonferroni",
-                     bpost = list(a1 = function(x) { x * 1 },
-                                  a2 = function(x) { x * 2 }),
-                     bmeta = list(purpose = "for testing"))
-    bd <- addBMethod(bd,
-                     blabel = "bh",
-                     bfunc = p.adjust,
-                     p = pval, method = "BH",
-                     bpost = list(a1 = function(x) { x },
-                                  a2 = function(x) { x / 2 }),
-                     bmeta = list(purpose = "for comparing"))
+    bd <- addMethod(bd,
+                    label = "bonf",
+                    func = p.adjust,
+                    p = pval, method = "bonferroni",
+                    post = list(a1 = function(x) { x * 1 },
+                                a2 = function(x) { x * 2 }),
+                    meta = list(purpose = "for testing"))
+    bd <- addMethod(bd,
+                    label = "bh",
+                    func = p.adjust,
+                    p = pval, method = "BH",
+                    post = list(a1 = function(x) { x },
+                                a2 = function(x) { x / 2 }),
+                    meta = list(purpose = "for comparing"))
 
     ## compare output run with and without parallelization
     sb <- buildBench(bd, parallel = FALSE)
@@ -147,45 +147,45 @@ test_that("errors thrown with inappropriate inputs", {
     expect_error(sb <- buildBench(BenchDesign(tdat)),
                  "list of methods in BenchDesign is empty")
 
-    ## check error if bpost only list for one method
-    bd <- addBMethod(BenchDesign(tdat), blabel = "bonf",
-                     bfunc = p.adjust, p = pval, method = "bonferroni",
-                     bpost = list(a1 = function(x) { x * 1 }))
-    bd <- addBMethod(bd, blabel = "bh",
-                     bfunc = p.adjust, p = pval, method = "BH",
-                     bpost = function(x) { x * 1 })
-    expect_error(buildBench(bd), "Inconsistent bpost specification style across methods.")
+    ## check error if post only list for one method
+    bd <- addMethod(BenchDesign(tdat), label = "bonf",
+                    func = p.adjust, p = pval, method = "bonferroni",
+                    post = list(a1 = function(x) { x * 1 }))
+    bd <- addMethod(bd, label = "bh",
+                    func = p.adjust, p = pval, method = "BH",
+                    post = function(x) { x * 1 })
+    expect_error(buildBench(bd), "Inconsistent post specification style across methods.")
 
-    ## check error in bpost specification if inconsistent length across methods
-    bd <- addBMethod(BenchDesign(tdat), blabel = "bonf",
-                     bfunc = p.adjust, p = pval, method = "bonferroni",
-                     bpost = list(a1 = function(x) { x * 1 }, a2 = function(x) { x * 2 }))
-    bd <- addBMethod(bd, blabel = "bh",
-                     bfunc = p.adjust, p = pval, method = "BH",
-                     bpost = list(a1 = function(x) { x }))
-    expect_error(buildBench(bd), "Inconsistent bpost length across methods.")
+    ## check error in post specification if inconsistent length across methods
+    bd <- addMethod(BenchDesign(tdat), label = "bonf",
+                    func = p.adjust, p = pval, method = "bonferroni",
+                    post = list(a1 = function(x) { x * 1 }, a2 = function(x) { x * 2 }))
+    bd <- addMethod(bd, label = "bh",
+                    func = p.adjust, p = pval, method = "BH",
+                    post = list(a1 = function(x) { x }))
+    expect_error(buildBench(bd), "Inconsistent post length across methods.")
 
-    ## check error in bpost specification if inconsistent naming across methods
-    bd <- addBMethod(BenchDesign(tdat), blabel = "bonf",
-                     bfunc = p.adjust, p = pval, method = "bonferroni",
-                     bpost = list(a1 = function(x) { x * 1 }, a2 = function(x) { x * 2 }))
-    bd <- addBMethod(bd, blabel = "bh",
-                     bfunc = p.adjust, p = pval, method = "BH",
-                     bpost = list(a100 = function(x) { x }, a200 = function(x) { x * 2 }))
-    expect_error(buildBench(bd), "Inconsistent bpost naming across methods.")
+    ## check error in post specification if inconsistent naming across methods
+    bd <- addMethod(BenchDesign(tdat), label = "bonf",
+                    func = p.adjust, p = pval, method = "bonferroni",
+                    post = list(a1 = function(x) { x * 1 }, a2 = function(x) { x * 2 }))
+    bd <- addMethod(bd, label = "bh",
+                    func = p.adjust, p = pval, method = "BH",
+                    post = list(a100 = function(x) { x }, a200 = function(x) { x * 2 }))
+    expect_error(buildBench(bd), "Inconsistent post naming across methods.")
 
     ## check error if truthCols not column in original data
-    bd <- addBMethod(BenchDesign(tdat), blabel = "bonf", bfunc = p.adjust, p = pval, method = "bonferroni")
-    bd <- addBMethod(bd, blabel = "bh", bfunc = p.adjust, p = pval, method = "BH")
+    bd <- addMethod(BenchDesign(tdat), label = "bonf", func = p.adjust, p = pval, method = "bonferroni")
+    bd <- addMethod(bd, label = "bh", func = p.adjust, p = pval, method = "BH")
     expect_error(buildBench(bd, truthCols = "apple"))
     
-    ## check error if truthCols names don't match assay names when bpost specified as list 
-    bd <- addBMethod(BenchDesign(tdat), blabel = "bonf",
-                     bfunc = p.adjust, p = pval, method = "bonferroni",
-                     bpost = list(a1 = function(x) { x * 1 }))
-    bd <- addBMethod(bd, blabel = "bh",
-                     bfunc = p.adjust, p = pval, method = "BH",
-                     bpost = list(a1 = function(x) { x }))
+    ## check error if truthCols names don't match assay names when post specified as list 
+    bd <- addMethod(BenchDesign(tdat), label = "bonf",
+                    func = p.adjust, p = pval, method = "bonferroni",
+                    post = list(a1 = function(x) { x * 1 }))
+    bd <- addMethod(bd, label = "bh",
+                    func = p.adjust, p = pval, method = "BH",
+                    post = list(a1 = function(x) { x }))
     expect_error(buildBench(bd, truthCols = "H"))
 
     ## check error if invalid ftCols is specified
@@ -200,10 +200,10 @@ test_that("buildBench can handle sortIDs", {
     
     ## basic BenchDesign w/ 1 assay, different length output
     bd1 <- BenchDesign(newdat)
-    bd1 <- addBMethod(bd1, blabel = "abc",
-                      bfunc = function() { c(a = 1, b = 2, c = 3) })
-    bd1 <- addBMethod(bd1, blabel = "bcef",
-                      bfunc = function() { c(b = 11, c = 12, e = 13, f = 15) })
+    bd1 <- addMethod(bd1, label = "abc",
+                     func = function() { c(a = 1, b = 2, c = 3) })
+    bd1 <- addMethod(bd1, label = "bcef",
+                     func = function() { c(b = 11, c = 12, e = 13, f = 15) })
     
     ## check behavior when output has unequal lengths
     expect_error(buildBench(bd1))
@@ -224,14 +224,14 @@ test_that("buildBench can handle sortIDs", {
 
     ## basic BenchDesign w/ 2 assays, different length output
     bd2 <- BenchDesign(newdat)
-    bd2 <- addBMethod(bd2, blabel = "abc",
-                      bfunc = function() { c(a = 1, b = 2, c = 3) },
-                      bpost = list(o1 = function(x) { x },
-                                   o2 = function(x) { x*2 }))
-    bd2 <- addBMethod(bd2, blabel = "bcef",
-                      bfunc = function() { c(b = 11, c = 12, e = 13, f = 15) },
-                      bpost = list(o1 = function(x) { x },
-                                   o2 = function(x) { x*2 }))
+    bd2 <- addMethod(bd2, label = "abc",
+                     func = function() { c(a = 1, b = 2, c = 3) },
+                     post = list(o1 = function(x) { x },
+                                 o2 = function(x) { x*2 }))
+    bd2 <- addMethod(bd2, label = "bcef",
+                     func = function() { c(b = 11, c = 12, e = 13, f = 15) },
+                     post = list(o1 = function(x) { x },
+                                 o2 = function(x) { x*2 }))
 
     ## check behavior when output has unequal lengths
     expect_error(buildBench(bd2))

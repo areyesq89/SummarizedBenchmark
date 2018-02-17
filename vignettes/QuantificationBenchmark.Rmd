@@ -167,7 +167,7 @@ runSailfish <- function( sample, args="-l IU" ){
 
 ```
 
-Having defined these functions, we can now design our benchmark experiment using the `BenchDesign()` and `addBMethod()` functions. For this specific experiment, we will run *salmon*, *sailfish* and *kallisto*. In addition, we will run *kallisto* and *salmon* both with default parameters and with their respective options to model for sequencing bias.
+Having defined these functions, we can now design our benchmark experiment using the `BenchDesign()` and `addMethod()` functions. For this specific experiment, we will run *salmon*, *sailfish* and *kallisto*. In addition, we will run *kallisto* and *salmon* both with default parameters and with their respective options to model for sequencing bias.
 	
 ```{r, eval=FALSE}
 
@@ -175,43 +175,43 @@ library(SummarizedBenchmark)
 library(tximport)
 
 b <- BenchDesign() %>%
-    addBMethod(
-        blabel="kallisto-default",
-        bfunc=runKallisto,
+    addMethod(
+        label="kallisto-default",
+        func=runKallisto,
         sample=sample,
         args="-t 16",
-        bmeta=list( version=getKallistoVersion() )
+        meta=list( version=getKallistoVersion() )
     ) %>%
-    addBMethod(
-        blabel="kallisto-bias",
-        bfunc=runKallisto,
+    addMethod(
+        label="kallisto-bias",
+        func=runKallisto,
         sample=sample,
         args="--bias -t 16",
-        bmeta=list( version=getKallistoVersion() )
+        meta=list( version=getKallistoVersion() )
     ) %>%
-    addBMethod(
-        blabel="salmon-default",
-        bfunc=runSalmon,
+    addMethod(
+        label="salmon-default",
+        func=runSalmon,
         sample=sample,
         args="-l IU -p 16",
-        bmeta=list( version=getSalmonVersion() )
+        meta=list( version=getSalmonVersion() )
     ) %>%
-    addBMethod(
-        blabel="salmon-gcBias",
-        bfunc=runSalmon,
+    addMethod(
+        label="salmon-gcBias",
+        func=runSalmon,
         sample=sample,
         args="-l IU --gcBias -p 16",
-        bmeta=list( version=getSalmonVersion() )
+        meta=list( version=getSalmonVersion() )
     ) %>%
-    addBMethod(
-        blabel="sailfish-default",
-        bfunc=runSailfish,
+    addMethod(
+        label="sailfish-default",
+        func=runSailfish,
         sample=sample,
         args="-l IU -p 16",
-        bmeta=list( version=getSailfishVersion() )
+        meta=list( version=getSailfishVersion() )
     )
 
-showBMethods( b )
+printMethods( b )
 
 ```
 	
@@ -270,14 +270,14 @@ tidyData <- data.frame(
   PC1=pcaRes$x[,"PC1"], 
   PC2=pcaRes$x[,"PC2"], 
   sample=colData( allSB )$sample[sampleIndexes], 
-  blabel=colData( allSB )$blabel[sampleIndexes] )
+  label=colData( allSB )$label[sampleIndexes] )
 
 tidyData <- tidyData %>%
   dplyr::mutate( 
-    method=gsub( "-.*$", "", blabel) )
+    method=gsub( "-.*$", "", label) )
 
 tidyData %>%
-  ggplot( aes( PC1, PC2, colour=blabel ) ) +
+  ggplot( aes( PC1, PC2, colour=label ) ) +
   geom_point() + coord_fixed() +
   ylab(sprintf( "PC2 (%0.2f %%)", varExp[2]) ) +
   xlab(sprintf( "PC1 (%0.2f %%)", varExp[1]) ) +
@@ -310,14 +310,14 @@ houseMouse <-
                                   houseHuman]
 
 condInfo <- 
-  colData( allSB )[colData( allSB )$blabel == "kallisto-default","tissue"]
+  colData( allSB )[colData( allSB )$label == "kallisto-default","tissue"]
 replicateInfo <- condInfo
 evaluationFeature <- rep( TRUE, length.out = nrow( allSB ) )
 calibrationFeature <- 
   gsub( "\\.\\d+", "", rownames(allSB) ) %in% houseMouse
 unitReference <- 1
 quantificationList <- lapply( 
-  split( seq_along( colnames( allSB ) ), colData( allSB )$blabel ), 
+  split( seq_along( colnames( allSB ) ), colData( allSB )$label ), 
   function(x){
     assay( allSB )[,x]
   } )

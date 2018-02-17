@@ -70,25 +70,25 @@ Each of the simulators in the `r BiocStyle::Biocpkg("splatter")` package follow 
 
 ```{r construct-sim-benchdesign}
 bd <- BenchDesign() %>%
-    addBMethod("splat", splatSimulate,
-               params = splatEstimate(in_data), dropout.present = FALSE,
-               verbose = in_verbose, seed = in_seed,
-               bpost = list) %>% 
-    addBMethod("splat.drop", splatSimulate,
-               params = splatEstimate(in_data), dropout.present = TRUE, 
-               verbose = in_verbose, seed = in_seed,
-               bpost = list) %>% 
-    addBMethod("simple", simpleSimulate,
-               params = simpleEstimate(in_data),
-               verbose = in_verbose, seed = in_seed, 
-               bpost = list) %>%
-    addBMethod("lun", lunSimulate,
-               params = lunEstimate(in_data),
-               verbose = in_verbose, seed = in_seed,
-               bpost = list)
+    addMethod("splat", splatSimulate,
+              params = splatEstimate(in_data), dropout.present = FALSE,
+              verbose = in_verbose, seed = in_seed,
+              post = list) %>% 
+    addMethod("splat.drop", splatSimulate,
+              params = splatEstimate(in_data), dropout.present = TRUE, 
+              verbose = in_verbose, seed = in_seed,
+              post = list) %>% 
+    addMethod("simple", simpleSimulate,
+              params = simpleEstimate(in_data),
+              verbose = in_verbose, seed = in_seed, 
+              post = list) %>%
+    addMethod("lun", lunSimulate,
+              params = lunEstimate(in_data),
+              verbose = in_verbose, seed = in_seed,
+              post = list)
 ```
 
-Each simulator returns a single _SingleCellExperiment_ object containing the simulated scRNA-seq counts. However, to fit the _SummarizedBenchmark_ structure, each method in the _BenchDesign_ must return a vector or a list. To handle the non-standard output of the methods, we add `bpost = list` in each `addBMethod` call to wrap each _SingleCellExperiment_ object in a list. 
+Each simulator returns a single _SingleCellExperiment_ object containing the simulated scRNA-seq counts. However, to fit the _SummarizedBenchmark_ structure, each method in the _BenchDesign_ must return a vector or a list. To handle the non-standard output of the methods, we add `post = list` in each `addMethod` call to wrap each _SingleCellExperiment_ object in a list. 
 
 # Running the Benchmark Experiment
 
@@ -144,11 +144,11 @@ sb <- sb %>%
         })
 ```
 
-Next, the metrics are calculated using `estimatePerformanceMetrics`. For plotting, we only keep the `blabel`, `value`, and `performanceMetric` columns of the returned table.
+Next, the metrics are calculated using `estimatePerformanceMetrics`. For plotting, we only keep the `label`, `value`, and `performanceMetric` columns of the returned table.
 
 ```{r compute-performance-metrics}
 sbmets <- estimatePerformanceMetrics(sb, tidy = TRUE)
-sbmets  <- dplyr::select(sbmets, blabel, value, performanceMetric)
+sbmets  <- dplyr::select(sbmets, label, value, performanceMetric)
 head(sbmets)
 ```
 
@@ -162,8 +162,8 @@ head(sbmets)
 Finally, the performance metrics can be explored using standard plotting functions.
 
 ```{r plot-performace-metrics}
-ggplot(sbmets, aes(x = blabel, y = value,
-                   color = blabel, fill = blabel)) +
+ggplot(sbmets, aes(x = label, y = value,
+                   color = label, fill = label)) +
     geom_boxplot(alpha = 1/2) +
     xlab("method") +
     scale_color_discrete("method") + 
