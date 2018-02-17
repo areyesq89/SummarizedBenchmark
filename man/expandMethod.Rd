@@ -4,29 +4,26 @@
 \alias{expandMethod}
 \title{Expand method in BenchDesign object across parameter settings}
 \usage{
-expandMethod(bd, label, param = NULL, ..., .replace = FALSE,
+expandMethod(bd, label, params, onlyone = NULL, .replace = FALSE,
   .overwrite = FALSE)
 }
 \arguments{
 \item{bd}{BenchDesign object.}
 
-\item{label}{Character name of method to be modified.}
+\item{label}{Character name of method to be expanded.}
 
-\item{param}{Character name of parameter to be modified. Should only be
-specified if only one parameter should be replaced in original
-method definition. Only one of `param` or `list` should be
-specified. (default = NULL)}
+\item{params}{Named list of quosure lists specifying the label of the
+new methods to be added to the BenchDesign, and the set of
+parameters to overwrite in the original method definition for
+each new method. Alternatively, if \code{onlyone} is non-NULL, a single quosure
+list with \code{name = value} pairs specifying the label of the new methods and
+the values to use for overwriting the parameter specified in \code{onlyone}.}
 
-\item{...}{If `param != NULL`, named values to use for
-overwriting the specified parameter in the original method definition.
-If `param = NULL`, then named lists of parameter sets to be used in
-place of parameters in the original method definition. Each parameter set
-should also be a named list of parameter, value pairs.
-Names will be used as the new method names in the BenchDesign object.
-An error will be returned if an existing method name is used.
-(defualt = NULL)}
+\item{onlyone}{Character name of a parameter to be modified. Only specify
+if just a single parameter should be replaced in the original
+method definition. Ignored if NULL. (default = NULL)}
 
-\item{.replace}{Logical whether original `label` object should be removed
+\item{.replace}{Logical whether original \code{label} object should be removed
 if method expansion is successful. (default = FALSE)}
 
 \item{.overwrite}{Logical whether to overwrite the existing list of
@@ -39,8 +36,9 @@ Modified BenchDesign object.
 \description{
 This function takes a BenchDesign object and the name of a method
 already defined in the object, and returns a modified BenchDesign
-object with multiple copies of the method differing by the specified
-parameter sets.
+object with multiple variants of the method differing only by the
+specified parameter sets. In other words, this function "expands"
+the set of methods using a set of parameters.
 }
 \examples{
 ## with toy data.frame
@@ -50,22 +48,24 @@ bench <- BenchDesign(df)
 ## add basic 'padjust' method
 bench <- addMethod(bench, label = "padjust",
                    func = p.adjust,
-                   params = rlang::quos(p = pval))
+                   params = rlang::quos(p = pval,
+                                        method = "none"))
 
-## "expand" 'padjust' by adding "method" parameters
-bench <- expandMethod(bench, label = "padjust",
-                      param = "method",
-                      bonf = "bonferonni", BH = "BH",
-                      .replace = TRUE)
+## modify multiple parameters, "p" and "method"
+bench_exp <- expandMethod(bench, label = "padjust",
+                          params = list(
+        bonf = rlang::quos(p = round(pval, 5),
+                           method = "bonferonni"),
+        bh = rlang::quos(p = round(pval, 3),
+                         method = "BH")))
+printMethods(bench_exp)
 
-## resulting BenchDesign has same methods as following set of calls
-bench_alt <- BenchDesign(df)
-bench <- addMethod(bench_alt, label = "bonf",
-                   func = p.adjust,
-                   params = rlang::quos(p = pval, method = "bonferroni"))
-bench <- addMethod(bench_alt, label = "BH",
-                   func = p.adjust,
-                   params = rlang::quos(p = pval, method = "BH"))
+## only modify a single parameter using the 'onlyone=' parameter
+bench_exp <- expandMethod(bench, label = "padjust",
+                          onlyone = "method",
+                          params = rlang::quos(bonf = "bonferonni",
+                                               BH = "BH"))
+printMethods(bench_exp)
 
 }
 \author{

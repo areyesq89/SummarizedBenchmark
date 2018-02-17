@@ -2,23 +2,21 @@
 #'
 #' This function takes a BenchDesign object and the name of a method
 #' already defined in the object, and returns a modified BenchDesign
-#' object with multiple copies of the method differing by the specified
-#' parameter sets.
+#' object with multiple variants of the method differing only by the
+#' specified parameter sets. In other words, this function "expands"
+#' the set of methods using a set of parameters. 
 #' 
 #' @param bd BenchDesign object.
-#' @param label Character name of method to be modified.
-#' @param param Character name of parameter to be modified. Should only be
-#'        specified if only one parameter should be replaced in original
-#'        method definition. Only one of `param` or `list` should be
-#'        specified. (default = NULL)
-#' @param ... If `param != NULL`, named values to use for
-#'        overwriting the specified parameter in the original method definition.
-#'        If `param = NULL`, then named lists of parameter sets to be used in
-#'        place of parameters in the original method definition. Each parameter set
-#'        should also be a named list of parameter, value pairs.
-#'        Names will be used as the new method names in the BenchDesign object.
-#'        An error will be returned if an existing method name is used.
-#'        (defualt = NULL) 
+#' @param label Character name of method to be expanded.
+#' @param params Named list of quosure lists specifying the label of the 
+#'        new methods to be added to the BenchDesign, and the set of
+#'        parameters to overwrite in the original method definition for
+#'        each new method. Alternatively, if `onlyone` is non-NULL, a single quosure
+#'        list with `name = value` pairs specifying the label of the new methods and
+#'        the values to use for overwriting the parameter specified in `onlyone`.
+#' @param onlyone Character name of a parameter to be modified. Only specify
+#'        if just a single parameter should be replaced in the original
+#'        method definition. Ignored if NULL. (default = NULL)
 #' @param .replace Logical whether original `label` object should be removed
 #'        if method expansion is successful. (default = FALSE)
 #' @param .overwrite Logical whether to overwrite the existing list of
@@ -36,38 +34,69 @@
 #' ## add basic 'padjust' method
 #' bench <- addMethod(bench, label = "padjust",
 #'                    func = p.adjust,
-#'                    params = rlang::quos(p = pval))
+#'                    params = rlang::quos(p = pval,
+#'                                         method = "none"))
 #'
-#' ## "expand" 'padjust' by adding "method" parameters
-#' bench <- expandMethod(bench, label = "padjust",
-#'                       param = "method",
-#'                       bonf = "bonferonni", BH = "BH",
-#'                       .replace = TRUE)
+#' ## modify multiple parameters, "p" and "method"
+#' bench_exp <- expandMethod(bench, label = "padjust",
+#'                           params = list(
+#'         bonf = rlang::quos(p = round(pval, 5),
+#'                            method = "bonferonni"),
+#'         bh = rlang::quos(p = round(pval, 3),
+#'                          method = "BH")))
+#' printMethods(bench_exp)
 #'
-#' ## resulting BenchDesign has same methods as following set of calls
-#' bench_alt <- BenchDesign(df)
-#' bench <- addMethod(bench_alt, label = "bonf",
-#'                    func = p.adjust,
-#'                    params = rlang::quos(p = pval, method = "bonferroni"))
-#' bench <- addMethod(bench_alt, label = "BH",
-#'                    func = p.adjust,
-#'                    params = rlang::quos(p = pval, method = "BH"))
-#' 
+#' ## only modify a single parameter using the 'onlyone=' parameter
+#' bench_exp <- expandMethod(bench, label = "padjust",
+#'                           onlyone = "method",
+#'                           params = rlang::quos(bonf = "bonferonni",
+#'                                                BH = "BH"))
+#' printMethods(bench_exp)
+#'
+#' @md
+#' @importFrom rlang is_quosures quos !! :=
 #' @export
 #' @author Patrick Kimes
-expandMethod <- function(bd, label, param = NULL, ...,
+expandMethod <- function(bd, label, params, onlyone = NULL,
                          .replace = FALSE, .overwrite = FALSE) {
     UseMethod("expandMethod")
 }
 
 #' @export
-expandMethod.BenchDesign <- function(bd, label, param = NULL, ...,
-                                     .replace = FALSE, .overwrite = FALSE) { 
-    ## capture new parameter sets
-    qd <- quos(...)
+expandMethod.BenchDesign <- function(bd, label, params, onlyone = NULL, 
+                                     .replace = FALSE, .overwrite = FALSE) {
+    ## parse new inputs
+    if (rlang::is_quosures(params)) {
+        if (is.null(onlyone)) {
+            stop("If onlyone = NULL, a named list of parameter lists must be supplied to ",
+                 "'params =' as a list of quosure lists created using rland::quos.\n",
+                 "e.g. params = list(new_method1 = quos(..), new_method2 = quos(..))")
+        }
+        qd <- lapply(1:length(params), function(zi) {
+            rlang::quos(!! onlyone := !! params[[zi]])
+        })
+        names(qd) <- names(params)
+    } else if (is.list(params) & all(sapply(params, rlang::is_quosures))) {
+        if (!is.null(onlyone)) {
+            stop("If onlyone is non-NULL, a list of parameter values must be supplied to ",
+                 "'params =' as a list of quosures created using rland::quos.\n",
+                 "e.g. params = quos(new_method1 = new_value1, new_method2 = new_value2)")
+        }
+        qd <- params
+    } else {
+        if (is.null(onlyone)) {
+            stop("If 'onlyone = NULL', a named list of parameter lists must be supplied to ",
+                 "'params =' as a list of quosure lists created using rland::quos.\n",
+                 "e.g. params = list(new_method1 = quos(..), new_method2 = quos(..))")
+        } else {
+            stop("If 'onlyone' is non-NULL, a list of parameter values must be supplied to ",
+                 "'params =' as a list of quosures created using rland::quos.\n",
+                 "e.g. params = quos(new_method1 = new_value1, new_method2 = new_value2)")
+        }
+    }
 
     ## verify that parameter names are valid
-    if (any(nchar(names(qd)) == 0)) {
+    if (is.null(names(qd)) | any(nchar(names(qd)) == 0)) {
         stop("New parameter values must be named.")
     }
     if (any(names(qd) %in% names(bd$methods))) {
@@ -82,26 +111,14 @@ expandMethod.BenchDesign <- function(bd, label, param = NULL, ...,
         stop("Specified method is not defined in BenchDesign.")
     }
     bm <- bd$methods[[label]]
-
-    ## convert new params to named list of quosures
-    new_names <- names(qd)
-    if (is.null(param)) {
-        qd <- lapply(1:length(qd), function(zi) {
-            lapply(lang_args(qd[[zi]]), as_quosure)
-        })
-    } else {
-        qd <- lapply(1:length(qd), function(zi) {
-            quos(!! param := !! qd[[zi]])
-        })
-    }
     
     ## handle all using same named list format
     zl <- lapply(qd, .modmethod, m = bm, .overwrite = .overwrite)
-    names(zl) <- new_names
+    names(zl) <- names(qd)
 
     ## drop source method
     if (.replace) {
-        bd$methods <- bd$methods[names(bd$methods) != label]
+        bd <- dropMethod(bd, label)
     }
     
     bd$methods <- c(bd$methods, zl)
