@@ -4,12 +4,12 @@
 \alias{buildBench}
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
-buildBench(b, data = NULL, truthCols = NULL, ftCols = NULL,
+buildBench(bd, data = NULL, truthCols = NULL, ftCols = NULL,
   ptabular = TRUE, sortIDs = FALSE, parallel = FALSE,
   BPPARAM = bpparam())
 }
 \arguments{
-\item{b}{\code{BenchDesign} object.}
+\item{bd}{\code{BenchDesign} object.}
 
 \item{data}{Data set to be used for benchmarking, will take priority over
 data set originally specified to BenchDesign object. 
@@ -21,8 +21,8 @@ the \code{groundTruth} DataFrame for the returned SummarizedBenchmark object.
 If the \code{BenchDesign} includes only a single assay, the same name
 will be used for the assay. If the \code{BenchDesign} includes multiple assays,
 to map data set columns with assays, the vector must have names corresponding
-to the assay names specified to the \code{bpost} parameter at each
-\code{addBMethod} call. (default = NULL)}
+to the assay names specified to the \code{post} parameter at each
+\code{addMethod} call. (default = NULL)}
 
 \item{ftCols}{Vector of character names of columns in data set that should be
 included as feature data (row data) in the returned SummarizedBenchmark
@@ -66,19 +66,19 @@ object.
 \examples{
 ## with toy data.frame
 df <- data.frame(pval = rnorm(100))
-bd <- BenchDesign(df)
+bench <- BenchDesign(df)
 
 ## add methods
-bd <- addBMethod(bd, blabel = "bonf", bfunc = p.adjust,
-                 p = pval, method = "bonferroni")
-bd <- addBMethod(bd, blabel = "BH", bfunc = p.adjust,
-                 p = pval, method = "BH")
+bench <- addMethod(bench, label = "bonf", func = p.adjust,
+                   p = pval, method = "bonferroni")
+bench <- addMethod(bench, label = "BH", func = p.adjust,
+                   p = pval, method = "BH")
 
 ## evaluate benchmark experiment
-sb <- buildBench(bd)
+sb <- buildBench(bench)
 
 ## evaluate benchmark experiment w/ data sepecified
-sb <- buildBench(bd, data = df)
+sb <- buildBench(bench, data = df)
 
 }
 \author{
