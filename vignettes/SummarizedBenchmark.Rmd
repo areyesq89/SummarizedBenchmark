@@ -112,7 +112,7 @@ At a minimum, `addMethod()` requires three parameters:
 2. `label`: a character name for the method, and
 3. `func`: the function to be called.
 
-After the minimum parameters are specified, any parameters needed by the `func` method should be passed as named parameters, e.g. `p = pval, method = "bonferroni"` to the optional parameter, `params =` as a list of [*quosures*](http://rlang.tidyverse.org/reference/quosure.html) using `rlang::quos(..)`. Notice here that the `pval` specified to `rlang::quos(..)` **does not** need to be specified as `tdat$pval` for the function to know that it is a column in the data.frame. For readers familiar with the `r BiocStyle::CRANpkg("ggplot2")` package, the `params = rlang::quos(..)` specification here may be viewed similarly to the `aes = aes(..)` specification in `ggplot2` for mapping between the data and plotting parameters.  
+After the minimum parameters are specified, any parameters needed by the `func` method should be passed as named parameters, e.g. `p = pval, method = "bonferroni"`, to `params =` as a list of [*quosures*](http://rlang.tidyverse.org/reference/quosure.html) using `rlang::quos(..)`. Notice here that the `pval` wrapped in `rlang::quos(..)` **does not** need to be specified as `tdat$pval` for the function to access the column in the data.frame. For readers familiar with the `r BiocStyle::CRANpkg("ggplot2")` package, the use of `params = rlang::quos(..)` here should be viewed similar to the use of `aes = aes(..)` in `ggplot2` for mapping between the data and plotting (or benchmarking) parameters.  
 
 The process of adding methods can be written more concisely using the pipe operators from the `r BiocStyle::CRANpkg("magrittr")` package.
 
