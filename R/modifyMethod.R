@@ -54,10 +54,16 @@ modifyMethod <- function(bd, label, params, .overwrite = FALSE) {
 #' @export
 modifyMethod.BenchDesign <- function(bd, label, params, .overwrite = FALSE) {
     ## verify that method definition already exists
-    if(!(label %in% names(bd$methods))) {
+    if (!(label %in% names(bd$methods))) {
         stop("Specified method is not defined in BenchDesign.")
     }
 
+    if (!rlang::is_quosures(params)) {
+        stop("Please supply 'func' parameters to 'params =' as ",
+             "a list of quosures using rlang::quos.\n",
+             "e.g. params = quos(param1 = x, param2 = y)")
+    }
+    
     ## modify and add to bench
     bm <- bd$methods[[label]]
     bd$methods[[label]] <- .modmethod(bm, params, .overwrite)
@@ -97,9 +103,9 @@ modifyMethod.BenchDesign <- function(bd, label, params, .overwrite = FALSE) {
     ## process named parameters to be used for func
     q <- q[! names(q) %in% c("bd.func", "bd.post", "bd.meta")]
     if (.overwrite) {
-        m$dparams <- q
+        m$params <- q
     } else {
-        m$dparams <- replace(m$dparams, names(q), q)
+        m$params <- replace(m$params, names(q), q)
     }
     
     return(m)

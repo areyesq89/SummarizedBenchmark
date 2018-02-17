@@ -75,7 +75,7 @@
 #'                    params = rlang::quos(p = pval))
 #'
 #' @md
-#' @import rlang
+#' @importFrom rlang enquo quo quos is_quosures
 #' @export
 #' @author Patrick Kimes
 addMethod <- function(bd, label, func, post = NULL, meta = NULL,
@@ -92,9 +92,9 @@ addMethod.BenchDesign <- function(bd, label, func, post = NULL, meta = NULL,
              "e.g. params = quos(param1 = x, param2 = y)")
     }
     ## capture input
-    qf <- enquo(func)
-    qp <- enquo(post)
-    qm <- enquo(meta)
+    qf <- rlang::enquo(func)
+    qp <- rlang::enquo(post)
+    qm <- rlang::enquo(meta)
     
     ## add to bench
     bd$methods[[label]] <- list(func = qf, params = params, 
