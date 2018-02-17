@@ -12,12 +12,12 @@ test_that("basic buildBench call works", {
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
-                    p = pval, method = "bonferroni",
+                    params = rlang::quos(p = pval, method = "bonferroni"),
                     meta = list(purpose = "for testing"))
     bd <- addMethod(bd,
                     label = "bh",
                     func = p.adjust,
-                    p = pval, method = "BH",
+                    params = rlang::quos(p = pval, method = "BH"),
                     meta = list(purpose = "for comparing"))
 
     ## check simplest call returns SummarizedBenchmark with an assay
@@ -47,12 +47,12 @@ test_that("basic buildBench call works", {
     bd_empty <- addMethod(bd_empty,
                           label = "bonf",
                           func = p.adjust,
-                          p = pval, method = "bonferroni",
+                          params = rlang::quos(p = pval, method = "bonferroni"),
                           meta = list(purpose = "for testing"))
     bd_empty <- addMethod(bd_empty,
                           label = "bh",
                           func = p.adjust,
-                          p = pval, method = "BH",
+                          params = rlang::quos(p = pval, method = "BH"),
                           meta = list(purpose = "for comparing"))
 
     ## check call with data specified at buildBench step
@@ -64,12 +64,12 @@ test_that("basic buildBench call works", {
     bd_kw <- addMethod(bd_kw,
                        label = "bonf",
                        func = p.adjust,
-                       p = pval, method = "bonferroni",
+                       params = rlang::quos(p = pval, method = "bonferroni"),
                        meta = list(pkg_func = rlang::quo(testthat::expect_equal)))
     bd_kw <- addMethod(bd_kw,
                        label = "bh",
                        func = p.adjust,
-                       p = pval, method = "BH",
+                       params = rlang::quos(p = pval, method = "BH"),
                        meta = list(purpose = "for comparing",
                                    pkg_vers = "100", pkg_name = "nothing"))
 
@@ -86,14 +86,14 @@ test_that("multi-assay BenchDesigns are handled", {
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
-                    p = pval, method = "bonferroni",
+                    params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 },
                                 a2 = function(x) { x * 2 }),
                     meta = list(purpose = "for testing"))
     bd <- addMethod(bd,
                     label = "bh",
                     func = p.adjust,
-                    p = pval, method = "BH",
+                    params = rlang::quos(p = pval, method = "BH"),
                     post = list(a1 = function(x) { x },
                                 a2 = function(x) { x / 2 }),
                     meta = list(purpose = "for comparing"))
@@ -119,14 +119,14 @@ test_that("parallelization is accepted", {
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
-                    p = pval, method = "bonferroni",
+                    params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 },
                                 a2 = function(x) { x * 2 }),
                     meta = list(purpose = "for testing"))
     bd <- addMethod(bd,
                     label = "bh",
                     func = p.adjust,
-                    p = pval, method = "BH",
+                    params = rlang::quos(p = pval, method = "BH"),
                     post = list(a1 = function(x) { x },
                                 a2 = function(x) { x / 2 }),
                     meta = list(purpose = "for comparing"))
@@ -149,42 +149,44 @@ test_that("errors thrown with inappropriate inputs", {
 
     ## check error if post only list for one method
     bd <- addMethod(BenchDesign(tdat), label = "bonf",
-                    func = p.adjust, p = pval, method = "bonferroni",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 }))
     bd <- addMethod(bd, label = "bh",
-                    func = p.adjust, p = pval, method = "BH",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
                     post = function(x) { x * 1 })
     expect_error(buildBench(bd), "Inconsistent post specification style across methods.")
 
     ## check error in post specification if inconsistent length across methods
     bd <- addMethod(BenchDesign(tdat), label = "bonf",
-                    func = p.adjust, p = pval, method = "bonferroni",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 }, a2 = function(x) { x * 2 }))
     bd <- addMethod(bd, label = "bh",
-                    func = p.adjust, p = pval, method = "BH",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
                     post = list(a1 = function(x) { x }))
     expect_error(buildBench(bd), "Inconsistent post length across methods.")
 
     ## check error in post specification if inconsistent naming across methods
     bd <- addMethod(BenchDesign(tdat), label = "bonf",
-                    func = p.adjust, p = pval, method = "bonferroni",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 }, a2 = function(x) { x * 2 }))
     bd <- addMethod(bd, label = "bh",
-                    func = p.adjust, p = pval, method = "BH",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
                     post = list(a100 = function(x) { x }, a200 = function(x) { x * 2 }))
     expect_error(buildBench(bd), "Inconsistent post naming across methods.")
 
     ## check error if truthCols not column in original data
-    bd <- addMethod(BenchDesign(tdat), label = "bonf", func = p.adjust, p = pval, method = "bonferroni")
-    bd <- addMethod(bd, label = "bh", func = p.adjust, p = pval, method = "BH")
+    bd <- addMethod(BenchDesign(tdat), label = "bonf", func = p.adjust,
+                    params = rlang::quos(p = pval, method = "bonferroni"))
+    bd <- addMethod(bd, label = "bh", func = p.adjust,
+                    params = rlang::quos(p = pval, method = "BH"))
     expect_error(buildBench(bd, truthCols = "apple"))
     
     ## check error if truthCols names don't match assay names when post specified as list 
     bd <- addMethod(BenchDesign(tdat), label = "bonf",
-                    func = p.adjust, p = pval, method = "bonferroni",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 }))
     bd <- addMethod(bd, label = "bh",
-                    func = p.adjust, p = pval, method = "BH",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
                     post = list(a1 = function(x) { x }))
     expect_error(buildBench(bd, truthCols = "H"))
 

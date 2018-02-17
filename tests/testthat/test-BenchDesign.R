@@ -35,7 +35,7 @@ test_that("methods can be added and removed", {
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
-                    p = pval, method = "bonferroni",
+                    params = rlang::quos(p = pval, method = "bonferroni"),
                     meta = list(purpose = "for testing"))
 
     ## check returned object
@@ -63,34 +63,36 @@ test_that("methods can be modified", {
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
-                    p = pval, method = "bonferroni")
+                    params = rlang::quos(p = pval, method = "bonferroni"))
 
     ## check basic method modification
-    bd_mod <- modifyMethod(bd, "bonf", p = pval / 2)
+    bd_mod <- modifyMethod(bd, "bonf", params = rlang::quos(p = pval / 2))
     ## check only single method, but with new param value
     expect_length(bd_mod$methods, 1)
-    expect_equal(bd_mod$methods$bonf$dparams$p, quo(pval / 2))
-    expect_equal(bd_mod$methods$bonf$dparams$method, quo("bonferroni"))
+    expect_equal(bd_mod$methods$bonf$params$p, rlang::quo(pval / 2))
+    expect_equal(bd_mod$methods$bonf$params$method, rlang::quo("bonferroni"))
     
     ## check method modification with overwrite
-    bd_ow <- modifyMethod(bd, "bonf", p = pval / 2,
+    bd_ow <- modifyMethod(bd, "bonf", params = rlang::quos(p = pval / 2),
                           .overwrite = TRUE)
     ## check only single method, but with only new param value
     expect_length(bd_ow$methods, 1)
-    expect_equal(bd_ow$methods$bonf$dparams$p, quo(pval / 2))
-    expect_null(bd_ow$methods$bonf$dparams$method)
+    expect_equal(bd_ow$methods$bonf$params$p, rlang::quo(pval / 2))
+    expect_null(bd_ow$methods$bonf$params$method)
 
     ## check handling of non-parameter "special" values (func, post, meta)
     bd_spec <- modifyMethod(bd, "bonf",
-                            func = function(x) { x }, post = p.adjust,
-                            meta = list(new_purpose = "test special values"))
+                            params = rlang::quos(bd.func = function(x) { x },
+                                                 bd.post = p.adjust,
+                                                 bd.meta = list(new_purpose = "test special values")))
     expect_equal(names(bd_spec$methods), "bonf")
-    expect_equal(bd_spec$methods$bonf$func, quo(function(x) { x }))
-    expect_equal(bd_spec$methods$bonf$post, quo(p.adjust))
+    expect_equal(bd_spec$methods$bonf$func, rlang::quo(function(x) { x }))
+    expect_equal(bd_spec$methods$bonf$post, rlang::quo(p.adjust))
     expect_equal(bd_spec$methods$bonf$meta, list(new_purpose = "test special values"))
 
     ## check error when invalid method specified
-    expect_error(modifyMethod(bd, "apple", p = pval / 2), "not defined")
+    expect_error(modifyMethod(bd, "apple", params = rlang::quos(p = pval / 2)),
+                 "not defined")
 })
 
 
@@ -99,7 +101,7 @@ test_that("methods can be expanded", {
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
-                    p = pval, method = "bonferroni")
+                    params = rlang::quos(p = pval, method = "bonferroni"))
 
     ## check basic method expansion
     bd_exp <- expandMethod(bd, "bonf", param = "p",
@@ -107,11 +109,11 @@ test_that("methods can be expanded", {
                            bonf_alt2 = pval / 4)
     expect_equal(names(bd_exp$methods), c("bonf", "bonf_alt1", "bonf_alt2"))
     ## check expanded param changed (note: values equal but not identical)
-    expect_equal(bd_exp$methods$bonf_alt1$dparams$p, quo(pval / 2))
-    expect_equal(bd_exp$methods$bonf_alt2$dparams$p, quo(pval / 4))
+    expect_equal(bd_exp$methods$bonf_alt1$params$p, rlang::quo(pval / 2))
+    expect_equal(bd_exp$methods$bonf_alt2$params$p, rlang::quo(pval / 4))
     ## check other param unchanged
-    expect_identical(bd_exp$methods$bonf$dparams$method,
-                     bd_exp$methods$bonf_alt2$dparams$method)
+    expect_identical(bd_exp$methods$bonf$params$method,
+                     bd_exp$methods$bonf_alt2$params$method)
     ## check defined methods are valid and don't break buildBench call
     expect_is(buildBench(bd_exp), "SummarizedBenchmark")
     
@@ -130,10 +132,10 @@ test_that("methods can be expanded", {
                             bonf_alt2 = list(p = pval / 4, method = "BH"))
     expect_equal(names(bd_mult$methods), c("bonf", "bonf_alt1", "bonf_alt2"))
     ## check params changed only for expected (note: values equal but not identical)
-    expect_equal(bd_mult$methods$bonf_alt1$dparams$p, quo(pval / 2))
-    expect_equal(bd_mult$methods$bonf_alt1$dparams$method, quo("bonferroni"))
-    expect_equal(bd_mult$methods$bonf_alt2$dparams$p, quo(pval / 4))
-    expect_equal(bd_mult$methods$bonf_alt2$dparams$method, quo("BH"))
+    expect_equal(bd_mult$methods$bonf_alt1$params$p, rlang::quo(pval / 2))
+    expect_equal(bd_mult$methods$bonf_alt1$params$method, rlang::quo("bonferroni"))
+    expect_equal(bd_mult$methods$bonf_alt2$params$p, rlang::quo(pval / 4))
+    expect_equal(bd_mult$methods$bonf_alt2$params$method, rlang::quo("BH"))
     ## check defined methods are valid and don't break buildBench call
     expect_is(buildBench(bd_mult), "SummarizedBenchmark")
 
@@ -144,28 +146,28 @@ test_that("methods can be expanded", {
                           .overwrite = TRUE)
     expect_equal(names(bd_ow$methods), c("bonf", "bonf_alt1", "bonf_alt2"))
     ## check params changed only for expected (note: values equal but not identical)
-    expect_equal(bd_ow$methods$bonf_alt1$dparams$p, quo(pval / 2))
-    expect_null(bd_ow$methods$bonf_alt1$dparams$method)
-    expect_equal(bd_ow$methods$bonf_alt2$dparams$p, quo(pval / 4))
-    expect_equal(bd_ow$methods$bonf_alt2$dparams$method, quo("BH"))
+    expect_equal(bd_ow$methods$bonf_alt1$params$p, rlang::quo(pval / 2))
+    expect_null(bd_ow$methods$bonf_alt1$params$method)
+    expect_equal(bd_ow$methods$bonf_alt2$params$p, rlang::quo(pval / 4))
+    expect_equal(bd_ow$methods$bonf_alt2$params$method, rlang::quo("BH"))
     ## check defined methods are valid and don't break buildBench call
     expect_is(buildBench(bd_ow), "SummarizedBenchmark")
 
     ## check handling of non-parameter "special" values (func, post, meta)
     bd_spec <- expandMethod(bd, "bonf",
-                            bonf_alt1 = list(func = function(p, method) { p },
-                                             post = p.adjust,
-                                             meta = list(new_purpose = "test special values")),
-                            bonf_alt2 = list(func = function(p, method) { p / 2 },
-                                             post = function(x) { x * 2 },
-                                             meta = list(new_purpose = "test special values again")),
+                            bonf_alt1 = list(bd.func = function(p, method) { p },
+                                             bd.post = p.adjust,
+                                             bd.meta = list(new_purpose = "test special values")),
+                            bonf_alt2 = list(bd.func = function(p, method) { p / 2 },
+                                             bd.post = function(x) { x * 2 },
+                                             bd.meta = list(new_purpose = "test special values again")),
                             .replace = TRUE)
     expect_equal(names(bd_spec$methods), c("bonf_alt1", "bonf_alt2"))
-    expect_equal(bd_spec$methods$bonf_alt1$func, quo(function(p, method) { p }))
-    expect_equal(bd_spec$methods$bonf_alt1$post, quo(p.adjust))
+    expect_equal(bd_spec$methods$bonf_alt1$func, rlang::quo(function(p, method) { p }))
+    expect_equal(bd_spec$methods$bonf_alt1$post, rlang::quo(p.adjust))
     expect_equal(bd_spec$methods$bonf_alt1$meta, list(new_purpose = "test special values"))
-    expect_equal(bd_spec$methods$bonf_alt2$func, quo(function(p, method) { p / 2 }))
-    expect_equal(bd_spec$methods$bonf_alt2$post, quo(function(x) { x * 2}))
+    expect_equal(bd_spec$methods$bonf_alt2$func, rlang::quo(function(p, method) { p / 2 }))
+    expect_equal(bd_spec$methods$bonf_alt2$post, rlang::quo(function(x) { x * 2}))
     expect_equal(bd_spec$methods$bonf_alt2$meta, list(new_purpose = "test special values again"))
     ## check defined methods are valid and don't break buildBench call
     expect_is(buildBench(bd_spec), "SummarizedBenchmark")
