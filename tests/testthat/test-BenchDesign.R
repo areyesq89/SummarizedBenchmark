@@ -104,9 +104,9 @@ test_that("methods can be expanded", {
                     params = rlang::quos(p = pval, method = "bonferroni"))
 
     ## check basic method expansion
-    bd_exp <- expandMethod(bd, "bonf", param = "p",
-                           bonf_alt1 = pval / 2,
-                           bonf_alt2 = pval / 4)
+    bd_exp <- expandMethod(bd, "bonf", onlyone = "p",
+                           params = rlang::quos(bonf_alt1 = pval / 2,
+                                                bonf_alt2 = pval / 4))
     expect_equal(names(bd_exp$methods), c("bonf", "bonf_alt1", "bonf_alt2"))
     ## check expanded param changed (note: values equal but not identical)
     expect_equal(bd_exp$methods$bonf_alt1$params$p, rlang::quo(pval / 2))
@@ -118,9 +118,9 @@ test_that("methods can be expanded", {
     expect_is(buildBench(bd_exp), "SummarizedBenchmark")
     
     ## check method expansion w/ replacing original method
-    bd_replace <- expandMethod(bd, "bonf", param = "p",
-                               bonf_alt1 = pval / 2,
-                               bonf_alt2 = pval / 4,
+    bd_replace <- expandMethod(bd, "bonf", onlyone = "p",
+                               params = rlang::quos(bonf_alt1 = pval / 2,
+                                                    bonf_alt2 = pval / 4),
                                .replace = TRUE)
     expect_equal(names(bd_replace$methods), c("bonf_alt1", "bonf_alt2"))
     ## check defined methods are valid and don't break buildBench call
@@ -128,8 +128,9 @@ test_that("methods can be expanded", {
 
     ## check method expansion w/ mult params
     bd_mult <- expandMethod(bd, "bonf",
-                            bonf_alt1 = list(p = pval / 2),
-                            bonf_alt2 = list(p = pval / 4, method = "BH"))
+                            params = list(bonf_alt1 = rlang::quos(p = pval / 2),
+                                          bonf_alt2 = rlang::quos(p = pval / 4,
+                                                                  method = "BH")))
     expect_equal(names(bd_mult$methods), c("bonf", "bonf_alt1", "bonf_alt2"))
     ## check params changed only for expected (note: values equal but not identical)
     expect_equal(bd_mult$methods$bonf_alt1$params$p, rlang::quo(pval / 2))
@@ -141,8 +142,9 @@ test_that("methods can be expanded", {
 
     ## check method expansion w/ mult params and overwriting all 'params' 
     bd_ow <- expandMethod(bd, "bonf",
-                          bonf_alt1 = list(p = pval / 2),
-                          bonf_alt2 = list(p = pval / 4, method = "BH"),
+                          params = list(bonf_alt1 = rlang::quos(p = pval / 2),
+                                        bonf_alt2 = rlang::quos(p = pval / 4,
+                                                                method = "BH")),
                           .overwrite = TRUE)
     expect_equal(names(bd_ow$methods), c("bonf", "bonf_alt1", "bonf_alt2"))
     ## check params changed only for expected (note: values equal but not identical)
@@ -155,12 +157,13 @@ test_that("methods can be expanded", {
 
     ## check handling of non-parameter "special" values (func, post, meta)
     bd_spec <- expandMethod(bd, "bonf",
-                            bonf_alt1 = list(bd.func = function(p, method) { p },
-                                             bd.post = p.adjust,
-                                             bd.meta = list(new_purpose = "test special values")),
-                            bonf_alt2 = list(bd.func = function(p, method) { p / 2 },
-                                             bd.post = function(x) { x * 2 },
-                                             bd.meta = list(new_purpose = "test special values again")),
+                            params = list(
+                                bonf_alt1 = rlang::quos(bd.func = function(p, method) { p },
+                                                        bd.post = p.adjust,
+                                                        bd.meta = list(new_purpose = "test special values")),
+                                bonf_alt2 = rlang::quos(bd.func = function(p, method) { p / 2 },
+                                                        bd.post = function(x) { x * 2 },
+                                                        bd.meta = list(new_purpose = "test special values again"))),
                             .replace = TRUE)
     expect_equal(names(bd_spec$methods), c("bonf_alt1", "bonf_alt2"))
     expect_equal(bd_spec$methods$bonf_alt1$func, rlang::quo(function(p, method) { p }))
@@ -173,12 +176,19 @@ test_that("methods can be expanded", {
     expect_is(buildBench(bd_spec), "SummarizedBenchmark")
     
     ## check error when invalid method specified
-    expect_error(expandMethod(bd, "apple", bonf_alt1 = list(p = pval / 2)), "not defined")
+    expect_error(expandMethod(bd, label = "apple",
+                              params = list(bonf_alt1 = rlang::quos(p = pval / 2))),
+                              "not defined")
 
     ## check error when name conflicts introduced
-    expect_error(expandMethod(bd, "bonf", bonf = list(p = pval / 2)), "should not overlap")
-    expect_error(expandMethod(bd, "bonf", param = NULL, list(p = pval / 2)), "must be named")
-    expect_error(expandMethod(bd, "bonf",
-                              bonf_alt = list(p = pval / 2),
-                              bonf_alt = list(p = pval / 4)), "must be unique")
+    expect_error(expandMethod(bd, label = "bonf",
+                              params = list(bonf = rlang::quos(p = pval / 2))),
+                 "should not overlap")
+    expect_error(expandMethod(bd, label = "bonf",
+                              params = list(rlang::quos(p = pval / 2))),
+                 "must be named")
+    expect_error(expandMethod(bd, label = "bonf",
+                              params = list(bonf_alt = rlang::quos(p = pval / 2),
+                                            bonf_alt = rlang::quos(p = pval / 4))),
+                 "must be unique")
 })
