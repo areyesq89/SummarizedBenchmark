@@ -30,8 +30,8 @@
 #'        included in `colData` of `SummarizedBenchmark` object
 #'        generated using `buildBench`. See Details for more
 #'        information. Ignored if NULL. (default = NULL)
-#' @param ... Named `parameter = value` pairs to be passed to
-#'        `func`.
+#' @param params Named quosure list created using `rlang::quos` of
+#'        `parameter = value` pairs to be passed to `func`.
 #'
 #' @return
 #' A copy of the originally supplied BenchDesign with the
@@ -72,26 +72,32 @@
 #'                    label = "qv",
 #'                    func = qvalue::qvalue,
 #'                    post = function(x) { x$qvalue },
-#'                    p = pval)
+#'                    params = rlang::quos(p = pval))
 #'
 #' @md
 #' @import rlang
 #' @export
 #' @author Patrick Kimes
-addMethod <- function(bd, label, func, post = NULL, meta = NULL, ...) {
+addMethod <- function(bd, label, func, post = NULL, meta = NULL,
+                      params = rlang::quos()) {
     UseMethod("addMethod")
 }
 
 #' @export
-addMethod.BenchDesign <- function(bd, label, func, post = NULL, meta = NULL, ...) {
+addMethod.BenchDesign <- function(bd, label, func, post = NULL, meta = NULL,
+                                  params = rlang::quos()) {
+    if (!rlang::is_quosures(params)) {
+        stop("Please supply 'func' parameters to 'params =' as ",
+             "a list of quosures using rlang::quos.\n",
+             "e.g. params = quos(param1 = x, param2 = y)")
+    }
     ## capture input
     qf <- enquo(func)
-    qd <- quos(...)
     qp <- enquo(post)
     qm <- enquo(meta)
     
     ## add to bench
-    bd$methods[[label]] <- list(func = qf, dparams = qd, 
+    bd$methods[[label]] <- list(func = qf, params = params, 
                                 post = qp, meta = qm)
     bd
 }

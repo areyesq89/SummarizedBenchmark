@@ -8,15 +8,17 @@
 #' 
 #' @param bd BenchDesign object.
 #' @param label Character name of method to be modified.
-#' @param ... Named parameter, value pairs to overwrite 
-#'        in method definition. This can include `func`,
-#'        `post`, and `meta` parameters. All other named parameters
-#'        will be added to the list of parameters to be passed to
-#'        `func`.
-#' @param .overwrite Logical whether to overwrite the existing list of
+#' @param params Named quosure list created using `rlang::quos` of 
+#'        `parameter = value` paiars to replace in the method definition.
+#'        The `func`, `post`, and `meta` parameters of the method can be
+#'        modified using the special keywords, `bd.func`, `bd.post`, and `bd.meta`
+#'        (the prefix denoting that these values should modify BenchDesign
+#'        parameters). All other named parameters will be added to the list of
+#'        parameters to be passed to `func`.
+#' @param .overwrite Logical whether to overwrite the complete existing list of
 #'        parameters to be passed to `func` (TRUE), or to simply add
-#'        the new parameters to the existing list (FALSE).
-#'        (default = FALSE) 
+#'        the new parameters to the existing list and only replace overlapping
+#'        parameters (FALSE). (default = FALSE) 
 #'        
 #' @examples
 #' ## with toy data.frame
@@ -25,14 +27,15 @@
 #'
 #' ## add method
 #' bench <- addMethod(bench, label = "qv",
-#'                  func = qvalue::qvalue,
-#'                  post = function(x) { x$qvalue },
-#'                  meta = list(note = "storey's q-value"),
-#'                  p = pval)
+#'                    func = qvalue::qvalue,
+#'                    post = function(x) { x$qvalue },
+#'                    meta = list(note = "storey's q-value"),
+#'                    params = rlang::quos(p = pval))
 #'
 #' ## modify method 'meta' property of 'qv' method
 #' bench <- modifyMethod(bench, label = "qv",
-#'                     meta = list(note = "Storey's q-value"))
+#'                       params = rlang::quos(bd.meta =
+#'                            list(note = "Storey's q-value"))
 #' 
 #' ## verify that method has been updated
 #' printMethod(bench, "qv")
@@ -44,15 +47,12 @@
 #' @import rlang
 #' @export
 #' @author Patrick Kimes
-modifyMethod <- function(bd, label, ..., .overwrite = FALSE) {
+modifyMethod <- function(bd, label, params, .overwrite = FALSE) {
     UseMethod("modifyMethod")
 }
 
 #' @export
-modifyMethod.BenchDesign <- function(bd, label, ..., .overwrite = FALSE) {
-    ## capture input
-    qd <- quos(...)
-
+modifyMethod.BenchDesign <- function(bd, label, params, .overwrite = FALSE) {
     ## verify that method definition already exists
     if(!(label %in% names(bd$methods))) {
         stop("Specified method is not defined in BenchDesign.")
@@ -60,7 +60,7 @@ modifyMethod.BenchDesign <- function(bd, label, ..., .overwrite = FALSE) {
 
     ## modify and add to bench
     bm <- bd$methods[[label]]
-    bd$methods[[label]] <- .modmethod(bm, qd, .overwrite)
+    bd$methods[[label]] <- .modmethod(bm, params, .overwrite)
 
     return(bd)
 }
@@ -84,18 +84,18 @@ modifyMethod.BenchDesign <- function(bd, label, ..., .overwrite = FALSE) {
 #' @author Patrick Kimes
 .modmethod <- function(m, q, .overwrite) {
     ## parse out func, post, meta
-    if ("func" %in% names(q)) {
-        m$func <- q$func
+    if ("bd.func" %in% names(q)) {
+        m$func <- q$bd.func
     }
-    if ("post" %in% names(q)) {
-        m$post <- q$post
+    if ("bd.post" %in% names(q)) {
+        m$post <- q$bd.post
     }
-    if ("meta" %in% names(q)) {
-        m$meta <- eval_tidy(q$meta)
+    if ("bd.meta" %in% names(q)) {
+        m$meta <- eval_tidy(q$bd.meta)
     }
 
     ## process named parameters to be used for func
-    q <- q[! names(q) %in% c("func", "post", "meta")]
+    q <- q[! names(q) %in% c("bd.func", "bd.post", "bd.meta")]
     if (.overwrite) {
         m$dparams <- q
     } else {

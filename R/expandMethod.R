@@ -34,8 +34,9 @@
 #' bench <- BenchDesign(df)
 #'
 #' ## add basic 'padjust' method
-#' bench <- addMethod(bench, label = "padjust", func = p.adjust,
-#'                    p = pval)
+#' bench <- addMethod(bench, label = "padjust",
+#'                    func = p.adjust,
+#'                    params = rlang::quos(p = pval))
 #'
 #' ## "expand" 'padjust' by adding "method" parameters
 #' bench <- expandMethod(bench, label = "padjust",
@@ -45,21 +46,23 @@
 #'
 #' ## resulting BenchDesign has same methods as following set of calls
 #' bench_alt <- BenchDesign(df)
-#' bench <- addMethod(bench_alt, label = "bonf", func = p.adjust,
-#'                    p = pval, method = "bonferroni")
-#' bench <- addMethod(bench_alt, label = "BH", func = p.adjust,
-#'                    p = pval, method = "BH")
+#' bench <- addMethod(bench_alt, label = "bonf",
+#'                    func = p.adjust,
+#'                    params = rlang::quos(p = pval, method = "bonferroni"))
+#' bench <- addMethod(bench_alt, label = "BH",
+#'                    func = p.adjust,
+#'                    params = rlang::quos(p = pval, method = "BH"))
 #' 
 #' @export
 #' @author Patrick Kimes
 expandMethod <- function(bd, label, param = NULL, ...,
-                          .replace = FALSE, .overwrite = FALSE) {
+                         .replace = FALSE, .overwrite = FALSE) {
     UseMethod("expandMethod")
 }
 
 #' @export
 expandMethod.BenchDesign <- function(bd, label, param = NULL, ...,
-                                      .replace = FALSE, .overwrite = FALSE) { 
+                                     .replace = FALSE, .overwrite = FALSE) { 
     ## capture new parameter sets
     qd <- quos(...)
 
@@ -88,7 +91,7 @@ expandMethod.BenchDesign <- function(bd, label, param = NULL, ...,
         })
     } else {
         qd <- lapply(1:length(qd), function(zi) {
-            qdqi <- quos(!! param := !! qd[[zi]])
+            quos(!! param := !! qd[[zi]])
         })
     }
     

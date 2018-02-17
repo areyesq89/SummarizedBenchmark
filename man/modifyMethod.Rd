@@ -4,23 +4,25 @@
 \alias{modifyMethod}
 \title{Modify definition of method in BenchDesign object}
 \usage{
-modifyMethod(bd, label, ..., .overwrite = FALSE)
+modifyMethod(bd, label, params, .overwrite = FALSE)
 }
 \arguments{
 \item{bd}{BenchDesign object.}
 
 \item{label}{Character name of method to be modified.}
 
-\item{...}{Named parameter, value pairs to overwrite
-in method definition. This can include \code{func},
-\code{post}, and \code{meta} parameters. All other named parameters
-will be added to the list of parameters to be passed to
-\code{func}.}
+\item{params}{Named quosure list created using \code{rlang::quos} of
+\code{parameter = value} paiars to replace in the method definition.
+The \code{func}, \code{post}, and \code{meta} parameters of the method can be
+modified using the special keywords, \code{bd.func}, \code{bd.post}, and \code{bd.meta}
+(the prefix denoting that these values should modify BenchDesign
+parameters). All other named parameters will be added to the list of
+parameters to be passed to \code{func}.}
 
-\item{.overwrite}{Logical whether to overwrite the existing list of
+\item{.overwrite}{Logical whether to overwrite the complete existing list of
 parameters to be passed to \code{func} (TRUE), or to simply add
-the new parameters to the existing list (FALSE).
-(default = FALSE)}
+the new parameters to the existing list and only replace overlapping
+parameters (FALSE). (default = FALSE)}
 }
 \value{
 Modified BenchDesign object.
@@ -39,14 +41,15 @@ bench <- BenchDesign(df)
 
 ## add method
 bench <- addMethod(bench, label = "qv",
-                 func = qvalue::qvalue,
-                 post = function(x) { x$qvalue },
-                 meta = list(note = "storey's q-value"),
-                 p = pval)
+                   func = qvalue::qvalue,
+                   post = function(x) { x$qvalue },
+                   meta = list(note = "storey's q-value"),
+                   params = rlang::quos(p = pval))
 
 ## modify method 'meta' property of 'qv' method
 bench <- modifyMethod(bench, label = "qv",
-                    meta = list(note = "Storey's q-value"))
+                      params = rlang::quos(bd.meta =
+                           list(note = "Storey's q-value"))
 
 ## verify that method has been updated
 printMethod(bench, "qv")

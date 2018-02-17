@@ -48,8 +48,9 @@ df <- data.frame(pval = rnorm(100))
 bench <- BenchDesign(df)
 
 ## add basic 'padjust' method
-bench <- addMethod(bench, label = "padjust", func = p.adjust,
-                   p = pval)
+bench <- addMethod(bench, label = "padjust",
+                   func = p.adjust,
+                   params = rlang::quos(p = pval))
 
 ## "expand" 'padjust' by adding "method" parameters
 bench <- expandMethod(bench, label = "padjust",
@@ -59,10 +60,12 @@ bench <- expandMethod(bench, label = "padjust",
 
 ## resulting BenchDesign has same methods as following set of calls
 bench_alt <- BenchDesign(df)
-bench <- addMethod(bench_alt, label = "bonf", func = p.adjust,
-                   p = pval, method = "bonferroni")
-bench <- addMethod(bench_alt, label = "BH", func = p.adjust,
-                   p = pval, method = "BH")
+bench <- addMethod(bench_alt, label = "bonf",
+                   func = p.adjust,
+                   params = rlang::quos(p = pval, method = "bonferroni"))
+bench <- addMethod(bench_alt, label = "BH",
+                   func = p.adjust,
+                   params = rlang::quos(p = pval, method = "BH"))
 
 }
 \author{

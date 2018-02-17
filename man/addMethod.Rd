@@ -4,7 +4,8 @@
 \alias{addMethod}
 \title{Add new method to BenchDesign object}
 \usage{
-addMethod(bd, label, func, post = NULL, meta = NULL, ...)
+addMethod(bd, label, func, post = NULL, meta = NULL,
+  params = rlang::quos())
 }
 \arguments{
 \item{bd}{BenchDesign object.}
@@ -25,8 +26,8 @@ included in \code{colData} of \code{SummarizedBenchmark} object
 generated using \code{buildBench}. See Details for more
 information. Ignored if NULL. (default = NULL)}
 
-\item{...}{Named \code{parameter = value} pairs to be passed to
-\code{func}.}
+\item{params}{Named quosure list created using \code{rlang::quos} of
+\code{parameter = value} pairs to be passed to \code{func}.}
 }
 \value{
 A copy of the originally supplied BenchDesign with the
@@ -85,7 +86,7 @@ bench <- addMethod(bench,
                    label = "qv",
                    func = qvalue::qvalue,
                    post = function(x) { x$qvalue },
-                   p = pval)
+                   params = rlang::quos(p = pval))
 
 }
 \author{

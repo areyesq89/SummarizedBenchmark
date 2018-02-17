@@ -276,7 +276,7 @@ evalMethods <- function(bd) {
     al <- lapply(seq(bd$methods),
                  function(i) {
                      x <- bd$methods[[i]]
-                     expr <- quo(UQ(x$func)(!!! x$dparams))
+                     expr <- quo(UQ(x$func)(!!! x$params))
                      if (is.function(eval_tidy(x$post, bd$bdata))) {
                          expr <- quo(UQ(x$post)(!! expr))
                      } else if (is.list(eval_tidy(x$post, bd$bdata))) {
@@ -309,7 +309,7 @@ evalMethodsParallel <- function(bd, BPPARAM) {
     al <- bplapply(seq(bd$methods),
                    function(i) {
                        x <- bd$methods[[i]]
-                       expr <- quo(UQ(x$func)(!!! x$dparams))
+                       expr <- quo(UQ(x$func)(!!! x$params))
                        if (is.function(eval_tidy(x$post, bd$bdata))) {
                            expr <- quo(UQ(x$post)(!! expr))
                        } else if (is.list(eval_tidy(x$post, bd$bdata))) {
@@ -345,7 +345,7 @@ cleanMethods <- function(bd, ptabular) {
                  SIMPLIFY = FALSE)
     df <- dplyr::bind_rows(df)
     df$label <- names(bd$methods)
-    ## rownames(df) <- names(b$methods)
+    ## rownames(df) <- names(bd$methods)
     df
 }
 
@@ -390,14 +390,14 @@ cleanMethod <- function(m, mname, bdata, ptabular) {
     res <- cbind(data.frame(func, post, stringsAsFactors = FALSE), meta)
 
     ## parse method parameters
-    if (length(m$dparams) > 0) {
+    if (length(m$params) > 0) {
         if (ptabular) {
-            bparams <- sapply(m$dparams, quo_text)
+            bparams <- sapply(m$params, quo_text)
             names(bparams) <- paste0("param.", names(bparams))
             bparams <- data.frame(t(bparams), stringsAsFactors = FALSE)
         } else {
-            bparams <- paste(names(m$dparams), "=",
-                             sapply(m$dparams, quo_text),
+            bparams <- paste(names(m$params), "=",
+                             sapply(m$params, quo_text),
                              collapse=", ")
             bparams <- data.frame(bparams, stringsAsFactors = FALSE)
         }
