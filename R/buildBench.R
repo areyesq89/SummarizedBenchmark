@@ -53,9 +53,9 @@
 #'
 #' ## add methods
 #' bench <- addMethod(bench, label = "bonf", func = p.adjust,
-#'                    p = pval, method = "bonferroni")
+#'                    params = rlang::quos(p = pval, method = "bonferroni"))
 #' bench <- addMethod(bench, label = "BH", func = p.adjust,
-#'                    p = pval, method = "BH")
+#'                    params = rlang::quos(p = pval, method = "BH"))
 #'
 #' ## evaluate benchmark experiment
 #' sb <- buildBench(bench)

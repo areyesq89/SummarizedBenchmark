@@ -107,7 +107,7 @@ Using the `"counts"` assay of the `fluidigm` data set as input, we generate simu
 ```{r run-sim-buildbench}
 fluidigm_dat <- list(in_data = assay(sce, "counts"),
                      in_verbose = FALSE,
-                     in_seed = 19120128))
+                     in_seed = 19120128)
 sb <- buildBench(bd, data = fluidigm_dat)
 sb
 ```

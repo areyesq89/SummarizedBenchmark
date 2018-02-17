@@ -530,18 +530,20 @@ As an example, we construct a *BenchDesign* object again using the differential 
 ```{r}
 BenchDesign(mydat) %>%
     addMethod(label = "deseq2",
-               func = deseq2_pvals,
-               meta = list(reason = "recommended by friend X"),
-               countData = cntdat,
-               colData = coldat, 
-               design = ~condition,
-               contrast = c("condition", "2", "1")) %>%
+              func = deseq2_pvals,
+              meta = list(reason = "recommended by friend X"),
+              params = rlang::quos(countData = cntdat,
+                                   colData = coldat, 
+                                   design = ~condition,
+                                   contrast = c("condition", "2", "1"))
+              ) %>%
     addMethod(label = "edgeR",
-               func = edgeR_pvals,
-               meta = list(reason = "recommended by friend Y"), 
-               countData = cntdat,
-               group = coldat$condition,
-               design = ~coldat$condition) %>%
+              func = edgeR_pvals,
+              meta = list(reason = "recommended by friend Y"), 
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)
+              ) %>%
     buildBench() %>%
     colData()
 ```
@@ -559,19 +561,21 @@ The following example illustrates the behavior when using either `pkg_func` or `
 ```{r}
 BenchDesign(mydat) %>%
     addMethod(label = "deseq2",
-               func = deseq2_pvals,
-               meta = list(pkg_func = rlang::quo(DESeq2::DESeq)),
-               countData = cntdat,
-               colData = coldat, 
-               design = ~condition,
-               contrast = c("condition", "2", "1")) %>%
+              func = deseq2_pvals,
+              meta = list(pkg_func = rlang::quo(DESeq2::DESeq)),
+              params = rlang::quos(countData = cntdat,
+                                   colData = coldat, 
+                                   design = ~condition,
+                                   contrast = c("condition", "2", "1"))
+              ) %>%
     addMethod(label = "edgeR",
-               func = edgeR_pvals,
-               meta = list(pkg_name = "edgeR",
-                            pkg_vers = as.character(packageVersion("edgeR"))), 
-               countData = cntdat,
-               group = coldat$condition,
-               design = ~coldat$condition) %>%
+              func = edgeR_pvals,
+              meta = list(pkg_name = "edgeR",
+                          pkg_vers = as.character(packageVersion("edgeR"))), 
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)
+              ) %>%
     buildBench() %>%
     colData()
 ```
@@ -656,10 +660,14 @@ As before, methods can be added to the `BenchDesign` with `addMethod()`, and the
 
 ```{r}
 bdnull <- bdnull %>%
-    addMethod(label = "bonf", func = p.adjust,
-              params = rlang::quos(p = pval, method = "bonferroni")) %>%
-    addMethod(label = "BH", func = p.adjust,
-              params = rlang::quos(p = pval, method = "BH"))
+    addMethod(label = "bonf",
+              func = p.adjust,
+              params = rlang::quos(p = pval,
+                                   method = "bonferroni")) %>%
+    addMethod(label = "BH",
+              func = p.adjust,
+              params = rlang::quos(p = pval,
+                                   method = "BH"))
 ```
 
 While not mentioned above, the `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the `BenchDesign` object.

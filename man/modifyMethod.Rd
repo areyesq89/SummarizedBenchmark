@@ -49,7 +49,7 @@ bench <- addMethod(bench, label = "qv",
 ## modify method 'meta' property of 'qv' method
 bench <- modifyMethod(bench, label = "qv",
                       params = rlang::quos(bd.meta =
-                           list(note = "Storey's q-value"))
+                           list(note = "Storey's q-value")))
 
 ## verify that method has been updated
 printMethod(bench, "qv")
