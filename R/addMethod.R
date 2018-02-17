@@ -20,6 +20,8 @@
 #' @param bd BenchDesign object.
 #' @param label Character name for the method.
 #' @param func Primary function to be benchmarked.
+#' @param params Named quosure list created using `rlang::quos` of
+#'        `parameter = value` pairs to be passed to `func`.
 #' @param post Optional post-processing function that takes
 #'        results of `func` as input. Ignored if NULL.
 #'        If multiple assays (metrics) should be generated for each
@@ -30,8 +32,6 @@
 #'        included in `colData` of `SummarizedBenchmark` object
 #'        generated using `buildBench`. See Details for more
 #'        information. Ignored if NULL. (default = NULL)
-#' @param params Named quosure list created using `rlang::quos` of
-#'        `parameter = value` pairs to be passed to `func`.
 #'
 #' @return
 #' A copy of the originally supplied BenchDesign with the
@@ -78,14 +78,14 @@
 #' @importFrom rlang enquo quo quos is_quosures
 #' @export
 #' @author Patrick Kimes
-addMethod <- function(bd, label, func, post = NULL, meta = NULL,
-                      params = rlang::quos()) {
+addMethod <- function(bd, label, func, params = rlang::quos(),
+                      post = NULL, meta = NULL) {
     UseMethod("addMethod")
 }
 
 #' @export
-addMethod.BenchDesign <- function(bd, label, func, post = NULL, meta = NULL,
-                                  params = rlang::quos()) {
+addMethod.BenchDesign <- function(bd, label, func, params = rlang::quos(),
+                                  post = NULL, meta = NULL) {
     if (!rlang::is_quosures(params)) {
         stop("Please supply 'func' parameters to 'params =' as ",
              "a list of quosures using rlang::quos.\n",

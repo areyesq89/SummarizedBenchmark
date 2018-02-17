@@ -4,8 +4,8 @@
 \alias{addMethod}
 \title{Add new method to BenchDesign object}
 \usage{
-addMethod(bd, label, func, post = NULL, meta = NULL,
-  params = rlang::quos())
+addMethod(bd, label, func, params = rlang::quos(), post = NULL,
+  meta = NULL)
 }
 \arguments{
 \item{bd}{BenchDesign object.}
@@ -13,6 +13,9 @@ addMethod(bd, label, func, post = NULL, meta = NULL,
 \item{label}{Character name for the method.}
 
 \item{func}{Primary function to be benchmarked.}
+
+\item{params}{Named quosure list created using \code{rlang::quos} of
+\code{parameter = value} pairs to be passed to \code{func}.}
 
 \item{post}{Optional post-processing function that takes
 results of \code{func} as input. Ignored if NULL.
@@ -25,9 +28,6 @@ list of post-processing functions, one for each assay.
 included in \code{colData} of \code{SummarizedBenchmark} object
 generated using \code{buildBench}. See Details for more
 information. Ignored if NULL. (default = NULL)}
-
-\item{params}{Named quosure list created using \code{rlang::quos} of
-\code{parameter = value} pairs to be passed to \code{func}.}
 }
 \value{
 A copy of the originally supplied BenchDesign with the
