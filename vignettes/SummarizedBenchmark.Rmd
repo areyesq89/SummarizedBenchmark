@@ -102,8 +102,8 @@ b <- BenchDesign(tdat)
 Then, each method of interest is added to the *BenchDesign* using `addMethod()`.
 
 ```{r}
-b <- addMethod(b, label = "bonf", func = p.adjust,
-                p = pval, method = "bonferroni")
+b <- addMethod(bd = b, label = "bonf", func = p.adjust,
+               params = rlang::quos(p = pval, method = "bonferroni"))
 ```
 
 At a minimum, `addMethod()` requires three parameters:
@@ -112,16 +112,18 @@ At a minimum, `addMethod()` requires three parameters:
 2. `label`: a character name for the method, and
 3. `func`: the function to be called.
 
-After the minimum parameters are specified, any parameters needed by the `func` method should be passed as named parameters, e.g. `p = pval, method = "bonferroni"`. Notice here that `pval` **does not** need to be called as `tdat$pval`. 
+After the minimum parameters are specified, any parameters needed by the `func` method should be passed as named parameters, e.g. `p = pval, method = "bonferroni"` to the optional parameter, `params =` as a list of [*quosures*](http://rlang.tidyverse.org/reference/quosure.html) using `rlang::quos(..)`. Notice here that the `pval` specified to `rlang::quos(..)` **does not** need to be specified as `tdat$pval` for the function to know that it is a column in the data.frame. For readers familiar with the `r BiocStyle::CRANpkg("ggplot2")` package, the `params = rlang::quos(..)` specification here may be viewed similarly to the `aes = aes(..)` specification in `ggplot2` for mapping between the data and plotting parameters.  
 
 The process of adding methods can be written more concisely using the pipe operators from the `r BiocStyle::CRANpkg("magrittr")` package.
 
 ```{r}
 b <- b %>% 
-    addMethod(label = "BH", func = p.adjust,
-              p = pval, method = "BH") %>%
-    addMethod("qv", qvalue::qvalue,
-              p = pval,
+    addMethod(label = "BH",
+              func = p.adjust,
+              params = rlang::quos(p = pval, method = "BH")) %>%
+    addMethod(label = "qv",
+              func = qvalue::qvalue,
+              params = rlang::quos(p = pval),
               post = function(x) { x$qvalues })
 ```
 
@@ -319,21 +321,24 @@ Next, each method is added to the *BenchDesign* using `addMethod()`, and the cor
 ```{r}
 bd <- bd %>%
     addMethod(label = "deseq2",
-               func = deseq2_pvals,
-               countData = cntdat,
-               colData = coldat, 
-               design = ~condition,
-               contrast = c("condition", "2", "1")) %>%
+              func = deseq2_pvals,
+              params = rlang::quos(countData = cntdat,
+                                   colData = coldat, 
+                                   design = ~condition,
+                                   contrast = c("condition", "2", "1"))
+              ) %>%
     addMethod(label = "edgeR",
-               func = edgeR_pvals,
-               countData = cntdat,
-               group = coldat$condition,
-               design = ~coldat$condition) %>%
+              func = edgeR_pvals,
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)
+              ) %>%
     addMethod(label = "voom",
-               func = voom_pvals,
-               countData = cntdat,
-               group = coldat$condition,
-               design = ~coldat$condition)
+              func = voom_pvals,
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)
+              )
 ```
 
 So far, none of the methods have been executed. The *BenchDesign* object simply serves as a container describing _how_ the methods should be executed. The methods are applied by a simple call to `buildBench()`. Since the ground truth is known and available in `mydat$status`, this is specified to `truthCols=`.
@@ -456,24 +461,30 @@ The primary wrapper function and a list of accessor functions are passed to `fun
 ```{r}
 bd <- BenchDesign(mydat) %>%
     addMethod(label = "deseq2",
-               func = deseq2_run,
-               post = list(pv = deseq2_pv, lfc = deseq2_lfc),
-               countData = cntdat,
-               colData = coldat, 
-               design = ~condition,
-               contrast = c("condition", "2", "1")) %>%
+              func = deseq2_run,
+              post = list(pv = deseq2_pv,
+                          lfc = deseq2_lfc),
+              params = rlang::quos(countData = cntdat,
+                                   colData = coldat, 
+                                   design = ~condition,
+                                   contrast = c("condition", "2", "1"))
+              ) %>%
     addMethod(label = "edgeR",
-               func = edgeR_run,
-               post = list(pv = edgeR_pv, lfc = edgeR_lfc),
-               countData = cntdat,
-               group = coldat$condition,
-               design = ~coldat$condition) %>%
+              func = edgeR_run,
+              post = list(pv = edgeR_pv,
+                          lfc = edgeR_lfc),
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)
+              ) %>%
     addMethod(label = "voom",
-               func = voom_run,
-               post = list(pv = voom_pv, lfc = voom_lfc),
-               countData = cntdat,
-               group = coldat$condition,
-               design = ~coldat$condition)
+              func = voom_run,
+              post = list(pv = voom_pv,
+                          lfc = voom_lfc),
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)
+              )
 ```
 
 When the *BenchDesign* is evaluated using `buildBench()`, the resulting *SummarizedBenchmark* will be generated with two assays: `"pv"` and `"lfc"`. As before, the ground truth can be specified using the `truthCols =` parameter. When multiple assays are used, `truthCols =` expects a named vector of `assay-name = "column-name"` pairs.
@@ -486,8 +497,8 @@ sb
 We can verify that the two assays contain the expected values. 
 
 ```{r}
-assay(sb, "pv") %>% head 
-assay(sb, "lfc") %>% head
+head(assay(sb, "pv"))
+head(assay(sb, "lfc"))
 ```
 
 ## Parallelizing with BiocParallel
@@ -512,22 +523,22 @@ Details on how to specify the parallelization back-end can be found in the _Intr
 
 ## Manually Specifying Method Metadata
 
-Metadata for methods are stored in the `colData()` of *SummarizedBenchmark* objects. As metioned above, several default metadata columns are populated in the `colData()` of the *SummarizedBenchmark* object generated by a call to `buildBench()`. Sometimes it may be useful to include additional metadata columns beyond just the default columns. While this can be accomplished manually by modifying the `colData()` of the *SummarizedBenchmark* object post hoc, method metadata can also be specified at the `addMethod()` step using the `bmeta =` optional parameter. The `bmeta =` parameter accepts a named list of metadata information. Each list entry will be added to the `colData()` as a new column. To avoid collisions between metadata columns specified with `bmeta =` and the default set of columns, metadata specified using `bmeta =` will be added to `colData()` with `meta.` prefixed to the column name.  
+Metadata for methods are stored in the `colData()` of *SummarizedBenchmark* objects. As metioned above, several default metadata columns are populated in the `colData()` of the *SummarizedBenchmark* object generated by a call to `buildBench()`. Sometimes it may be useful to include additional metadata columns beyond just the default columns. While this can be accomplished manually by modifying the `colData()` of the *SummarizedBenchmark* object post hoc, method metadata can also be specified at the `addMethod()` step using the `meta =` optional parameter. The `meta =` parameter accepts a named list of metadata information. Each list entry will be added to the `colData()` as a new column. To avoid collisions between metadata columns specified with `meta =` and the default set of columns, metadata specified using `meta =` will be added to `colData()` with `meta.` prefixed to the column name.  
 
-As an example, we construct a *BenchDesign* object again using the differential expression example. The *BenchDesign* is created with two methods, `r BiocStyle::Biocpkg("DESeq2")` and `r BiocStyle::Biocpkg("edgeR")`. Each method is specified with the optional `bmeta =` parameter. We can verify that the manually defined metadata column (`meta.reason`) is available in the `colData()` of the generated *SummarizedBenchmark*.
+As an example, we construct a *BenchDesign* object again using the differential expression example. The *BenchDesign* is created with two methods, `r BiocStyle::Biocpkg("DESeq2")` and `r BiocStyle::Biocpkg("edgeR")`. Each method is specified with the optional `meta =` parameter. We can verify that the manually defined metadata column (`meta.reason`) is available in the `colData()` of the generated *SummarizedBenchmark*.
 
 ```{r}
 BenchDesign(mydat) %>%
     addMethod(label = "deseq2",
                func = deseq2_pvals,
-               bmeta = list(reason = "recommended by friend X"),
+               meta = list(reason = "recommended by friend X"),
                countData = cntdat,
                colData = coldat, 
                design = ~condition,
                contrast = c("condition", "2", "1")) %>%
     addMethod(label = "edgeR",
                func = edgeR_pvals,
-               bmeta = list(reason = "recommended by friend Y"), 
+               meta = list(reason = "recommended by friend Y"), 
                countData = cntdat,
                group = coldat$condition,
                design = ~coldat$condition) %>%
@@ -535,28 +546,28 @@ BenchDesign(mydat) %>%
     colData()
 ```
 
-While all methods in this example had the `bmeta =` option specified, this is not necessary. It is completely acceptable to specify the `bmeta =` parameter for only a subset of methods.
+While all methods in this example had the `meta =` option specified, this is not necessary. It is completely acceptable to specify the `meta =` parameter for only a subset of methods.
 
 ## Manually Modifying Version Metadata
 
-Arguably, two of the most important pieces of metadata stored in the `colData()` of the *SummarizedBenchmark* returned by `buildBench()` are the relevant package name and version (`pkg_name`, `pkg_vers`). Determining the package name and version requires the primary "workhorse" function of the method be directly specified as `func =` in the `addMethod()` call. In some cases, this may not be possible, e.g. if the "workhorse" function is a wrapper as in the differential expression example above. However, there still might exist an important function for which we would like to track the package name and version. The `bmeta` parameter can help.  
+Arguably, two of the most important pieces of metadata stored in the `colData()` of the *SummarizedBenchmark* returned by `buildBench()` are the relevant package name and version (`pkg_name`, `pkg_vers`). Determining the package name and version requires the primary "workhorse" function of the method be directly specified as `func =` in the `addMethod()` call. In some cases, this may not be possible, e.g. if the "workhorse" function is a wrapper as in the differential expression example above. However, there still might exist an important function for which we would like to track the package name and version. The `meta` parameter can help.  
 
-The `bmeta =` parameter will handle the following named list entries as special values: `pkg_name`, `pkg_vers`, `pkg_func`. First, if values are specified for `pkg_name` and `pkg_vers` in `bmeta =`, these will overwrite the values determined from `func =`. To trace the source of `pkg_name` and `pkg_vers` information, the `vers_src` column of the `colData` will be set to `"bmeta_manual"` (the default value is `"func"`). Alternatively, a function can be passed to `bmeta =` as `pkg_func`. This function will be used to determine both `pkg_name` and `pkg_vers`, and will take precendence over manually specified `pkg_name` and `pkg_vers` values. If `pkg_func` is specified, it will be included in the `colData()` as a new column with the same name, and the `vers_src` column will be set to `"bmeta_func"`. **Note: the function should be wrapped in `rlang::quo` to be properly parsed.  
+The `meta =` parameter will handle the following named list entries as special values: `pkg_name`, `pkg_vers`, `pkg_func`. First, if values are specified for `pkg_name` and `pkg_vers` in `meta =`, these will overwrite the values determined from `func =`. To trace the source of `pkg_name` and `pkg_vers` information, the `vers_src` column of the `colData` will be set to `"meta_manual"` (the default value is `"func"`). Alternatively, a function can be passed to `meta =` as `pkg_func`. This function will be used to determine both `pkg_name` and `pkg_vers`, and will take precendence over manually specified `pkg_name` and `pkg_vers` values. If `pkg_func` is specified, it will be included in the `colData()` as a new column with the same name, and the `vers_src` column will be set to `"meta_func"`. **Note: the function should be wrapped in `rlang::quo` to be properly parsed.  
 
-The following example illustrates the behavior when using either `pkg_func` or `pkg_name` and `pkg_vers` with the `bmeta` optional parameter.
+The following example illustrates the behavior when using either `pkg_func` or `pkg_name` and `pkg_vers` with the `meta` optional parameter.
 
 ```{r}
 BenchDesign(mydat) %>%
     addMethod(label = "deseq2",
                func = deseq2_pvals,
-               bmeta = list(pkg_func = rlang::quo(DESeq2::DESeq)),
+               meta = list(pkg_func = rlang::quo(DESeq2::DESeq)),
                countData = cntdat,
                colData = coldat, 
                design = ~condition,
                contrast = c("condition", "2", "1")) %>%
     addMethod(label = "edgeR",
                func = edgeR_pvals,
-               bmeta = list(pkg_name = "edgeR",
+               meta = list(pkg_name = "edgeR",
                             pkg_vers = as.character(packageVersion("edgeR"))), 
                countData = cntdat,
                group = coldat$condition,
@@ -570,28 +581,26 @@ BenchDesign(mydat) %>%
 Modifying the defintion of a method after it has been added to a *BenchDesign* is supported by the `modifyMethod()` function. The *BenchDesign* object created in the differential expression above includes a method called `r BiocStyle::Biocpkg("DESeq2")`. We can check the definition of this method using `printMethod()`.
 
 ```{r}
-bd %>%
-    printMethod("deseq2")
+printMethod(bd, "deseq2")
 ```
 
-Suppose we wish to both flip the order of the contrast, and add a metadata tag. This can be easily accomplished by passing both new parameters to `modifyMethod()` exactly as they would be passed to `addMethod()` when the method was first defined.
+Suppose we wish to both flip the order of the contrast, and add a metadata tag. This can be easily accomplished by passing both new parameters to `modifyMethod()` as a `rlang::quos(..)` list, similar to how they would be passed to `addMethod()`. If the `func`, `post`, or `meta` valuesshould be modified, they should be included in the list using the special keywords, `bd.func =`, `bd.post =`, or `bd.meta =`, as shown in the example below.
 
 ```{r}
-bd %>%
-    modifyMethod("deseq2", 
-                  contrast = c("condition", "1", "2"),
-                  bmeta = list(note = "modified post hoc")) %>%
+modifyMethod(bd, label = "deseq2", 
+             params = rlang::quos(contrast = c("condition", "1", "2"),
+                                  bd.meta = list(note = "modified post hoc"))
+             ) %>%
     printMethod("deseq2")
 ```
 
 Sometimes it may be desirable to completely overwrite all function parameters for a method, e.g. `countData`, `colData`, `design`, and `contrast` in the case of `r BiocStyle::Biocpkg("DESeq2")`. This may occur if some parameters were optional and originally specified, but no longer necessary. All function parameters can be overwritten by specifying `.overwrite = TRUE`.
 
 ```{r}
-bd %>%
-    modifyMethod("deseq2", 
-                  contrast = c("condition", "1", "2"),
-                  bmeta = list(note = "modified post hoc"),
-                  .overwrite = TRUE) %>%
+modifyMethod(bd, label = "deseq2", 
+             params = rlang::quos(contrast = c("condition", "1", "2"),
+                                  bd.meta = list(note = "modified post hoc")),
+             .overwrite = TRUE) %>%
     printMethod("deseq2")
 ```
 
@@ -602,24 +611,22 @@ Notice that all parameters other than `contrast = c("condition", "1", "2")` have
 In addition to comparing multiple methods, a benchmark study may also involve comparing a single method across several parameter settings. The `expandMethod()` function provides the capability to take a method already defined in the *BenchDesign*, and _expand_ it to multiple methods with differing parameter values in the `BenchDesign` object. In the following example, `expandMethod()` is used to duplicate the `r BiocStyle::Biocpkg("DESeq2")` method with only the `"contrast"` parameter modified.
 
 ```{r}
-bde <- bd %>%
-    expandMethod("deseq2", 
-                  param = "contrast",
-                  deseq2_v1 = c("condition", "1", "2"),
-                  deseq2_v2 = c("condition", "2", "2"))
+bde <- expandMethod(bd, label = "deseq2", 
+                    param = "contrast",
+                    deseq2_v1 = c("condition", "1", "2"),
+                    deseq2_v2 = c("condition", "2", "2"))
 printMethod(bde, "deseq2_v1")
 printMethod(bde, "deseq2_v2")
 ```
 
-Notice that the method names are taken from the `expandMethod()` call. To modify more than a single parameter in the duplicated methods, the new parameter values should be specified as a list. Below, both the `"contrast"` and `bmeta` parameters are modified in the expanded methods.
+Notice that the method names are taken from the `expandMethod()` call. To modify more than a single parameter in the duplicated methods, the new parameter values should be specified as a list. Below, both the `"contrast"` and `meta` parameters are modified in the expanded methods.
 
 ```{r}
-bde <- bd %>%
-    expandMethod("deseq2", 
-                  deseq2_v1 = list(contrast = c("condition", "1", "2"),
-                                   bmeta = list(note = "filp order")),
-                  deseq2_v2 = list(contrast = c("condition", "2", "2"),
-                                   bmeta = list(note = "nonsensical order")))
+bde <- expandMethod(bd, label = "deseq2", 
+                    deseq2_v1 = list(contrast = c("condition", "1", "2"),
+                                     meta = list(note = "filp order")),
+                    deseq2_v2 = list(contrast = c("condition", "2", "2"),
+                                     meta = list(note = "nonsensical order")))
 printMethod(bde, "deseq2_v1")
 printMethod(bde, "deseq2_v2")
 ```
@@ -629,8 +636,7 @@ printMethod(bde, "deseq2_v2")
 After constructing a `BenchDesign`, it may become clear that a single method or parameter setting is no longer relevant to the comparison. In this case, the method can be easily dropped from the `BenchDesign` by specifying the `BenchDesign` and method name to `dropMethod()`.
 
 ```{r}
-bd %>%
-    dropMethod("deseq2") %>%
+dropMethod(bd, "deseq2") %>%
     printMethods()
 ```
 
@@ -647,10 +653,10 @@ As before, methods can be added to the `BenchDesign` with `addMethod()`, and the
 
 ```{r}
 bdnull <- bdnull %>%
-  addMethod(label = "bonf", func = p.adjust,
-             p = pval, method = "bonferroni") %>%
-  addMethod(label = "BH", func = p.adjust,
-             p = pval, method = "BH")
+    addMethod(label = "bonf", func = p.adjust,
+              params = rlang::quos(p = pval, method = "bonferroni")) %>%
+    addMethod(label = "BH", func = p.adjust,
+              params = rlang::quos(p = pval, method = "BH"))
 ```
 
 While not mentioned above, the `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the `BenchDesign` object.

@@ -70,21 +70,31 @@ Each of the simulators in the `r BiocStyle::Biocpkg("splatter")` package follow 
 
 ```{r construct-sim-benchdesign}
 bd <- BenchDesign() %>%
-    addMethod("splat", splatSimulate,
-              params = splatEstimate(in_data), dropout.present = FALSE,
-              verbose = in_verbose, seed = in_seed,
+    addMethod(label = "splat",
+              func = splatSimulate,
+              params = rlang::quos(params = splatEstimate(in_data),
+                                   dropout.present = FALSE,
+                                   verbose = in_verbose,
+                                   seed = in_seed),
               post = list) %>% 
-    addMethod("splat.drop", splatSimulate,
-              params = splatEstimate(in_data), dropout.present = TRUE, 
-              verbose = in_verbose, seed = in_seed,
+    addMethod(label = "splat.drop",
+              func = splatSimulate,
+              params = rlang::quos(params = splatEstimate(in_data),
+                                   dropout.present = TRUE, 
+                                   verbose = in_verbose,
+                                   seed = in_seed),
               post = list) %>% 
-    addMethod("simple", simpleSimulate,
-              params = simpleEstimate(in_data),
-              verbose = in_verbose, seed = in_seed, 
+    addMethod(label = "simple",
+              func = simpleSimulate,
+              params = rlang::quos(params = simpleEstimate(in_data),
+                                   verbose = in_verbose,
+                                   seed = in_seed), 
               post = list) %>%
-    addMethod("lun", lunSimulate,
-              params = lunEstimate(in_data),
-              verbose = in_verbose, seed = in_seed,
+    addMethod(label = "lun",
+              func = lunSimulate,
+              params = rlang::quos(params = lunEstimate(in_data),
+                                   verbose = in_verbose,
+                                   seed = in_seed),
               post = list)
 ```
 
@@ -95,10 +105,10 @@ Each simulator returns a single _SingleCellExperiment_ object containing the sim
 Using the `"counts"` assay of the `fluidigm` data set as input, we generate simulated data with the four methods.
 
 ```{r run-sim-buildbench}
-sb <- buildBench(bd,
-                 list(in_data = assay(sce, "counts"),
-                      in_verbose = FALSE,
-                      in_seed = 19120128))
+fluidigm_dat <- list(in_data = assay(sce, "counts"),
+                     in_verbose = FALSE,
+                     in_seed = 19120128))
+sb <- buildBench(bd, data = fluidigm_dat)
 sb
 ```
 
@@ -179,10 +189,10 @@ An advantage of the _SummarizedBenchmark_ framework is that rerunning the compar
 data(sc_example_counts, package = "scater")
 scec <- SingleCellExperiment(assays = list(counts = sc_example_counts))
 
-buildBench(bd, 
-           data = list(in_data = scec,
-                       in_verbose = FALSE,
-                       in_seed = 19120128))
+scater_dat <- list(in_data = scec,
+                   in_verbose = FALSE,
+                   in_seed = 19120128)
+buildBench(bd, data = scater_dat)
 ```
 
 # References

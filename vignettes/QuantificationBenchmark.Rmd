@@ -28,7 +28,6 @@ To demonstrate the use of *SummarizedBenchmark* to compare software that is not 
 We start by downloading the fastq files that we will use as input to quantify isoforms. We will use two samples from two brain replicates from the Mouse BodyMap [@Li_2017]. 
 
 ```{r experimentPrep, eval=FALSE}
-
 library(BiocParallel)
 dir.create("fastq", showWarnings=FALSE)
 
@@ -175,51 +174,45 @@ library(SummarizedBenchmark)
 library(tximport)
 
 b <- BenchDesign() %>%
-    addMethod(
-        label="kallisto-default",
-        func=runKallisto,
-        sample=sample,
-        args="-t 16",
-        meta=list( version=getKallistoVersion() )
-    ) %>%
-    addMethod(
-        label="kallisto-bias",
-        func=runKallisto,
-        sample=sample,
-        args="--bias -t 16",
-        meta=list( version=getKallistoVersion() )
-    ) %>%
-    addMethod(
-        label="salmon-default",
-        func=runSalmon,
-        sample=sample,
-        args="-l IU -p 16",
-        meta=list( version=getSalmonVersion() )
-    ) %>%
-    addMethod(
-        label="salmon-gcBias",
-        func=runSalmon,
-        sample=sample,
-        args="-l IU --gcBias -p 16",
-        meta=list( version=getSalmonVersion() )
-    ) %>%
-    addMethod(
-        label="sailfish-default",
-        func=runSailfish,
-        sample=sample,
-        args="-l IU -p 16",
-        meta=list( version=getSailfishVersion() )
-    )
+    addMethod(label = "kallisto-default",
+              func = runKallisto,
+              params = rlang::quos(sample = sample,
+                                   args = "-t 16"),
+              meta = list(version = getKallistoVersion())
+              ) %>%
+    addMethod(label = "kallisto-bias",
+              func = runKallisto,
+              params = rlang::quos(sample = sample,
+                                   args = "--bias -t 16"),
+              meta = list(version = getKallistoVersion())
+              ) %>%
+    addMethod(label = "salmon-default",
+              func = runSalmon,
+              params = rlang::quos(sample = sample,
+                                   args = "-l IU -p 16"),
+              meta = list(version = getSalmonVersion())
+              ) %>%
+    addMethod(label = "salmon-gcBias",
+              func = runSalmon,
+              params = rlang::quos(sample=sample,
+                                   args="-l IU --gcBias -p 16"),
+              meta = list(version = getSalmonVersion())
+              ) %>%
+    addMethod(label = "sailfish-default",
+              func = runSailfish,
+              params = rlang::quos(sample=sample,
+                                   args="-l IU -p 16"),
+              meta = list(version = getSailfishVersion())
+              )
 
-printMethods( b )
-
+printMethods(b)
 ```
 	
 Now, the next step is to run the benchmark experiment. Since we are running the benchmark for two samples, we use an `lapply()` to loop over the sample names, run the benchmark experiment for each of them, and combine them using `cbind()`.
 	
 ```{r runBenchmark, eval=FALSE}
 
-allSB <- lapply( samples, function(sample){
+allSB <- lapply(samples, function(sample) {
     dat <- list( sample=sample, txIDs=dnSt )
     sb <- buildBench( b, data=dat, sortIDs="txIDs")
     colData( sb )$sample <- sample
@@ -329,7 +322,6 @@ compObject <- signalCalibrate(
   calibrationFeature2 = calibrationFeature)
 
 compObject
-
 ```
 
 # References
