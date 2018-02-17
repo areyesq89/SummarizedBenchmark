@@ -612,21 +612,24 @@ In addition to comparing multiple methods, a benchmark study may also involve co
 
 ```{r}
 bde <- expandMethod(bd, label = "deseq2", 
-                    param = "contrast",
-                    deseq2_v1 = c("condition", "1", "2"),
-                    deseq2_v2 = c("condition", "2", "2"))
+                    onlyone = "contrast",
+                    params = rlang::quos(deseq2_v1 = c("condition", "1", "2"),
+                                         deseq2_v2 = c("condition", "2", "2"))
+                    )
 printMethod(bde, "deseq2_v1")
 printMethod(bde, "deseq2_v2")
 ```
 
-Notice that the method names are taken from the `expandMethod()` call. To modify more than a single parameter in the duplicated methods, the new parameter values should be specified as a list. Below, both the `"contrast"` and `meta` parameters are modified in the expanded methods.
+Notice that the parameter to be modified is specified with `onlyone =` (denoting "only one" parameter will be changed), and that method names are taken from names of the quosure list passed to `params =` in the `expandMethod()` call. To modify more than a single parameter in the duplicated methods, the `onlyone =` parameter can be ignored, and the new parameter values specified to `params =` as a list of quosure lists. Below, both the `"contrast"` and `meta` parameters are modified in the expanded methods.
 
 ```{r}
 bde <- expandMethod(bd, label = "deseq2", 
-                    deseq2_v1 = list(contrast = c("condition", "1", "2"),
-                                     meta = list(note = "filp order")),
-                    deseq2_v2 = list(contrast = c("condition", "2", "2"),
-                                     meta = list(note = "nonsensical order")))
+                    params = list(deseq2_v1 = rlang::quos(contrast = c("condition", "1", "2"),
+                                                          meta = list(note = "filp order")),
+                                  deseq2_v2 = rlang::quos(contrast = c("condition", "2", "2"),
+                                                          meta = list(note = "nonsensical order"))
+                                  )
+                    )
 printMethod(bde, "deseq2_v1")
 printMethod(bde, "deseq2_v2")
 ```
