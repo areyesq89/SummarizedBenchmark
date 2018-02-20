@@ -509,7 +509,8 @@ By default, parallel evaluation is disabled, but can easily be enabled by settin
 
 ```{r}
 bpparam()
-sbp <- buildBench(bd, parallel = TRUE)
+sbp <- buildBench(bd, parallel = TRUE,
+                  BPPARAM = BiocParallel::SerialParam())
 sbp
 ```
 
