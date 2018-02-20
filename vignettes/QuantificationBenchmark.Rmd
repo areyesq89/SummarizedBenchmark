@@ -28,6 +28,7 @@ To demonstrate the use of *SummarizedBenchmark* to compare software that is not 
 We start by downloading the fastq files that we will use as input to quantify isoforms. We will use two samples from two brain replicates from the Mouse BodyMap [@Li_2017]. 
 
 ```{r experimentPrep, eval=FALSE}
+
 library(BiocParallel)
 dir.create("fastq", showWarnings=FALSE)
 
@@ -209,7 +210,7 @@ printMethods(b)
 ```
 	
 Now, the next step is to run the benchmark experiment. Since we are running the benchmark for two samples, we use an `lapply()` to loop over the sample names, run the benchmark experiment for each of them, and combine them using `cbind()`.
-	
+
 ```{r runBenchmark, eval=FALSE}
 
 allSB <- lapply(samples, function(sample) {
@@ -222,7 +223,7 @@ allSB <- do.call( cbind, allSB )
 
 colData( allSB )$tissue <- 
   annotation$tissue[match( colData( allSB )$sample, 
-                           annotation$sample )]
+                          annotation$sample )]
 ```
 
 To keep the pre-computed object small, we will save the quantifications for only 50,000 randomly sampled transcripts.
