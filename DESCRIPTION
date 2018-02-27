@@ -1,7 +1,7 @@
 Package: SummarizedBenchmark
 Type: Package
 Title: A class and methods for benchmarks and comparisons across methods
-Version: 0.99.3
+Version: 0.99.3.1
 Author: Alejandro Reyes <alejandro.reyes.ds@gmail.com>, Patrick Kimes <patrick.kimes@gmail.com>
 Maintainer: Alejandro Reyes <alejandro.reyes.ds@gmail.com>, Patrick Kimes <patrick.kimes@gmail.com>
 Description: This package defines the SummarizedBenchmarck class, which extends 
