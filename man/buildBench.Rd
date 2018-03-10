@@ -56,7 +56,12 @@ parameter registry is used.}
 }
 \description{
 Function to evaluate \code{BenchDesign} methods on supplied
-data set to generate a \code{SummarizedBenchmark}.
+data set to generate a \code{SummarizedBenchmark}. In addition
+to the results of applying each method on the data, the returned
+\code{SummarizedBenchmark} also includes metadata for the methods
+in the \code{colData} of the returned object, metadata for the
+data in the \code{rowData}, and the session information generated
+by \code{sessionInfo()} in the \code{metadata}.
 }
 \details{
 Parallelization is performed across methods. Therefore, there is no benefit to

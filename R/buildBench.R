@@ -1,7 +1,12 @@
 #' Make SummarizedBenchmark from BenchDesign
 #'
 #' Function to evaluate \code{BenchDesign} methods on supplied
-#' data set to generate a \code{SummarizedBenchmark}.
+#' data set to generate a \code{SummarizedBenchmark}. In addition
+#' to the results of applying each method on the data, the returned
+#' \code{SummarizedBenchmark} also includes metadata for the methods
+#' in the \code{colData} of the returned object, metadata for the
+#' data in the \code{rowData}, and the session information generated
+#' by \code{sessionInfo()} in the \code{metadata}. 
 #' 
 #' @param bd \code{BenchDesign} object.
 #' @param data Data set to be used for benchmarking, will take priority over
@@ -216,11 +221,15 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, ptabula
     pf <- rep(list("bench" = list()), nassays)
     names(pf) <- assay_names
     pf <- SimpleList(pf)
+
+    ## metadata: record sessionInfo
+    md <- list(sessionInfo = sessionInfo())
     
     ## list of initialization parameters
     sbParams <- list(assays = a,
                      colData = df,
-                     performanceMetrics = pf)
+                     performanceMetrics = pf,
+                     metadata = md)
     
     ## pull out grouthTruth if available
     if (!is.null(truthCols)) {
