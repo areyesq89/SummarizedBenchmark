@@ -27,6 +27,9 @@
 #'        separate column of the \code{colData} for the returned SummarizedBenchmark
 #'        object, i.e. in tabular form. If FALSE, method parameters are returned
 #'        as a single column with comma-delimited "key=value" pairs. (default = TRUE)
+#' @param catchErrors logical whether errors produced by methods during evaluation
+#'        should be caught and printed as a message without stopping the entire
+#'        build process. (default = TRUE)
 #' @param sortIDs Whether the output of each method should be merged using IDs.
 #'        If TRUE, each method must return a named vector or list. The names will be
 #'        used to align the output of each method in the returned SummarizedBenchmark.
@@ -34,7 +37,7 @@
 #'        return overlapping, but not identical, results. If \code{truthCols} is also
 #'        specified, and sorting by IDs is necessary, rather than specifying 'TRUE',
 #'        specify the string name of a column in the \code{data} to use to sort the
-#'        method output to match the order of  \code{truthCols}. (default = FALSE) 
+#'        method output to match the order of \code{truthCols}. (default = FALSE)
 #' @param parallel Whether to use parallelization for evaluating each method.
 #'        Parallel execution is performed using \code{BiocParallel}. Parameters for
 #'        parallelization should be specified with \code{BiocParallel::register} or
@@ -47,6 +50,14 @@
 #' Parallelization is performed across methods. Therefore, there is no benefit to
 #' specifying more cores than the total number of methods in the \code{BenchDesign}
 #' object.
+#' By default, errors thrown by individual methods in the \code{BenchDesign} are caught
+#' during evaluation and handled in a way that allows \code{buildBench} to continue
+#' running with the other methods. The error is printed as a message, and the corresponding
+#' column in the returned \code{SummarizedBenchmark} object is set to NA. Since
+#' many benchmarking experiments can be time and computationally intensive, having to rerun
+#' the entire analysis due to a single failed method can be frustrating. Default error catching
+#' was included to alleviate these frustrations. However, if this behavior is not desired,
+#' setting \code{catchErrors = FALSE} will turn off error handling.
 #' 
 #' @return
 #' \code{SummarizedBenchmark} object with single assay
@@ -74,7 +85,7 @@
 #' @export
 #' @author Patrick Kimes
 buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, ptabular = TRUE,
-                       sortIDs = FALSE, parallel = FALSE, BPPARAM = bpparam()) {
+                       sortIDs = FALSE, catchErrors = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
     if (!is.null(data)) {
         bd$bdata <- data
@@ -172,9 +183,9 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, ptabula
     
     ## assay: evaluate all functions
     if (parallel) {
-        a <- evalMethodsParallel(bd, BPPARAM)
+        a <- evalMethodsParallel(bd, catchErrors, BPPARAM)
     } else {
-        a <- evalMethods(bd)
+        a <- evalMethods(bd, catchErrors)
     }
 
     ## handle multi-assay separately
@@ -281,7 +292,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, ptabula
 
 
 ## helper function to evaluate all quosures with data
-evalMethods <- function(bd) {
+evalMethods <- function(bd, ce) {
     al <- lapply(seq(bd$methods),
                  function(i) {
                      x <- bd$methods[[i]]
@@ -302,10 +313,14 @@ evalMethods <- function(bd) {
                          eval_tidy(expr, bd$bdata),
                          error = function(e) {
                              message("!! error caught in buildBench !!\n",
-                                     "!! error in method: ", names(bd$methods)[i], "\n",
-                                     "!!  original message: \n",
-                                     "!!  ", e)
-                             return(NA)
+                                     "!! error in method: ", names(bd$methods)[i])
+                             if (ce) {
+                                 message("!!  original message: \n",
+                                         "!!  ", e)
+                                 return(NA)
+                             } else {
+                                 stop(e)
+                             }
                          })
                  })
     names(al) <- names(bd$methods)
@@ -335,10 +350,14 @@ evalMethodsParallel <- function(bd, BPPARAM) {
                            eval_tidy(expr, bd$bdata),
                            error = function(e) {
                                message("!! error caught in buildBench !!\n",
-                                       "!! error in method: ", names(bd$methods)[i], "\n",
-                                       "!!  original message: \n",
-                                       "!!  ", e)
-                               return(NA)
+                                       "!! error in method: ", names(bd$methods)[i])
+                               if (ce) {
+                                   message("!!  original message: \n",
+                                           "!!  ", e)
+                                   return(NA)
+                               } else {
+                                   stop(e)
+                               }
                            })
                    },
                    BPPARAM = BPPARAM)

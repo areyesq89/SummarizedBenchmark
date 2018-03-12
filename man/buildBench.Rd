@@ -5,8 +5,8 @@
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
 buildBench(bd, data = NULL, truthCols = NULL, ftCols = NULL,
-  ptabular = TRUE, sortIDs = FALSE, parallel = FALSE,
-  BPPARAM = bpparam())
+  ptabular = TRUE, sortIDs = FALSE, catchErrors = TRUE,
+  parallel = FALSE, BPPARAM = bpparam())
 }
 \arguments{
 \item{bd}{\code{BenchDesign} object.}
@@ -40,7 +40,11 @@ Missing values will be set to NA. This can be useful if the different methods
 return overlapping, but not identical, results. If \code{truthCols} is also
 specified, and sorting by IDs is necessary, rather than specifying 'TRUE',
 specify the string name of a column in the \code{data} to use to sort the
-method output to match the order of  \code{truthCols}. (default = FALSE)}
+method output to match the order of \code{truthCols}. (default = FALSE)}
+
+\item{catchErrors}{logical whether errors produced by methods during evaluation
+should be caught and printed as a message without stopping the entire
+build process. (default = TRUE)}
 
 \item{parallel}{Whether to use parallelization for evaluating each method.
 Parallel execution is performed using \code{BiocParallel}. Parameters for
@@ -67,6 +71,14 @@ by \code{sessionInfo()} in the \code{metadata}.
 Parallelization is performed across methods. Therefore, there is no benefit to
 specifying more cores than the total number of methods in the \code{BenchDesign}
 object.
+By default, errors thrown by individual methods in the \code{BenchDesign} are caught
+during evaluation and handled in a way that allows \code{buildBench} to continue
+running with the other methods. The error is printed as a message, and the corresponding
+column in the returned \code{SummarizedBenchmark} object is set to NA. Since
+many benchmarking experiments can be time and computationally intensive, having to rerun
+the entire analysis due to a single failed method can be frustrating. Default error catching
+was included to alleviate these frustrations. However, if this behavior is not desired,
+setting \code{catchErrors = FALSE} will turn off error handling.
 }
 \examples{
 ## with toy data.frame
