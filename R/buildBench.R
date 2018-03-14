@@ -329,7 +329,7 @@ evalMethods <- function(bd, ce) {
 
 
 ## helper function to evaluate using BiocParallel
-evalMethodsParallel <- function(bd, BPPARAM) {
+evalMethodsParallel <- function(bd, ce, BPPARAM) {
     al <- bplapply(seq(bd$methods),
                    function(i) {
                        x <- bd$methods[[i]]
