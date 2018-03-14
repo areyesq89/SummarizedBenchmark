@@ -7,10 +7,13 @@
 availableMetrics()
 }
 \value{
-A data.frame with available performance metrics.
+A data.frame summarizing the default performance metrics provided in this package.
 }
 \description{
-List default performance metrics available in this package.
+This function returns a data frame summarizing the default performance metrics provided in this package.
+The data.frame contains three columns, `functions` is the name of the performance metric, `description`
+is longer description of the performance metric and `requiredTruth` is logical depending on whether the
+performance metrics require ground truths.
 }
 \examples{
 availableMetrics()

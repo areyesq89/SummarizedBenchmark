@@ -6,8 +6,13 @@
 \alias{truthdat}
 \alias{txi}
 \title{SummarizedBenchmark example}
+\source{
+Example data from the \code{\link{iCOBRA}} package.
+}
 \description{
-SummarizedBenchmark example
+This object contains the example data from the \code{\link{iCOBRA}} package reformatted as a
+\code{SummarizedBenchmark} object. It consists of differential expression results from \code{\link{DESeq2}}
+\code{\link{edgeR}} and \code{\link{limma}}-voom.
 }
 \keyword{SummarizedBenchmark}
 \keyword{data}
