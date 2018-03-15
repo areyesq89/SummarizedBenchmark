@@ -7,12 +7,12 @@
 \alias{txi}
 \title{SummarizedBenchmark example}
 \source{
-Example data from the \code{\link{iCOBRA}} package.
+Example data from the \code{iCOBRA} package.
 }
 \description{
-This object contains the example data from the \code{\link{iCOBRA}} package reformatted as a
-\code{SummarizedBenchmark} object. It consists of differential expression results from \code{\link{DESeq2}}
-\code{\link{edgeR}} and \code{\link{limma}}-voom.
+This object contains the example data from the \code{iCOBRA} package reformatted as a
+\code{SummarizedBenchmark} object. It consists of differential expression results from \code{DESeq2}
+\code{edgeR} and \code{limma}-voom.
 }
 \keyword{SummarizedBenchmark}
 \keyword{data}
