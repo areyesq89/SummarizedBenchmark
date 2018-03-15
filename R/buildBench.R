@@ -81,7 +81,7 @@
 #' 
 #' @import BiocParallel
 #' @importFrom dplyr bind_rows
-#' @importFrom utils packageName packageVersion
+#' @importFrom utils packageName packageVersion sessionInfo
 #' @export
 #' @author Patrick Kimes
 buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, ptabular = TRUE,
