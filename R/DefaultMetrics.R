@@ -24,23 +24,23 @@ availableMetrics <- function(){
 }
 
 sb.TPR <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha & truth == 1 ) / sum( truth == 1 )
+  sum( query < alpha & truth == 1, na.rm = TRUE ) / sum( truth == 1, na.rm = TRUE )
 }
 
 sb.TNR <- function( query, truth, alpha=0.1 ){
-  sum( ( !query < alpha ) & truth == 0 ) / sum( truth == 0 )
+  sum( ( !query < alpha ) & truth == 0, na.rm = TRUE ) / sum( truth == 0, na.rm = TRUE )
 }
 
 sb.FDR <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha & truth == 0 ) / sum( query < alpha )
+  sum( query < alpha & truth == 0, na.rm = TRUE ) / sum( query < alpha, na.rm = TRUE )
 }
 
 sb.FNR <- function( query, truth, alpha=0.1 ){
-  sum( !(query < alpha) & truth == 1 ) / sum( !( query < alpha ) )
+  sum( !(query < alpha) & truth == 1, na.rm = TRUE ) / sum( !( query < alpha ), na.rm = TRUE )
 }
 
 sb.rejections <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha )
+  sum( query < alpha, na.rm = TRUE )
 }
 
 sb.correlation <- function( query, truth, method="pearson" ){
@@ -52,11 +52,11 @@ sb.sdad <- function( query, truth ){
 }
 
 sb.hamming <- function( query, truth ){
-  sum( !query == truth )
+  sum( !query == truth, na.rm = TRUE )
 }
 
 sb.Lpnorm <- function( query, truth, p=2 ){
-  sum( abs(query - truth) ^ p ) ^ (1/p)
+  sum( abs(query - truth) ^ p, na.rm = TRUE ) ^ (1/p)
 }
 
 #' @importFrom mclust adjustedRandIndex
