@@ -36,9 +36,9 @@ With `SummarizedBenchmark`, a complete benchmarking workflow is comprised of thr
 2. methods, and
 3. performance metrics.
 
-The first two (_data_ and _methods_) are necessary for carrying out the benchmark experiment, and the last (_performance metrics_) is essential for evaluating the results of the experiment. Here, we define a _method_ to be the combination of a function or algorithm _and_ all data-independent parameter settings. Following this approach, the `SummarizedBenchmark` package defines two types of objects: *BenchDesign* objects and *SummarizedBenchmark* objects. *BenchDesign* objects contain only the design of the benchmark experiment, namely the _data_ and _methods_. After constructing a BenchDesign, the experiment can be executed to create a *SummarizedBenchmark*. SummarizedBenchmark objects extend the Bioconductor `SummarizedExperiment` class, with the additional capability of working with _performance metrics_.  
+The first two (_data_ and _methods_) are necessary for carrying out the benchmark experiment, and the last (_performance metrics_) is essential for evaluating the results of the experiment. Following this approach, the `SummarizedBenchmark` package defines two types of objects: *BenchDesign* objects and *SummarizedBenchmark* objects. *BenchDesign* objects contain only the design of the benchmark experiment, namely the _data_ and _methods_, where a _method_ is defined as the combination of a function or algorithm and parameter settings. After constructing a *BenchDesign*, the experiment is executed to create a *SummarizedBenchmark* containing the results of applying the methods to the data. *SummarizedBenchmark* objects extend the Bioconductor `SummarizedExperiment` class, with the additional capability of working with _performance metrics_.  
 
-The basic framework is illustrated in the figure below. Blue components must be specified by users. First, a BenchDesign is created with _data_ and _methods_. Next a SummarizedBenchmark is created with the method outputs, and paired with _performance metrics_ specified by the user. For convenience, several default _performance metrics_ are implemented in the package, and can be added to SummarizedBenchmark objects using simple commands.  
+The basic framework is illustrated in the figure below. A *BenchDesign* is created with _methods_ and combined with _data_ to create a *SummarizedBenchmark*, which contains the output of applying the methods to the data. This output is then paired with _performance metrics_ specified by the user. Note that the same *BenchDesign* can be combined with several data sets to produce several *SummarizedBenchmark* objects with the corresponding outputs. For convenience, several default _performance metrics_ are implemented in the package, and can be added to *SummarizedBenchmark* objects using simple commands.  
 
 ![basic benchmarking class relationship](summarizedbenchmark-figure1.png)
 
@@ -108,7 +108,7 @@ b <- addMethod(bd = b, label = "bonf", func = p.adjust,
 
 At a minimum, `addMethod()` requires three parameters:
 
-1. `bd`: the `BenchDesign` object to modify,
+1. `bd`: the *BenchDesign* object to modify,
 2. `label`: a character name for the method, and
 3. `func`: the function to be called.
 
@@ -503,7 +503,7 @@ head(assay(sb, "lfc"))
 
 ## Parallelizing with BiocParallel
 
-The simple examples considered in this vignette were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Since constructing a `BenchDesign` object requires no computation, the bottleneck only appears at the `buildBench()` step of the process. Parallelization of this step is enabled using the `r BiocStyle::Biocpkg("BiocParallel")` package.  
+The simple examples considered in this vignette were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Since constructing a *BenchDesign* object requires no computation, the bottleneck only appears at the `buildBench()` step of the process. Parallelization of this step is enabled using the `r BiocStyle::Biocpkg("BiocParallel")` package.  
 
 By default, parallel evaluation is disabled, but can easily be enabled by setting `parallel = TRUE` and optionally specifying the `BPPARAM =` parameter. If `BPPARAM =` is not specified, the default back-end will be used. The default back-end can be checked with `bpparam()`.
 
@@ -613,7 +613,7 @@ Notice that all parameters other than `contrast = c("condition", "1", "2")` have
 
 ## Duplicating Methods in a BenchDesign
 
-In addition to comparing multiple methods, a benchmark study may also involve comparing a single method across several parameter settings. The `expandMethod()` function provides the capability to take a method already defined in the *BenchDesign*, and _expand_ it to multiple methods with differing parameter values in the `BenchDesign` object. In the following example, `expandMethod()` is used to duplicate the `r BiocStyle::Biocpkg("DESeq2")` method with only the `"contrast"` parameter modified.
+In addition to comparing multiple methods, a benchmark study may also involve comparing a single method across several parameter settings. The `expandMethod()` function provides the capability to take a method already defined in the *BenchDesign*, and _expand_ it to multiple methods with differing parameter values in the *BenchDesign* object. In the following example, `expandMethod()` is used to duplicate the `r BiocStyle::Biocpkg("DESeq2")` method with only the `"contrast"` parameter modified.
 
 ```{r}
 bde <- expandMethod(bd, label = "deseq2", 
@@ -641,7 +641,7 @@ printMethod(bde, "deseq2_v2")
 
 ## Removing Methods in a BenchDesign
 
-After constructing a `BenchDesign`, it may become clear that a single method or parameter setting is no longer relevant to the comparison. In this case, the method can be easily dropped from the `BenchDesign` by specifying the `BenchDesign` and method name to `dropMethod()`.
+After constructing a *BenchDesign*, it may become clear that a single method or parameter setting is no longer relevant to the comparison. In this case, the method can be easily dropped from the *BenchDesign* by specifying the *BenchDesign* and method name to `dropMethod()`.
 
 ```{r}
 dropMethod(bd, "deseq2") %>%
@@ -650,14 +650,14 @@ dropMethod(bd, "deseq2") %>%
 
 ## Reusing a BenchDesign Across Data Sets
 
-When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single `BenchDesign` object across multiple data sets. While the `BenchDesign` objects in the examples above were all initialized with a data set, this is not necessary. 
+When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single *BenchDesign* object across multiple data sets. While the *BenchDesign* objects in the examples above were all initialized with a data set, this is not necessary. 
 
 ```{r}
 bdnull <- BenchDesign()
 bdnull
 ```
 
-As before, methods can be added to the `BenchDesign` with `addMethod()`, and the benchmark experiment run using `buildBench()`.
+As before, methods can be added to the *BenchDesign* with `addMethod()`, and the benchmark experiment run using `buildBench()`.
 
 ```{r}
 bdnull <- bdnull %>%
@@ -671,13 +671,13 @@ bdnull <- bdnull %>%
                                    method = "BH"))
 ```
 
-While not mentioned above, the `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the `BenchDesign` object.
+While not mentioned above, the `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the *BenchDesign* object.
 
 ```{r}
 buildBench(bdnull, data = tdat)
 ```
 
-By specifying data during the `buildBench()` step the exact same benchmark comparison, as defined in the common `BenchDesign` object, can be carried out consistently across multiple data sets. While this approach works even if the common `BenchDesign` object contains a default data set, it is recommended that the `BenchDesign` be created without any data to avoid errors if the design is going to be reunsed across data sets.
+By specifying data during the `buildBench()` step the exact same benchmark comparison, as defined in the common *BenchDesign* object, can be carried out consistently across multiple data sets. While this approach works even if the common *BenchDesign* object contains a default data set, it is recommended that the *BenchDesign* be created without any data to avoid errors if the design is going to be reunsed across data sets.
 
 # Related Work
 

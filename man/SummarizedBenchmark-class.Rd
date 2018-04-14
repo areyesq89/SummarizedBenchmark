@@ -20,6 +20,28 @@ as the number of \code{\link{assays}} containing performance
 functions to be compared with the ground truths.}
 }}
 
+\examples{
+
+## loading the example data from iCOBRA
+library(iCOBRA)
+data(cobradata_example)
+
+## a bit of data wrangling and reformatting
+assays <- list(
+    qvalue=cobradata_example@padj,
+    logFC=cobradata_example@score )
+assays[["qvalue"]]$DESeq2 <- p.adjust(cobradata_example@pval$DESeq2, method="BH")
+groundTruth <- DataFrame( cobradata_example@truth[,c("status", "logFC")] )
+colnames(groundTruth) <- names( assays )
+colData <- DataFrame( method=colnames(assays[[1]]) )
+groundTruth <- groundTruth[rownames(assays[[1]]),]
+
+## constructing a SummarizedBenchmark object
+sb <- SummarizedBenchmark(
+    assays=assays, colData=colData,
+    groundTruth=groundTruth )
+
+}
 \author{
 Alejandro Reyes
 }

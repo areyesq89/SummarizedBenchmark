@@ -1,11 +1,14 @@
 #' @title availableMetrics
 #' @aliases availableMetrics
 #' @description
-#' List default performance metrics available in this package.
+#' This function returns a data frame summarizing the default performance metrics provided in this package.
+#' The data.frame contains three columns, `functions` is the name of the performance metric, `description`
+#' is longer description of the performance metric and `requiredTruth` is logical depending on whether the
+#' performance metrics require ground truths.
 #' @examples
 #' availableMetrics()
 #'
-#' @return A data.frame with available performance metrics.
+#' @return A data.frame summarizing the default performance metrics provided in this package.
 #' 
 #' @export
 availableMetrics <- function(){
@@ -21,23 +24,23 @@ availableMetrics <- function(){
 }
 
 sb.TPR <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha & truth == 1, na.rm=TRUE ) / sum( truth == 1, na.rm=TRUE )
+  sum( query < alpha & truth == 1, na.rm = TRUE ) / sum( truth == 1, na.rm = TRUE )
 }
 
 sb.TNR <- function( query, truth, alpha=0.1 ){
-  sum( ( !query < alpha ) & truth == 0, na.rm=TRUE ) / sum( truth == 0, na.rm=TRUE )
+  sum( ( !query < alpha ) & truth == 0, na.rm = TRUE ) / sum( truth == 0, na.rm = TRUE )
 }
 
 sb.FDR <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha & truth == 0, na.rm=TRUE ) / sum( query < alpha, na.rm=TRUE )
+  sum( query < alpha & truth == 0, na.rm = TRUE ) / sum( query < alpha, na.rm = TRUE )
 }
 
 sb.FNR <- function( query, truth, alpha=0.1 ){
-  sum( !(query < alpha) & truth == 1, na.rm=TRUE ) / sum( !( query < alpha ), na.rm=TRUE )
+  sum( !(query < alpha) & truth == 1, na.rm = TRUE ) / sum( !( query < alpha ), na.rm = TRUE )
 }
 
 sb.rejections <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha, na.rm=TRUE )
+  sum( query < alpha, na.rm = TRUE )
 }
 
 sb.correlation <- function( query, truth, method="pearson" ){
@@ -49,11 +52,11 @@ sb.sdad <- function( query, truth ){
 }
 
 sb.hamming <- function( query, truth ){
-  sum( !query == truth, na.rm=TRUE )
+  sum( !query == truth, na.rm = TRUE )
 }
 
 sb.Lpnorm <- function( query, truth, p=2 ){
-  sum( abs(query - truth) ^ p, na.rm=TRUE ) ^ (1/p)
+  sum( abs(query - truth) ^ p, na.rm = TRUE ) ^ (1/p)
 }
 
 #' @importFrom mclust adjustedRandIndex

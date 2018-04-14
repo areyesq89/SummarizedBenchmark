@@ -35,7 +35,7 @@ plotMethodsOverlap <- function( object, assay="qvalue", alpha=0.1, ... ){
   }
   uobj <- as.data.frame( 1*( assays( object )[[assay]] < alpha) )
   uobj[is.na( uobj )] <- 0
-  if ( sum(colSums(uobj) > 0 ) < 2 ){
+  if ( sum(colSums(uobj) > 0) < 2 ){
     stop("To plot overlaps, at least 2 methods must have observations that pass the alpha threshold.")
   }
   upset(uobj , ... )

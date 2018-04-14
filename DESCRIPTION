@@ -1,16 +1,15 @@
 Package: SummarizedBenchmark
 Type: Package
-Title: A class and methods for benchmarks and comparisons across methods
-Version: 0.99.3.3
+Title: Classes and methods for performing benchmark comparisons
+Version: 0.99.3.4
 Author: Alejandro Reyes <alejandro.reyes.ds@gmail.com>, Patrick Kimes <patrick.kimes@gmail.com>
 Maintainer: Alejandro Reyes <alejandro.reyes.ds@gmail.com>, Patrick Kimes <patrick.kimes@gmail.com>
-Description: This package defines the SummarizedBenchmarck class, which extends 
-    the RangedSummarizedExperiment object. The SummarizedBenchmark object is designed 
-    to provide infrastructure to store and compare the results of different methods. 
-    This class provides an integrated interface to store metadata such as parameters and software 
-    versions as well as ground truths (in case these are available) and evaluation 
-    metrics. It also provides an flexible way to define and evaluate new
-    performance metrics.
+Description: This package defines the BenchDesign and SummarizedBenchmark classes for building,
+    executing, and evaluating benchmark experiments of computational methods. The SummarizedBenchmark
+    class extends the RangedSummarizedExperiment object, and is designed to provide infrastructure
+    to store and compare the results of applying different methods to a shared data set.
+    This class provides an integrated interface to store metadata such as method parameters and software 
+    versions as well as ground truths (when these are available) and evaluation metrics.
 biocViews: Software, Infrastructure
 Depends: R (>= 3.4),
          tidyr,
