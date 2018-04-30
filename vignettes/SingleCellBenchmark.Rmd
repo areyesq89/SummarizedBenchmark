@@ -66,21 +66,13 @@ To make comparisons with the simulated data sets easier, we convert the _Summari
 sce <- as(se, "SingleCellExperiment")
 ```
 
-Each of the simulators in the `r BiocStyle::Biocpkg("splatter")` package follow the `[prefix]Simulate` naming convention, with the corresponding parameter estimation function, `[prefix]Estimate`. Here, we use four methods included in the comparisons of [@Zappia_2017].
+Each of the simulators in the `r BiocStyle::Biocpkg("splatter")` package follow the `[prefix]Simulate` naming convention, with the corresponding parameter estimation function, `[prefix]Estimate`. Here, we use three methods included in the comparisons of [@Zappia_2017].
 
 ```{r construct-sim-benchdesign}
 bd <- BenchDesign() %>%
     addMethod(label = "splat",
               func = splatSimulate,
               params = rlang::quos(params = splatEstimate(in_data),
-                                   dropout.present = FALSE,
-                                   verbose = in_verbose,
-                                   seed = in_seed),
-              post = list) %>% 
-    addMethod(label = "splat.drop",
-              func = splatSimulate,
-              params = rlang::quos(params = splatEstimate(in_data),
-                                   dropout.present = TRUE, 
                                    verbose = in_verbose,
                                    seed = in_seed),
               post = list) %>% 
@@ -102,7 +94,7 @@ Each simulator returns a single _SingleCellExperiment_ object containing the sim
 
 # Running the Benchmark Experiment
 
-Using the `"counts"` assay of the `fluidigm` data set as input, we generate simulated data with the four methods.
+Using the `"counts"` assay of the `fluidigm` data set as input, we generate simulated data with the three methods.
 
 ```{r run-sim-buildbench}
 fluidigm_dat <- list(in_data = assay(sce, "counts"),
