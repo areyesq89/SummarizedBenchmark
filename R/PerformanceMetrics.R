@@ -161,7 +161,11 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=
     }
     indRes <- sapply( seq_len( ncol( assayData ) ), function( i ){
       assayRes <- do.call( vf, c( list(query=assayData[,i]), passArgs ) )
-      assayRes
+      if( all( is.na( assayData[,i] ) ) ){
+        rep( NA, length( assayRes ) )
+      }else{
+        assayRes
+      }
     } )
     resDF <- DataFrame( t( matrix( indRes, nrow=resNRow ) ) )
     elementMetadata( resDF ) <- eleMD
