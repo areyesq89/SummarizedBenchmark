@@ -23,10 +23,6 @@
 #' @param ftCols Vector of character names of columns in data set that should be
 #'        included as feature data (row data) in the returned SummarizedBenchmark
 #'        object. (default = NULL)
-#' @param ptabular Whether to return method parameters with each parameter in a
-#'        separate column of the \code{colData} for the returned SummarizedBenchmark
-#'        object, i.e. in tabular form. If FALSE, method parameters are returned
-#'        as a single column with comma-delimited "key=value" pairs. (default = TRUE)
 #' @param catchErrors logical whether errors produced by methods during evaluation
 #'        should be caught and printed as a message without stopping the entire
 #'        build process. (default = TRUE)
@@ -84,8 +80,8 @@
 #' @importFrom utils packageName packageVersion sessionInfo
 #' @export
 #' @author Patrick Kimes
-buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, ptabular = TRUE,
-                       sortIDs = FALSE, catchErrors = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
+buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs = FALSE,
+                       catchErrors = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
     if (!is.null(data)) {
         bd$bdata <- data
@@ -177,8 +173,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, ptabula
              "ftCols must be a subset of the column names of the input data.")
     }
         
-    ## check validity of ptabular, parallel values (unit logical value) 
-    stopifnot((length(ptabular) == 1) && is.logical(ptabular))
+    ## check validity of parallel values (unit logical value) 
     stopifnot((length(parallel) == 1) && is.logical(parallel))
     
     ## assay: evaluate all functions
@@ -226,7 +221,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, ptabula
     }
     
     ## colData: method information
-    df <- cleanMethods(bd, ptabular)
+    df <- cleanMethods(bd)
     
     ## performanceMetrics: empty
     pf <- rep(list("bench" = list()), nassays)
@@ -367,9 +362,9 @@ evalMethodsParallel <- function(bd, ce, BPPARAM) {
 
 
 ## helper function to convert method info to character for colData
-cleanMethods <- function(bd, ptabular) {
+cleanMethods <- function(bd) {
     df <- mapply(cleanMethod, m = bd$methods, mname = names(bd$methods), 
-                 MoreArgs = list(bdata = bd$bdata, ptabular = ptabular),
+                 MoreArgs = list(bdata = bd$bdata),
                  SIMPLIFY = FALSE)
     df <- dplyr::bind_rows(df)
     df$label <- names(bd$methods)
@@ -377,7 +372,10 @@ cleanMethods <- function(bd, ptabular) {
     df
 }
 
-cleanMethod <- function(m, mname, bdata, ptabular) {
+
+
+
+cleanMethod <- function(m, mname, bdata) {
     ## delay evalution of metadata information until buildBench
     m$meta <- eval_tidy(m$meta, bdata)
 
@@ -419,16 +417,9 @@ cleanMethod <- function(m, mname, bdata, ptabular) {
 
     ## parse method parameters
     if (length(m$params) > 0) {
-        if (ptabular) {
-            bparams <- sapply(m$params, quo_text)
-            names(bparams) <- paste0("param.", names(bparams))
-            bparams <- data.frame(t(bparams), stringsAsFactors = FALSE)
-        } else {
-            bparams <- paste(names(m$params), "=",
-                             sapply(m$params, quo_text),
-                             collapse=", ")
-            bparams <- data.frame(bparams, stringsAsFactors = FALSE)
-        }
+        bparams <- sapply(m$params, quo_text)
+        names(bparams) <- paste0("param.", names(bparams))
+        bparams <- data.frame(t(bparams), stringsAsFactors = FALSE)
         res <- cbind(res, bparams)
     }
 
@@ -436,14 +427,19 @@ cleanMethod <- function(m, mname, bdata, ptabular) {
 }
 
 
+
+
+
+
+
 ## helper to gather important information for function
 funcMeta <- function(f, meta) {
-
+ 
     ## determine if main `func` was anonymous
     ## -- If an anonymous func was specified directly to *Method, then the
     ##    capturing envirnment of the anonymous function will be a child of the
     ##    SummarizedBenchmark environment.
-    ##    Handle this by greping for a 
+    ##    Handle this by greping for `function(` in the specified value.
     f_anon <- is.null(packageName(environment(eval_tidy(f)))) ||
         grepl("^\\s*function\\s*\\(", quo_text(f))
 

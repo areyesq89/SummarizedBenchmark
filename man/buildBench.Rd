@@ -5,8 +5,8 @@
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
 buildBench(bd, data = NULL, truthCols = NULL, ftCols = NULL,
-  ptabular = TRUE, sortIDs = FALSE, catchErrors = TRUE,
-  parallel = FALSE, BPPARAM = bpparam())
+  sortIDs = FALSE, catchErrors = TRUE, parallel = FALSE,
+  BPPARAM = bpparam())
 }
 \arguments{
 \item{bd}{\code{BenchDesign} object.}
@@ -27,11 +27,6 @@ to the assay names specified to the \code{post} parameter at each
 \item{ftCols}{Vector of character names of columns in data set that should be
 included as feature data (row data) in the returned SummarizedBenchmark
 object. (default = NULL)}
-
-\item{ptabular}{Whether to return method parameters with each parameter in a
-separate column of the \code{colData} for the returned SummarizedBenchmark
-object, i.e. in tabular form. If FALSE, method parameters are returned
-as a single column with comma-delimited "key=value" pairs. (default = TRUE)}
 
 \item{sortIDs}{Whether the output of each method should be merged using IDs.
 If TRUE, each method must return a named vector or list. The names will be
