@@ -93,11 +93,8 @@ addMethod.BenchDesign <- function(bd, label, func, params = rlang::quos(),
     }
     ## capture input
     qf <- rlang::enquo(func)
-    qp <- rlang::enquo(post)
-    qm <- rlang::enquo(meta)
     
     ## add to bench
-    bd$methods[[label]] <- list(func = qf, params = params, 
-                                post = qp, meta = qm)
+    bd@methods[[label]] <- BDMethod(f = qf, params = params, post = post, meta = meta)
     bd
 }

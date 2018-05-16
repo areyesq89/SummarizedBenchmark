@@ -1,48 +1,3 @@
-#' Create a new BDMethod
-#'
-#' Initializes a new BenchDesign object for benchmarking methods.
-#'
-#' @param f a function to be benchmarked
-#' @param params a list of quosures specifying function parameters
-#' @param post a list of functions to be applied to the output of \code{f}
-#' @param meta a list of meta data
-#' 
-#' @return
-#' BDMethod object
-#'
-#' @rdname BDMethod-class
-#' @importFrom rlang enquo
-#' @export
-#' @author Patrick Kimes
-BDMethod <- function(f, params = rlang::quos(), post = NULL, meta = NULL) {
-    qf <- rlang::enquo(f)
-    if (is(post, "function")) {
-        post <- list("default" = post)
-    }
-    new("BDMethod", f = f, qf = qf, params = params, post = post, meta = meta)
-}
-
-
-## Compare BDMethod meta data
-#'
-#' Simple comparison of two BDMethod objects based on
-#' meta data.
-#' 
-#' @param bdm1 a \code{BDMethod} object
-#' @param bdm2 a \code{BDMethod} object
-#'
-#' @return
-#' logical value indicating whether two objects produced same
-#' meta data.
-#' 
-#' @importFrom dplyr all_equal
-#' @author Patrick Kimes
-compareBDMethod <- function(bdm1, bdm2) {
-    dplyr::all_equal(tidyBDMethod(bdm1), tidyBDMethod(bdm2))
-}
-
-
-
 #' Create a new BenchDesign
 #'
 #' Initializes a new BenchDesign object for benchmarking methods.
@@ -75,8 +30,8 @@ setGeneric("BenchDesign",
     if (!is.null(methods))
         ml <- c(ml, methods)
     if (length(ml) == 0)
-        ml <- NULL
-
+        ml <- list()
+    
     if (!is.null(data)) {
         data <- new("BDData", data = data,
                     type = ifelse(is(data, "character"), "hash", "data"))

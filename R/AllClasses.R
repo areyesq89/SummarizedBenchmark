@@ -74,14 +74,14 @@ setValidity("BDMethod",
 #' @exportClass BenchDesign
 #' @name BenchDesign-class
 #' @author Patrick Kimes
-setClass("BenchDesign", representation(data = "BDDataOrNULL", methods = "listOrNULL"))
+setClass("BenchDesign", representation(data = "BDDataOrNULL", methods = "list"))
 
 setValidity("BenchDesign",
             function(object) {
-                if (!is.null(object@methods) && is.null(names(object@methods)))
-                    stop("The slot 'methods' must be a named list of BDMethods, else should be NULL.")
-                if (!is.null(object@methods) && !all(sapply(object@methods, is, "BDMethod")))
-                    stop("The slot 'methods' must be a named list of BDMethods, else should be NULL.")
+                if (length(object@methods) > 0 && is.null(names(object@methods)))
+                    stop("The slot 'methods' must be a named list of BDMethods, else should be length zero.")
+                if (length(object@methods) > 0 && !all(sapply(object@methods, is, "BDMethod")))
+                    stop("The slot 'methods' must be a named list of BDMethods, else should be length zero.")
                 TRUE
             })
 

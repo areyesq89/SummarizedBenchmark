@@ -61,7 +61,7 @@ setMethod("show", signature(object = "BDMethod"), .show.BDMethod)
     }
     cat("  benchmark methods:\n")
     if (length(object@methods) < 1) {
-        cat("    NULL\n")
+        cat("    none\n")
     } else {
         max_c <- 20
         m1 <- max(nchar(names(head(object@methods))))
