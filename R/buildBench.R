@@ -83,64 +83,57 @@
 buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs = FALSE,
                        catchErrors = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
+    if (!is.null(data) && !is.list(data)) {
+        stop("If specified, 'data' must be a list or data.frame object.")
+    }
     if (!is.null(data)) {
-        bd$bdata <- data
+        bd@data <- new("BDData", data = data, type = "data")
     }
     
     ## make sure data is provided
-    if (is.null(bd$bdata)) {
+    if (is.null(bd@data)) {
         stop("data in BenchDesign is NULL.\n",
+             "Please specify a non-NULL dataset to build SummarizedBenchmark.")
+    }
+    
+    if (bd@data@type != "data") {
+        stop("data in BenchDesign is only hash.\n",
              "Please specify a non-NULL dataset to build SummarizedBenchmark.")
     }
 
     ## make sure methods are specified
-    if (length(bd$methods) == 0) {
+    if (length(bd@methods) == 0) {
         stop("list of methods in BenchDesign is empty.\n",
              "Please specify at least one method to build SummarizedBenchmark.")
     }
     
-    ## determine whether post was specified as a list
-    assay_aslist <- sapply(bd$methods, function(x) { is.list(eval_tidy(x$post, bd$bdata)) })
-    assay_aslist <- unique(assay_aslist)
-    if (length(assay_aslist) > 1) {
-        stop("Inconsistent post specification style across methods. ",
-             "If post is specified as a list for any method, it must be specified ",
-             "as a list for all methods.")
-    }
-    
-    ## determine number of assay to generate
-    nassays <- sapply(bd$methods, function(x) { length(eval_tidy(x$post, bd$bdata)) })
-    nassays <- unique(nassays)
-    if (all(nassays %in% 0:1)) {
-        nassays <- 1
-    } else if (length(nassays) > 1) {
-        stop("Inconsistent post length across methods. ",
-             "If post is specified as a list for any method, it must be specified ",
-             "as a list of the same length for all methods.")
-    }
 
-    ## if multiple assays are used, make sure that all are same name
-    if (assay_aslist) {
-        assay_names <- lapply(bd$methods, function(x) { names(eval_tidy(x$post, bd$bdata)) })
-        assay_names <- unique(unlist(assay_names))
-        if (length(assay_names) != nassays) {
-            stop("Inconsistent post naming across methods. ",
-                 "If post is specified as a list for any method, it must be specified ",
-                 "as a list of the same length, with the same names, for all methods.")
-        }
-    } else {
-        if (is.null(truthCols)) {
-            assay_names <- "bench"
-        } else {
-            assay_names <- truthCols
-        }
+    ## CLEAN UP METHODS POSTPROCESSING FUNCTIONS ---------------------------------------
+    
+    ## fill post-processing methods with null method if not specified
+    bd@methods <- lapply(bd@methods, function(x) { if (length(x@post) < 1) { x@post <- list(default = function(z) { z }) }; x })
+
+    ## determine number of assay to generate
+    assay_names <- lapply(bd@methods, function(x) names(x@post))
+    uassays <- unique(unlist(assay_names))
+    nassays <- length(uassays)
+    
+    ## fill in missing functions
+    bd@methods <- lapply(bd@methods, function(x) { x@post <- x@post[uassays]; x })
+    
+    fillpost <- function(mp) {
+        lapply(mp, function(y) { ifelse(is.null(y), function(z) { NA }, y) })
     }
+    bd@methods <- lapply(bd@methods, function(x) { x@post <- fillpost(x@post); x })
+    
+    ## ---------------------------------------------------------------------------------
+    
     
     ## check validity of sortIDs value (unit logical or data column name)
     stopifnot(length(sortIDs) == 1)
     stopifnot(is.logical(sortIDs) || is.character(sortIDs))
     if (is.character(sortIDs)) {
-        if (sortIDs %in% names(bd$bdata)) {
+        if (sortIDs %in% names(bd@data@data)) {
             sortID_col <- sortIDs
             sortIDs <- TRUE
         } else {
@@ -152,23 +145,22 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## check if truthCols is in bdata and 1-dim vector
     if (!is.null(truthCols)) {
-        stopifnot(truthCols %in% names(bd$bdata),
-                  length(truthCols) == nassays)
-        if (assay_aslist &&
-            (!all(names(truthCols) %in% assay_names) || is.null(names(truthCols)))) {
-            stop("Invalid 'truthCols' specification. ",
-                 "If 'post' is specified as a list and 'truthCols' is also specified, ",
-                 "'truthCols' must be a list with names matching 'post'.")
-        }
-        if (sortIDs && is.null(sortID_col)) {
+        if (length(truthCols) == 1 && is.null(names(truthCols)))
+            names(truthCols) <- "default"
+
+        stopifnot(truthCols %in% names(bd@data@data))
+        stopifnot(length(truthCols) <= nassays)
+        stopifnot(names(truthCols) %in% uassays)
+        stopifnot(!is.null(names(truthCols)))
+        
+        if (sortIDs && is.null(sortID_col))
             stop("If 'truthCols' is specified, 'sortIDs' can not simply be 'TRUE'.\n",
                  "Instead, specify a column in the data to use for sorting the output to ",
                  "match the order of the 'truthCols'.")
-        }
     }
     
     ## check if ftCols are in bdata
-    if (!is.null(ftCols) && !all(ftCols %in% names(bd$bdata))) {
+    if (!is.null(ftCols) && !all(ftCols %in% names(bd@data@data))) {
         stop("Invalid ftCols specification. ",
              "ftCols must be a subset of the column names of the input data.")
     }
@@ -182,50 +174,31 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     } else {
         a <- evalMethods(bd, catchErrors)
     }
-
+    
     ## handle multi-assay separately
-    if (assay_aslist) {
-        if (sortIDs) {
-            if (any(unlist(lapply(a, function(x) { lapply(x, function(y) { is.null(names(y)) }) })))) {
-                stop("If sortIDs = TRUE, all methods must return a named list or vector.")
-            }
-            a <- lapply(assay_names, function(x) { lapply(a, `[[`, x) })
-            a <- .list2mat(a)
-            if (!is.null(sortID_col)) {
-                ## reorder by specified ID column
-                a <- lapply(a, .expandrows, rid = bd$bdata[[sortID_col]])
-            }
-        } else {
-            ## note difference in lapply vs. sapply
-            a <- lapply(assay_names, function(x) { sapply(a, `[[`, x) })
+    if (sortIDs) {
+        if (any(unlist(lapply(a, function(x) { lapply(x, function(y) { is.null(names(y)) }) })))) {
+            stop("If sortIDs = TRUE, all methods must return a named list or vector.")
         }
-        names(a) <- assay_names
+        a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
+        a <- .list2mat(a)
+        if (!is.null(sortID_col)) {
+            ## reorder by specified ID column
+            a <- lapply(a, .expandrows, rid = bd@data@data[[sortID_col]])
+        }
     } else {
-        if (sortIDs) {
-            if (any(unlist(lapply(a, function(x) { is.null(names(x)) })))) {
-                stop("If sortIDs = TRUE, all methods must return a named list or vector.")
-            }
-            a <- .list2mat(list("bench" = a))
-            if (!is.null(sortID_col)) {
-                ## reorder by specified ID column
-                a$bench <- .expandrows(a$bench, rid = bd$bdata[[sortID_col]])
-            }
-        } else {
-            if (length(unique(sapply(a[!is.na(a)], length))) > 1) {
-                stop("Not all methods returned list or vector of same length.\n",
-                     "If this is expected, consider setting sortIDs = TRUE and ",
-                     "requiring all methods to return named lists or vectors.")
-            }
-            a <- list("bench" = do.call(cbind, a))
-        }
+        ## note difference in lapply vs. sapply
+        a <- lapply(uassays, function(x) { sapply(a, `[[`, x) })
     }
+    names(a) <- uassays
+
     
     ## colData: method information
-    df <- cleanMethods(bd)
+    df <- tidyBDMethods(bd@methods, dat = bd@data@data)
     
     ## performanceMetrics: empty
     pf <- rep(list("bench" = list()), nassays)
-    names(pf) <- assay_names
+    names(pf) <- uassays
     pf <- SimpleList(pf)
 
     ## metadata: record sessionInfo
@@ -235,28 +208,31 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     sbParams <- list(assays = a,
                      colData = df,
                      performanceMetrics = pf,
-                     metadata = md)
+                     metadata = md,
+                     BenchDesign = bd)
     
     ## pull out grouthTruth if available
     if (!is.null(truthCols)) {
-        sbParams[["groundTruth"]] <- DataFrame(bd$bdata[truthCols])
-        if (assay_aslist) {
-            ## rename grouthTruth to match assays for named assays case
-            names(sbParams[["groundTruth"]]) <- names(truthCols)
-        } else {
+        sbParams[["groundTruth"]] <- DataFrame(bd@data@data[truthCols])
+        
+        if (length(a) == 1 && names(a) == "default") {
             ## rename assay to match groundTruth
             names(sbParams[["assays"]]) <- truthCols
             names(sbParams[["performanceMetrics"]]) <- truthCols
+        } else {
+            ## rename grouthTruth to match assays for named assays case
+            names(sbParams[["groundTruth"]]) <- names(truthCols)
         }
     }
 
     ## add feature columns if specified
     if (!is.null(ftCols)) {
-        sbParams[["ftData"]] <- DataFrame(bd$bdata[ftCols])
+        sbParams[["ftData"]] <- DataFrame(bd@data@data[ftCols])
     }
     
     do.call(SummarizedBenchmark, sbParams)
 }
+
 
 
 ## helper function to take list of "method = value-vector" pairs,
@@ -286,198 +262,38 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 }
 
 
+## helper to evaluate a single BDMethod
+evalMethod <- function(bdm, lab, dat, ce) {
+    expr <- rlang::quo((bdm@f)(!!! bdm@params))
+    expr <- rlang::quo({ z <- (!! expr); lapply(bdm@post, function(zz) { zz(z) }) })
+    tryCatch(
+        rlang::eval_tidy(expr, dat),
+        error = function(e) {
+            message("!! error caught in buildBench !!\n",
+                    "!! error in method: ", lab)
+            if (ce) {
+                message("!!  original message: \n",
+                        "!!  ", e)
+                return(NA)
+            } else {
+                stop(e)
+            }
+        })
+}
+
+
 ## helper function to evaluate all quosures with data
 evalMethods <- function(bd, ce) {
-    al <- lapply(seq(bd$methods),
-                 function(i) {
-                     x <- bd$methods[[i]]
-                     expr <- quo(UQ(x$func)(!!! x$params))
-                     if (is.function(eval_tidy(x$post, bd$bdata))) {
-                         expr <- quo(UQ(x$post)(!! expr))
-                     } else if (is.list(eval_tidy(x$post, bd$bdata))) {
-                         epost <- eval_tidy(x$post, bd$bdata)
-                         enames <- names(epost)
-                         if (all(sapply(epost, is_function))) {
-                             expr <- quo({
-                                 z <- (!! expr)
-                                 lapply(UQ(x$post), function(zz) { zz(z) })
-                             })
-                         }
-                     }
-                     tryCatch(
-                         eval_tidy(expr, bd$bdata),
-                         error = function(e) {
-                             message("!! error caught in buildBench !!\n",
-                                     "!! error in method: ", names(bd$methods)[i])
-                             if (ce) {
-                                 message("!!  original message: \n",
-                                         "!!  ", e)
-                                 return(NA)
-                             } else {
-                                 stop(e)
-                             }
-                         })
-                 })
-    names(al) <- names(bd$methods)
-    al
+    mapply(evalMethod, bdm = bd@methods, lab = names(bd@methods),
+           MoreArgs = list(dat = bd@data@data, ce = ce), SIMPLIFY = FALSE)
 }
 
 
 ## helper function to evaluate using BiocParallel
 evalMethodsParallel <- function(bd, ce, BPPARAM) {
-    al <- bplapply(seq(bd$methods),
-                   function(i) {
-                       x <- bd$methods[[i]]
-                       expr <- quo(UQ(x$func)(!!! x$params))
-                       if (is.function(eval_tidy(x$post, bd$bdata))) {
-                           expr <- quo(UQ(x$post)(!! expr))
-                       } else if (is.list(eval_tidy(x$post, bd$bdata))) {
-                           epost <- eval_tidy(x$post, bd$bdata)
-                           enames <- names(epost)
-                           if (all(sapply(epost, is_function))) {
-                               expr <- quo({
-                                   z <- (!! expr)
-                                   lapply(UQ(x$post), function(zz) { zz(z) })
-                               })
-                           }
-                       }
-                       tryCatch(
-                           eval_tidy(expr, bd$bdata),
-                           error = function(e) {
-                               message("!! error caught in buildBench !!\n",
-                                       "!! error in method: ", names(bd$methods)[i])
-                               if (ce) {
-                                   message("!!  original message: \n",
-                                           "!!  ", e)
-                                   return(NA)
-                               } else {
-                                   stop(e)
-                               }
-                           })
-                   },
-                   BPPARAM = BPPARAM)
-    names(al) <- names(bd$methods)
-    al
+    bpmapply(evalMethod, bdm = bd@methods, lab = names(bd@methods),
+             MoreArgs = list(dat = bd@data@data, ce = ce), SIMPLIFY = FALSE,
+             BPPARAM = BPPARAM)
 }
-
-
-## helper function to convert method info to character for colData
-cleanMethods <- function(bd) {
-    df <- mapply(cleanMethod, m = bd$methods, MoreArgs = list(bdata = bd$bdata), SIMPLIFY = FALSE)
-    df <- dplyr::bind_rows(df)
-    df$label <- names(bd$methods)
-    df
-}
-
-
-
-
-cleanMethod <- function(m, bdata) {
-    ## delay evalution of metadata information until buildBench
-    m$meta <- eval_tidy(m$meta, bdata)
-
-    ## parse package/version information
-    meta <- funcMeta(m$func, m$meta)
-    
-    ## parse primary method
-    if (meta$func_anon[1]) {
-        func <- gsub("\n", ";", quo_text(m$func))
-    } else {
-        func <- quo_text(m$func)
-    }
-    
-    ## parse postprocessing method
-    has_post <- is.function(eval_tidy(m$post, bdata))
-    has_postlist <- is.list(eval_tidy(m$post, bdata))
-    if (has_post & !has_postlist) {
-        post <- gsub("\n", ";", quo_text(m$post))
-    } else if (has_postlist) {
-        post <- paste(names(eval_tidy(m$post, bdata)), collapse = ";")
-    } else {
-        post <- NA_character_
-    }
-    
-    res <- cbind(data.frame(func, post, stringsAsFactors = FALSE), meta)
-
-    ## parse method parameters
-    if (length(m$params) > 0) {
-        bparams <- sapply(m$params, quo_text)
-        names(bparams) <- paste0("param.", names(bparams))
-        bparams <- data.frame(t(bparams), stringsAsFactors = FALSE)
-        res <- cbind(res, bparams)
-    }
-
-    res
-}
-
-
-
-
-
-
-
-## helper to gather important information for function
-funcMeta <- function(f, meta) {
- 
-    ## determine if main `func` was anonymous
-    ## -- If an anonymous func was specified directly to *Method, then the
-    ##    capturing envirnment of the anonymous function will be a child of the
-    ##    SummarizedBenchmark environment.
-    ##    Handle this by greping for `function(` in the specified value.
-    f_anon <- is.null(packageName(environment(eval_tidy(f)))) ||
-        grepl("^\\s*function\\s*\\(", quo_text(f))
-
-    fsrc <- eval_tidy(f)
-    vers_src <- "func"
-    if ("pkg_func" %in% names(meta)) {
-        vers_src <- "meta_func"
-        fsrc <- eval_tidy(rlang::as_quosure(meta$pkg_func))
-    } else if ("pkg_name" %in% names(meta) |
-               "pkg_name" %in% names(meta)) {
-        pkg_name <- ifelse("pkg_name" %in% names(meta),
-                           meta$pkg_name, NA_character_)
-        pkg_vers <- ifelse("pkg_vers" %in% names(meta),
-                           meta$pkg_vers, NA_character_)
-        vers_src <- "meta_manual"
-        fsrc <- NULL
-    }
-
-    if (!is.null(fsrc)) {
-        if (f_anon) {
-            pkg_name <- NA_character_
-            pkg_vers <- NA_character_
-        } else {
-            fenv <- environment(fsrc)
-            pkg_name <- packageName(fenv)
-            pkg_vers <- as(packageVersion(pkg_name), "character")
-        }
-    }
-
-    res <- data.frame(func_anon = f_anon, vers_src = vers_src,
-                      pkg_name = pkg_name, pkg_vers = pkg_vers,
-                      stringsAsFactors = FALSE)
-
-    ## need to parse and merge manually defined metadata columns 
-    if (!is.null(meta)) {
-        meta_func <- meta[["pkg_func"]] 
-        meta <- meta[!(names(meta) %in% c("pkg_func", "pkg_name", "pkg_vers"))]
-        if (length(meta) > 0) {
-            names(meta) <- paste0("meta.", names(meta))
-        }
-        if (!is.null(meta_func)) {
-            meta_func <- gsub("\n", ";", quo_text(meta_func))
-            if (nchar(meta_func) > 100) {
-                meta_func <- paste0(substr(meta_func, 1, 97), "...")
-            }
-            meta <- c(meta, "pkg_func" = meta_func)
-        }
-        if (length(meta) > 0) {
-            res <- cbind(res, meta, stringsAsFactors = FALSE)
-        }
-    }
-
-    res
-}
-
 
 

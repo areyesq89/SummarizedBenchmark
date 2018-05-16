@@ -20,6 +20,13 @@ compareBDMethod <- function(bdm1, bdm2) {
 }
 
 
+## helper function to convert method info to character for colData
+tidyBDMethods <- function(bdms, dat = NULL) {
+    df <- lapply(bdms, tidyBDMethod, dat = dat)
+    dplyr::bind_rows(df)
+}
+
+
 #' Tidy BDMethod Data 
 #'
 #' A helper function to create tabular info for a single

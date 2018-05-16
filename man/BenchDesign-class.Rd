@@ -6,15 +6,12 @@
 \alias{BenchDesign-class}
 \alias{BenchDesign}
 \alias{BenchDesign,ANY-method}
-\alias{BenchDesign,SummarizedBenchmark-method}
 \alias{show,BenchDesign-method}
 \title{BenchDesign class}
 \usage{
 BenchDesign(..., methods = NULL, data = NULL)
 
 \S4method{BenchDesign}{ANY}(..., methods = NULL, data = NULL)
-
-\S4method{BenchDesign}{SummarizedBenchmark}(methods, data)
 
 \S4method{show}{BenchDesign}(object)
 }

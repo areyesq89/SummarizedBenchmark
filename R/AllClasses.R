@@ -54,6 +54,8 @@ setValidity("BDMethod",
                     stop("The slot 'post' must be a named list, else should be NULL.")
                 if (!is.null(post) && any(names(post) == ""))
                     stop("The slot 'post' must be a named list, else should be NULL.")
+                if (!is.null(post) && any(duplicated(names(post))))
+                    stop("The slot 'post' must be a named list, else should be NULL.")
                 if (!is.null(post) && !all(sapply(post, is, "function")))
                     stop("The slot 'post' must be a list of functions, else should be NULL.")
                 if (!is.null(meta) && is.null(names(meta)))
