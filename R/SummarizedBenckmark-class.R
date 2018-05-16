@@ -1,85 +1,3 @@
-#' @name SummarizedBenchmark-class
-#' @title SummarizedBenchmark class documentation
-#' @description
-#' Extension of the \code{\link{RangedSummarizedExperiment}} to
-#' store the output of different methods intended for the same purpose
-#' in a given dataset. For example, a differential expression analysis could be
-#' done using \pkg{limma}-voom, \pkg{edgeR} and \pkg{DESeq2}. The
-#' SummarizedBenchmark class provides a framework that is useful to store, benckmark and
-#' compare results.
-#' @slot performanceMetrics A \code{\link{SimpleList}} of the same length
-#' as the number of \code{\link{assays}} containing performance
-#' functions to be compared with the ground truths.
-#'
-#' @author Alejandro Reyes
-#'
-#' @aliases SummarizedBenchmark-class
-#' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
-#' @importFrom methods as formalArgs is new validObject
-#' @import S4Vectors SummarizedExperiment
-#' @export
-#' 
-#' @examples
-#'
-#' ## loading the example data from iCOBRA
-#' library(iCOBRA)
-#' data(cobradata_example)
-#'
-#' ## a bit of data wrangling and reformatting
-#' assays <- list(
-#'     qvalue=cobradata_example@padj,
-#'     logFC=cobradata_example@score )
-#' assays[["qvalue"]]$DESeq2 <- p.adjust(cobradata_example@pval$DESeq2, method="BH")
-#' groundTruth <- DataFrame( cobradata_example@truth[,c("status", "logFC")] )
-#' colnames(groundTruth) <- names( assays )
-#' colData <- DataFrame( method=colnames(assays[[1]]) )
-#' groundTruth <- groundTruth[rownames(assays[[1]]),]
-#'
-#' ## constructing a SummarizedBenchmark object
-#' sb <- SummarizedBenchmark(
-#'     assays=assays, colData=colData,
-#'     groundTruth=groundTruth )
-#'
-#' @exportClass SummarizedBenchmark
-setClass( "SummarizedBenchmark",
-         contains = "RangedSummarizedExperiment",
-         representation = representation( performanceMetrics = "SimpleList" ) )
-
-setValidity( "SummarizedBenchmark", function( object ) {
-  if( ! length( object@performanceMetrics ) == length( assays( object ) ) ){
-    stop("The number of elements of the slot 'performanceFunction' has
-         be of the same length as the number of assays.")
-  }
-#  if( ncol( rowData( object ) ) > 0 & !all( assayNames( object ) %in% colnames( rowData( object ) ) ) ){
-#    stop("Not all assays have a corresponding ground truth column in rowData")
-#  }
-  if( !all( names( object@performanceMetrics ) %in% assayNames( object  ) ) ){
-    stop("The names of the performanceMetrics list must match the names of the assays")
-  }
-  if( !all( sapply( object@performanceMetrics, "class" ) == "list" ) ){
-    stop("In the slot 'performanceMetrics', each element of the list must contain a list of functions")
-  }
-  permFunc <- object@performanceMetrics
-  for( i in names( permFunc ) ){
-    funcAssay <- permFunc[[i]]
-    for(j in names(funcAssay) ){
-      y <- funcAssay[[j]]
-      f1 <- all( c("query", "truth") %in% formalArgs( y ) )
-      if( !f1 ){
-        stop(sprintf( "The performance function '%s' for assay '%s' does not contain a 'query' and/or a 'truth' argument", j, i) )
-      }
-      otherArgs <- formals(y)[!names(formals(y)) %in% c("query", "truth")]
-      f2 <- any( sapply(otherArgs, class) == "name" )
-      if( f2 ){
-        missingDefaults <- names(otherArgs)[which(f2)]
-        stop(sprintf("The parameter(s) '%s' of the performance function '%s' for assay '%s' has/have no default values. Please specify defaults values.", paste(missingDefaults, collapse=","), j, i ) )
-      }
-    }
-  }
-  TRUE
-} )
-
-
 #' @title Constructor function for SummarizedBenchmark objects.
 #' @aliases SummarizedBenchmark
 #' @description
@@ -107,6 +25,8 @@ setValidity( "SummarizedBenchmark", function( object ) {
 #' length as the number of assays. Each element of the list must be a list
 #' of functions. Each function must contain the parameters 'query' and
 #' 'truth'.
+#' @param BenchDesign A \code{\link{BenchDesign}} containing the code used
+#'        to construct the object. (default = NULL)
 #' @param ... Additional parameters passed to \code{\link{SummarizedExperiment}}.
 #'
 #' @author Alejandro Reyes
@@ -137,8 +57,9 @@ setValidity( "SummarizedBenchmark", function( object ) {
 #' @importFrom S4Vectors DataFrame
 #' @export
 #'
-SummarizedBenchmark <- function( assays, colData, ftData=NULL,
-                                 groundTruth=NULL, performanceMetrics=NULL, ... ){
+SummarizedBenchmark <- function(assays, colData, ftData = NULL,
+                                groundTruth = NULL, performanceMetrics = NULL,
+                                BenchDesign = NULL, ... ) {
   if( is( colData, "data.frame" ) ){
     colData <- DataFrame( colData )
   }
@@ -179,7 +100,8 @@ SummarizedBenchmark <- function( assays, colData, ftData=NULL,
   se <- as( SummarizedExperiment( assays, colData=colData, ... ),
             "RangedSummarizedExperiment")
   rowData(se) <- rData
-  sb <- new( "SummarizedBenchmark", se, performanceMetrics=performanceMetrics )
+  sb <- new( "SummarizedBenchmark", se, performanceMetrics=performanceMetrics,
+            BenchDesign = BenchDesign)
   sb
 }
 

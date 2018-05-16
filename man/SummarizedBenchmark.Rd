@@ -5,7 +5,7 @@
 \title{Constructor function for SummarizedBenchmark objects.}
 \usage{
 SummarizedBenchmark(assays, colData, ftData = NULL, groundTruth = NULL,
-  performanceMetrics = NULL, ...)
+  performanceMetrics = NULL, BenchDesign = NULL, ...)
 }
 \arguments{
 \item{assays}{A list containing outputs of the methods to be
@@ -34,6 +34,9 @@ The names of the columns should have the same names as the assays.}
 length as the number of assays. Each element of the list must be a list
 of functions. Each function must contain the parameters 'query' and
 'truth'.}
+
+\item{BenchDesign}{A \code{\link{BenchDesign}} containing the code used
+to construct the object. (default = NULL)}
 
 \item{...}{Additional parameters passed to \code{\link{SummarizedExperiment}}.}
 }
