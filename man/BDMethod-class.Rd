@@ -39,7 +39,7 @@ Initializes a new BenchDesign object for benchmarking methods.
 \describe{
 \item{\code{f}}{a function to be benchmarked}
 
-\item{\code{qf}}{a quosure of the function \code{f}}
+\item{\code{fc}}{a captured expression of the function \code{f}}
 
 \item{\code{params}}{a list of quosures specifying function parameters}
 

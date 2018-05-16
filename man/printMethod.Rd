@@ -5,7 +5,7 @@
 \alias{printMethods}
 \title{Pretty print methods in a BenchDesign}
 \usage{
-printMethod(bd, n)
+printMethod(bd, n = NULL)
 
 printMethods(bd)
 }

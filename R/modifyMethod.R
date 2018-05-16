@@ -10,8 +10,8 @@
 #' @param label Character name of method to be modified.
 #' @param params Named quosure list created using `rlang::quos` of 
 #'        `parameter = value` paiars to replace in the method definition.
-#'        The `func`, `post`, and `meta` parameters of the method can be
-#'        modified using the special keywords, `bd.func`, `bd.post`, and `bd.meta`
+#'        The `post`, and `meta` parameters of the method can be
+#'        modified using the special keywords, `bd.post`, and `bd.meta`
 #'        (the prefix denoting that these values should modify BenchDesign
 #'        parameters). All other named parameters will be added to the list of
 #'        parameters to be passed to `func`.
@@ -54,7 +54,7 @@ modifyMethod <- function(bd, label, params, .overwrite = FALSE) {
 #' @export
 modifyMethod.BenchDesign <- function(bd, label, params, .overwrite = FALSE) {
     ## verify that method definition already exists
-    if (!(label %in% names(bd$methods))) {
+    if (!(label %in% names(bd@methods))) {
         stop("Specified method is not defined in BenchDesign.")
     }
 
@@ -65,8 +65,8 @@ modifyMethod.BenchDesign <- function(bd, label, params, .overwrite = FALSE) {
     }
     
     ## modify and add to bench
-    bm <- bd$methods[[label]]
-    bd$methods[[label]] <- .modmethod(bm, params, .overwrite)
+    bm <- bd@methods[[label]]
+    bd@methods[[label]] <- .modmethod(bm, params, .overwrite)
 
     return(bd)
 }
@@ -89,23 +89,20 @@ modifyMethod.BenchDesign <- function(bd, label, params, .overwrite = FALSE) {
 #' @keywords internal
 #' @author Patrick Kimes
 .modmethod <- function(m, q, .overwrite) {
-    ## parse out func, post, meta
-    if ("bd.func" %in% names(q)) {
-        m$func <- q$bd.func
-    }
+    ## parse out post, meta
     if ("bd.post" %in% names(q)) {
-        m$post <- q$bd.post
+        m@post <- q@bd.post
     }
     if ("bd.meta" %in% names(q)) {
-        m$meta <- eval_tidy(q$bd.meta)
+        m@meta <- q@bd.meta
     }
 
     ## process named parameters to be used for func
-    q <- q[! names(q) %in% c("bd.func", "bd.post", "bd.meta")]
+    q <- q[! names(q) %in% c("bd.post", "bd.meta")]
     if (.overwrite) {
-        m$params <- q
+        m@params <- q
     } else {
-        m$params <- replace(m$params, names(q), q)
+        m@params <- replace(m@params, names(q), q)
     }
     
     return(m)

@@ -99,7 +99,7 @@ expandMethod.BenchDesign <- function(bd, label, params, onlyone = NULL,
     if (is.null(names(qd)) | any(nchar(names(qd)) == 0)) {
         stop("New parameter values must be named.")
     }
-    if (any(names(qd) %in% names(bd$methods))) {
+    if (any(names(qd) %in% names(bd@methods))) {
         stop("New method names should not overlap with names of current methods.")
     }
     if (any(duplicated(names(qd)))) {
@@ -107,10 +107,10 @@ expandMethod.BenchDesign <- function(bd, label, params, onlyone = NULL,
     }
     
     ## verify that method definition already exists
-    if(!(label %in% names(bd$methods))) {
+    if(!(label %in% names(bd@methods))) {
         stop("Specified method is not defined in BenchDesign.")
     }
-    bm <- bd$methods[[label]]
+    bm <- bd@methods[[label]]
     
     ## handle all using same named list format
     zl <- lapply(qd, .modmethod, m = bm, .overwrite = .overwrite)
@@ -121,6 +121,6 @@ expandMethod.BenchDesign <- function(bd, label, params, onlyone = NULL,
         bd <- dropMethod(bd, label)
     }
     
-    bd$methods <- c(bd$methods, zl)
+    bd@methods <- c(bd@methods, zl)
     bd
 } 

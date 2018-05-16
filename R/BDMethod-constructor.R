@@ -15,24 +15,23 @@
 #' @export
 #' @author Patrick Kimes
 setGeneric("BDMethod",
-           valueClass = "BDMethod",
            function(f, params = rlang::quos(), post = NULL, meta = NULL) standardGeneric("BDMethod"))
 
 .BDMethod.quo <- function(f, params = rlang::quos(), post = NULL, meta = NULL) {
-    qf <- f
-    f <- rlang::eval_tidy(qf)
+    fc <- rlang::get_expr(f)
+    f <- rlang::eval_tidy(f)
     if (is(post, "function")) {
         post <- list("default" = post)
     }
-    new("BDMethod", f = f, qf = qf, params = params, post = post, meta = meta)
+    new("BDMethod", f = f, fc = fc, params = params, post = post, meta = meta)
 }
 
 .BDMethod.fun <- function(f, params = rlang::quos(), post = NULL, meta = NULL) {
-    qf <- rlang::enquo(f)
+    fc <- substitute(f)
     if (is(post, "function")) {
         post <- list("default" = post)
     }
-    new("BDMethod", f = f, qf = qf, params = params, post = post, meta = meta)
+    new("BDMethod", f = f, fc = fc, params = params, post = post, meta = meta)
 }
 
 #' @rdname BDMethod-class

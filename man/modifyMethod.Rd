@@ -13,8 +13,8 @@ modifyMethod(bd, label, params, .overwrite = FALSE)
 
 \item{params}{Named quosure list created using \code{rlang::quos} of
 \code{parameter = value} paiars to replace in the method definition.
-The \code{func}, \code{post}, and \code{meta} parameters of the method can be
-modified using the special keywords, \code{bd.func}, \code{bd.post}, and \code{bd.meta}
+The \code{post}, and \code{meta} parameters of the method can be
+modified using the special keywords, \code{bd.post}, and \code{bd.meta}
 (the prefix denoting that these values should modify BenchDesign
 parameters). All other named parameters will be added to the list of
 parameters to be passed to \code{func}.}

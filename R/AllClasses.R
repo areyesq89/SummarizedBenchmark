@@ -35,7 +35,7 @@ setClassUnion("BDDataOrNULL", c("BDData", "NULL"))
 #' a BenchDesign object.
 #'
 #' @slot f a function to be benchmarked
-#' @slot qf a quosure of the function \code{f}
+#' @slot fc a captured expression of the function \code{f}
 #' @slot params a list of quosures specifying function parameters
 #' @slot post a list of functions to be applied to the output of \code{f}
 #' @slot meta a list of meta data
@@ -43,7 +43,7 @@ setClassUnion("BDDataOrNULL", c("BDData", "NULL"))
 #' @exportClass BDMethod
 #' @name BDMethod-class
 #' @author Patrick Kimes
-setClass("BDMethod", representation(f = "function", qf = "quosure", params = "quosures",
+setClass("BDMethod", representation(f = "function", fc = "language", params = "quosures",
                                     post = "listOrNULL", meta = "listOrNULL"))
 
 setValidity("BDMethod",

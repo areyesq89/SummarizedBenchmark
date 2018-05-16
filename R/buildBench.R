@@ -363,34 +363,18 @@ evalMethodsParallel <- function(bd, ce, BPPARAM) {
 
 ## helper function to convert method info to character for colData
 cleanMethods <- function(bd) {
-    df <- mapply(cleanMethod, m = bd$methods, mname = names(bd$methods), 
-                 MoreArgs = list(bdata = bd$bdata),
-                 SIMPLIFY = FALSE)
+    df <- mapply(cleanMethod, m = bd$methods, MoreArgs = list(bdata = bd$bdata), SIMPLIFY = FALSE)
     df <- dplyr::bind_rows(df)
     df$label <- names(bd$methods)
-    ## rownames(df) <- names(bd$methods)
     df
 }
 
 
 
 
-cleanMethod <- function(m, mname, bdata) {
+cleanMethod <- function(m, bdata) {
     ## delay evalution of metadata information until buildBench
     m$meta <- eval_tidy(m$meta, bdata)
-
-    ## check if `meta =` is specified for method
-    if (!is.null(m$meta)) {
-        if (!is(m$meta, "list") ||
-            length(names(m$meta)) != length(m$meta) ||
-            is.null(names(m$meta)) ||
-            any(names(m$meta) == "")) {
-            warning(paste0("meta parameter specified for method '",
-                           mname, "' will not be used. ",
-                           "meta must be a list of named entries."))
-            m$meta <- NULL
-        }
-    }
 
     ## parse package/version information
     meta <- funcMeta(m$func, m$meta)

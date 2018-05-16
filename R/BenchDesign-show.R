@@ -1,7 +1,7 @@
 .show.BDMethod <- function(object) {
     cat(stringr::str_pad("BenchDesign Method ", 60, "right", pad = "-"), "\n")
     cat("method: ")
-    func_q <- rlang::quo_text(object@qf, nlines = 3)
+    func_q <- rlang::quo_text(object@fc, nlines = 3)
     if (!grepl("^function\\(", func_q)) {
         cat(stringr::str_trunc(func_q, 52))
         func_q <- rlang::quo_text(object@f, nlines = 3)
@@ -66,11 +66,11 @@ setMethod("show", signature(object = "BDMethod"), .show.BDMethod)
         max_c <- 20
         m1 <- max(nchar(names(head(object@methods))))
         m1 <- min(m1, max_c)
-        m2 <- max(nchar(sapply(head(object@methods), function(x) { rlang::quo_text(x@qf) })))
+        m2 <- max(nchar(sapply(head(object@methods), function(x) { rlang::quo_text(x@fc) })))
         m2 <- min(m2, max_c)
         for (n in names(head(object@methods, 5))) {
             p1 <- stringr::str_pad(stringr::str_trunc(n, max_c), m1 + 1, "left", " ")
-            p2 <- stringr::str_pad(stringr::str_trunc(gsub("\n", ";", rlang::quo_text(object@methods[[n]]@qf)), max_c),
+            p2 <- stringr::str_pad(stringr::str_trunc(gsub("\n", ";", rlang::quo_text(object@methods[[n]]@fc)), max_c),
                           m2 + 1, "right", " ")
             cat("    method: ", p1, "; func: ", p2, "\n", sep="")
         }
