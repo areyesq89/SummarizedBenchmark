@@ -91,19 +91,27 @@ modifyMethod.BenchDesign <- function(bd, label, params, .overwrite = FALSE) {
 .modmethod <- function(m, q, .overwrite) {
     ## parse out post, meta
     if ("bd.post" %in% names(q)) {
-        m@post <- q@bd.post
+        new_post <- rlang::eval_tidy(q$bd.post)
+    } else {
+        new_post <- m@post
     }
     if ("bd.meta" %in% names(q)) {
-        m@meta <- q@bd.meta
+        new_meta <- rlang::eval_tidy(q$bd.meta)
+    } else {
+        new_meta <- m@meta
     }
 
     ## process named parameters to be used for func
     q <- q[! names(q) %in% c("bd.post", "bd.meta")]
     if (.overwrite) {
-        m@params <- q
+        new_params <- q
     } else {
-        m@params <- replace(m@params, names(q), q)
+        new_params <- replace(m@params, names(q), q)
     }
-    
-    return(m)
+
+    ## easiest way to create modified BDMethod w/ m@f, m@fc
+    bd <- BDMethod(f = m@f, post = new_post, meta = new_meta,
+                   params = new_params)
+    bd@fc <- m@fc
+    bd
 }
