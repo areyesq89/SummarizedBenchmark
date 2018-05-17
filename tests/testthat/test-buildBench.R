@@ -147,7 +147,7 @@ test_that("errors thrown with inappropriate inputs", {
     expect_error(sb <- buildBench(BenchDesign(data = tdat)),
                  "list of methods in BenchDesign is empty")
 
-    ## check proper handling if post only list for one method - might want to change this ...
+    ## check proper handling if post only list for one method
     bd <- addMethod(BenchDesign(data = tdat), label = "bonf",
                     func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 }))
@@ -155,7 +155,7 @@ test_that("errors thrown with inappropriate inputs", {
                     func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
                     post = function(x) { x * 1 })
     expect_silent(sb <- buildBench(bd))
-    expect_equal(assayNames(sb), c("a1", "default"))
+    expect_equal(assayNames(sb), "a1")
 
     ## check proper handling if inconsistent length across methods
     bd <- addMethod(BenchDesign(data = tdat), label = "bonf",
@@ -201,9 +201,8 @@ test_that("buildBench can handle sortIDs", {
                      func = function() { c(a = 1, b = 2, c = 3) })
     bd1 <- addMethod(bd1, label = "bcef",
                      func = function() { c(b = 11, c = 12, e = 13, f = 15) })
-    
     ## check behavior when output has unequal lengths
-    expect_error(buildBench(bd1))
+    expect_warning(buildBench(bd1), "different lengths")
 
     ## check behavior when sorting without ID column
     sb1a <- buildBench(bd1, sortIDs = TRUE)
@@ -228,10 +227,10 @@ test_that("buildBench can handle sortIDs", {
     bd2 <- addMethod(bd2, label = "bcef",
                      func = function() { c(b = 11, c = 12, e = 13, f = 15) },
                      post = list(o1 = function(x) { x },
-                                 o2 = function(x) { x*2 }))
+                                 o2 = function(x) { x*2[1:2] }))
 
     ## check behavior when output has unequal lengths
-    expect_error(buildBench(bd2))
+    expect_warning(buildBench(bd2))
 
     ## check behavior when sorting without ID column
     sb2a <- buildBench(bd2, sortIDs = TRUE)
