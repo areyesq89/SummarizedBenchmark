@@ -27,9 +27,8 @@
 #' Modified BenchDesign object.
 #'
 #' @examples
-#' ## with toy data.frame
-#' df <- data.frame(pval = rnorm(100))
-#' bench <- BenchDesign(df)
+#' ## empty BenchDesign
+#' bench <- BenchDesign()
 #'
 #' ## add basic 'padjust' method
 #' bench <- addMethod(bench, label = "padjust",

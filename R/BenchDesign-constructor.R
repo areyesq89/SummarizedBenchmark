@@ -34,7 +34,7 @@ setGeneric("BenchDesign",
     
     if (!is.null(data)) {
         data <- new("BDData", data = data,
-                    type = ifelse(is(data, "character"), "hash", "data"))
+                    type = ifelse(is(data, "character"), "md5hash", "data"))
     }
 
     new("BenchDesign", methods = ml, data = data)

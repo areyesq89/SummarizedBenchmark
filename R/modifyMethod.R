@@ -21,9 +21,8 @@
 #'        parameters (FALSE). (default = FALSE) 
 #'        
 #' @examples
-#' ## with toy data.frame
-#' df <- data.frame(pval = runif(100))
-#' bench <- BenchDesign(df)
+#' ## empty BenchDesign
+#' bench <- BenchDesign()
 #'
 #' ## add method
 #' bench <- addMethod(bench, label = "qv",

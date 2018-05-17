@@ -26,14 +26,11 @@
 #' @param catchErrors logical whether errors produced by methods during evaluation
 #'        should be caught and printed as a message without stopping the entire
 #'        build process. (default = TRUE)
-#' @param sortIDs Whether the output of each method should be merged using IDs.
-#'        If TRUE, each method must return a named vector or list. The names will be
-#'        used to align the output of each method in the returned SummarizedBenchmark.
-#'        Missing values will be set to NA. This can be useful if the different methods
-#'        return overlapping, but not identical, results. If \code{truthCols} is also
-#'        specified, and sorting by IDs is necessary, rather than specifying 'TRUE',
-#'        specify the string name of a column in the \code{data} to use to sort the
-#'        method output to match the order of \code{truthCols}. (default = FALSE)
+#' @param keepData Whether to store the data as part of the BenchDesign slot of the
+#'        returned SummarizedBenchmark object. If FALSE, a MD5 hash of the data will be
+#'        stored with the BenchDesign slot. (default = FALSE)
+#' @param sortIDs Whether the output of each method should be merged and sorted using IDs.
+#'        See Details for more information. (default = FALSE)
 #' @param parallel Whether to use parallelization for evaluating each method.
 #'        Parallel execution is performed using \code{BiocParallel}. Parameters for
 #'        parallelization should be specified with \code{BiocParallel::register} or
@@ -41,11 +38,12 @@
 #' @param BPPARAM Optional \code{BiocParallelParam} instance to be used when
 #'        \code{parallel} is TRUE. If not specified, the default instance from the
 #'        parameter registry is used.
-#'
+#' 
 #' @details
-#' Parallelization is performed across methods. Therefore, there is no benefit to
+#' Parallelization is performed across methods. Therefore, there is currently no benefit to
 #' specifying more cores than the total number of methods in the \code{BenchDesign}
 #' object.
+#'
 #' By default, errors thrown by individual methods in the \code{BenchDesign} are caught
 #' during evaluation and handled in a way that allows \code{buildBench} to continue
 #' running with the other methods. The error is printed as a message, and the corresponding
@@ -54,14 +52,25 @@
 #' the entire analysis due to a single failed method can be frustrating. Default error catching
 #' was included to alleviate these frustrations. However, if this behavior is not desired,
 #' setting \code{catchErrors = FALSE} will turn off error handling.
+#'
+#' If \code{sortIDs} is TRUE, each method must return a named vector or list. The names will be
+#' used to align the output of each method in the returned SummarizedBenchmark. Missing values
+#' from each method will be set to NA. This can be useful if the different methods return
+#' overlapping, but not identical, results. If \code{truthCols} is also specified, and sorting
+#' by IDs is necessary, rather than specifying 'TRUE', specify the string name of a column in
+#' the \code{data} to use to sort the method output to match the order of \code{truthCols}.
+#'
+#' When a method specified in the BenchDesign does not have a postprocessing function specified
+#' to 'post', the trivial \code{base::identity} function is used as the default postprocessing
+#' function. 
 #' 
 #' @return
-#' \code{SummarizedBenchmark} object with single assay
+#' \code{SummarizedBenchmark} object.
 #'
 #' @examples
 #' ## with toy data.frame
 #' df <- data.frame(pval = rnorm(100))
-#' bench <- BenchDesign(df)
+#' bench <- BenchDesign(data = df)
 #'
 #' ## add methods
 #' bench <- addMethod(bench, label = "bonf", func = p.adjust,
@@ -81,7 +90,7 @@
 #' @export
 #' @author Patrick Kimes
 buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs = FALSE,
-                       catchErrors = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
+                       keepData = FALSE, catchErrors = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
     if (!is.null(data) && !is.list(data)) {
         stop("If specified, 'data' must be a list or data.frame object.")
@@ -97,7 +106,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     }
     
     if (bd@data@type != "data") {
-        stop("data in BenchDesign is only hash.\n",
+        stop("data in BenchDesign is only a MD5 hash.\n",
              "Please specify a non-NULL dataset to build SummarizedBenchmark.")
     }
 
@@ -106,34 +115,19 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         stop("list of methods in BenchDesign is empty.\n",
              "Please specify at least one method to build SummarizedBenchmark.")
     }
-    
 
-    ## CLEAN UP METHODS POSTPROCESSING FUNCTIONS ---------------------------------------
-    
-    ## fill post-processing methods with null method if not specified
-    bd@methods <- lapply(bd@methods, function(x) { if (length(x@post) < 1) { x@post <- list(default = function(z) { z }) }; x })
+    ## match @post functions across BDMethods in the BenchDessign
+    bdx <- expandPostFunctions(bd)
 
-    ## determine number of assay to generate
-    assay_names <- lapply(bd@methods, function(x) names(x@post))
-    uassays <- unique(unlist(assay_names))
+    ## determine final post function names and count
+    uassays <- names(bdx@methods[[1]]@post)
     nassays <- length(uassays)
 
-    ## fill in missing functions
-    bd@methods <- lapply(bd@methods, function(x) { x@post <- x@post[uassays]; names(x@post) <- uassays; x })
-    
-    fillpost <- function(mp) {
-        lapply(mp, function(y) { ifelse(is.null(y), function(z) { rep(NA, length(z)) }, y) })
-    }
-    bd@methods <- lapply(bd@methods, function(x) { x@post <- fillpost(x@post); x })
-
-    ## ---------------------------------------------------------------------------------
-    
-    
     ## check validity of sortIDs value (unit logical or data column name)
     stopifnot(length(sortIDs) == 1)
     stopifnot(is.logical(sortIDs) || is.character(sortIDs))
     if (is.character(sortIDs)) {
-        if (sortIDs %in% names(bd@data@data)) {
+        if (sortIDs %in% names(bdx@data@data)) {
             sortID_col <- sortIDs
             sortIDs <- TRUE
         } else {
@@ -143,12 +137,12 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         sortID_col <- NULL
     }
 
-    ## check if truthCols is in bdata and 1-dim vector
+    ## check if truthCols is in data and 1-dim vector
     if (!is.null(truthCols)) {
         if (length(truthCols) == 1 && is.null(names(truthCols)))
             names(truthCols) <- "default"
 
-        stopifnot(truthCols %in% names(bd@data@data))
+        stopifnot(truthCols %in% names(bdx@data@data))
         stopifnot(length(truthCols) <= nassays)
         stopifnot(names(truthCols) %in% uassays)
         stopifnot(!is.null(names(truthCols)))
@@ -159,8 +153,8 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
                  "match the order of the 'truthCols'.")
     }
     
-    ## check if ftCols are in bdata
-    if (!is.null(ftCols) && !all(ftCols %in% names(bd@data@data))) {
+    ## check if ftCols are in data
+    if (!is.null(ftCols) && !all(ftCols %in% names(bdx@data@data))) {
         stop("Invalid ftCols specification. ",
              "ftCols must be a subset of the column names of the input data.")
     }
@@ -170,9 +164,9 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     
     ## assay: evaluate all functions
     if (parallel) {
-        a <- evalMethodsParallel(bd, catchErrors, BPPARAM)
+        a <- evalMethodsParallel(bdx, catchErrors, BPPARAM)
     } else {
-        a <- evalMethods(bd, catchErrors)
+        a <- evalMethods(bdx, catchErrors)
     }
     
     ## handle multi-assay separately
@@ -181,20 +175,31 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
             stop("If sortIDs = TRUE, all methods must return a named list or vector.")
         }
         a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
+        a <- lapply(a, function(x) { x[!is.null(x)] })
         a <- .list2mat(a)
         if (!is.null(sortID_col)) {
             ## reorder by specified ID column
-            a <- lapply(a, .expandrows, rid = bd@data@data[[sortID_col]])
+            a <- lapply(a, .expandrows, rid = bdx@data@data[[sortID_col]])
         }
     } else {
-        ## note difference in lapply vs. sapply
-        a <- lapply(uassays, function(x) { sapply(a, `[[`, x) })
+        ## only keep non-missing (NULL) results and explicitly simplify
+        a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
+        a <- lapply(a, function(x) x[!unlist(lapply(x, is.null))])
+        a <- lapply(a, simplify2array, higher = FALSE)
     }
-    names(a) <- uassays
 
+    ## fill in missing methods with NAs, return in fixed order
+    a <- lapply(a, function(x) {
+        ms <- setdiff(names(bx@methods), colnames(x))
+        msl <- list()
+        msl[ms] <- NA
+        x <- do.call(cbind, c(list(x), msl))
+        x[, names(bdx@methods)]
+    })
+    names(a) <- uassays
     
     ## colData: method information
-    df <- tidyBDMethods(bd@methods, dat = bd@data@data)
+    df <- tidyBDMethods(bdx@methods, dat = bdx@data@data)
     
     ## performanceMetrics: empty
     pf <- rep(list("bench" = list()), nassays)
@@ -203,17 +208,22 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## metadata: record sessionInfo
     md <- list(sessionInfo = sessionInfo())
+
+    ## BenchDesign: replace data with MD5 hash
+    if (!keepData) {
+        bdx@data <- BDDataHash(bdx@data)
+    }
     
     ## list of initialization parameters
     sbParams <- list(assays = a,
                      colData = df,
                      performanceMetrics = pf,
                      metadata = md,
-                     BenchDesign = bd)
+                     BenchDesign = bdx)
     
     ## pull out grouthTruth if available
     if (!is.null(truthCols)) {
-        sbParams[["groundTruth"]] <- DataFrame(bd@data@data[truthCols])
+        sbParams[["groundTruth"]] <- DataFrame(bdx@data@data[truthCols])
         
         if (length(a) == 1 && names(a) == "default") {
             ## rename assay to match groundTruth
@@ -227,7 +237,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## add feature columns if specified
     if (!is.null(ftCols)) {
-        sbParams[["ftData"]] <- DataFrame(bd@data@data[ftCols])
+        sbParams[["ftData"]] <- DataFrame(bdx@data@data[ftCols])
     }
     
     do.call(SummarizedBenchmark, sbParams)
@@ -296,4 +306,34 @@ evalMethodsParallel <- function(bd, ce, BPPARAM) {
              BPPARAM = BPPARAM)
 }
 
+
+
+## helper function to expand '@post' slot of all methods to contain same set of functions
+expandPostFunctions <- function(db) {
+    ## determine full set of assay/post function names
+    uassays <- unique(unlist(lapply(db@methods, function(x) names(x@post))))
+
+    ## define default base::identify function for methods w/ no @post slot
+    base_fnl <- list(default = base::identity)
+
+    ## if a single post function was named, we'll use that as the assay/post name
+    if (length(uassays) == 1) {
+        names(base_fnl) <- uassays
+    }
+
+    ## fill post-processing methods with default identify function if not specified
+    db@methods <- lapply(db@methods, function(x) { if (length(x@post) < 1) { x@post <- base_fnl }; x })
+
+    ## check full set of assay/post function names
+    ## uassays <- unique(unlist(lapply(db@methods, function(x) names(x@post))))
+
+    ## fill in missing functions
+    ## db@methods <- lapply(db@methods, function(x) { x@post <- x@post[uassays]; names(x@post) <- uassays; x })
+    ## db@methods <- lapply(db@methods, function(x) { x@post <- fillpost(x@post); x })
+}
+
+## helper function to fill NULL post functions with dummy function returning all NAs
+fillpost <- function(mp) {
+    lapply(mp, function(y) { ifelse(is.null(y), function(z) { rep(NA, length(z)) }, y) })
+}
 

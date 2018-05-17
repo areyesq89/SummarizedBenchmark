@@ -35,9 +35,8 @@ At a minimum, a string name for the method, \code{label}, must be
 specified in addition to the primary BenchDesign object.
 }
 \examples{
-## with toy data.frame
-df <- data.frame(pval = runif(100))
-bench <- BenchDesign(df)
+## empty BenchDesign
+bench <- BenchDesign()
 
 ## add method
 bench <- addMethod(bench, label = "qv",

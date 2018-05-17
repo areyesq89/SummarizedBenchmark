@@ -54,8 +54,8 @@ setMethod("show", signature(object = "BDMethod"), .show.BDMethod)
         cat("    type:", object@data@type, "\n")
         if (dtype == "data")
             cat("    names:", paste(names(object@data@data), collapse=", "), "\n")
-        if (dtype == "hash")
-            cat("    hash:", stringr::str_trunc(object@data@data, 50), "\n")
+        if (dtype == "md5hash")
+            cat(" MD5 hash:", stringr::str_trunc(object@data@data, 50), "\n")
     } else {
         cat("    NULL\n")
     }

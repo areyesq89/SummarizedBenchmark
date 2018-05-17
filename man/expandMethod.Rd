@@ -41,9 +41,8 @@ specified parameter sets. In other words, this function "expands"
 the set of methods using a set of parameters.
 }
 \examples{
-## with toy data.frame
-df <- data.frame(pval = rnorm(100))
-bench <- BenchDesign(df)
+## empty BenchDesign
+bench <- BenchDesign()
 
 ## add basic 'padjust' method
 bench <- addMethod(bench, label = "padjust",

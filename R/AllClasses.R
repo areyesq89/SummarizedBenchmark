@@ -9,7 +9,7 @@ setClassUnion("listOrCharacter", c("list", "character"))
 #'
 #' @slot data a list or MD5 hash of the data.
 #' @slot type a character string indicating whether the data slot
-#'       contains the 'data' or a 'hash' of the data.
+#'       contains the 'data' or a 'md5hash' of the data.
 #'
 #' @exportClass BDData
 #' @name BDData-class
@@ -18,12 +18,16 @@ setClass("BDData", representation(data = "listOrCharacter", type = "character"))
 
 setValidity("BDData",
             function(object) {
-                if (! object@type %in% c("data", "hash"))
-                    stop("The type must be one of 'data' or 'hash'.")
-                if (object@type == "data" & !is.list(object@data))
+                if (! object@type %in% c("data", "md5hash"))
+                    stop("The type must be one of 'data' or 'md5hash'.")
+                if (object@type == "data" && !is.list(object@data))
                     stop("The data must be a list if type = 'data'.")
-                if (object@type == "hash" & !is(object@data, "character"))
-                    stop("The data must be a character string if type = 'hash'.")
+                if (object@type == "md5hash" && !is(object@data, "character"))
+                    stop("The data does not appear to be a valid MD5 hash - is not a character string.")
+                if (object@type == "md5hash" && nchar(object@data) != 32)
+                    stop("The data does not appear to be a valid MD5 hash - is not 32 characters long.")
+                if (object@type == "md5hash" && grepl("[^[:xdigit:]]", object@data))
+                    stop("The data does not appear to be a valid MD5 hash - includes non-hex characters.")
                 TRUE
             })
 

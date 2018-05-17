@@ -1,36 +1,7 @@
-## Compare BDMethod meta data
-#'
-#' Simple comparison of two BDMethod objects based on
-#' meta data.
-#' 
-#' @param bdm1 a \code{BDMethod} object
-#' @param bdm2 a \code{BDMethod} object
-#'
-#' @return
-#' logical value indicating whether two objects produced same
-#' meta data.
-#'
-#' @export
-#' @importFrom dplyr all_equal
-#' @author Patrick Kimes
-compareBDMethod <- function(bdm1, bdm2) {
-    if(!is(bdm1, "BDMethod") || !is(bdm2, "BDMethod"))
-        stop("Must specify two BDMethod objects to compare.")
-    dplyr::all_equal(tidyBDMethod(bdm1), tidyBDMethod(bdm2))
-}
-
-
-## helper function to convert method info to character for colData
-tidyBDMethods <- function(bdms, dat = NULL) {
-    df <- lapply(bdms, tidyBDMethod, dat = dat)
-    dplyr::bind_rows(df)
-}
-
-
 #' Tidy BDMethod Data 
 #'
 #' A helper function to create tabular info for a single
-#' BDMethod object.
+#' BDMethod object or a list of BDMethod objects.
 #'
 #' @param bdm a BDMethod object
 #' @param dat optional data object to use when evaluating any
@@ -38,8 +9,10 @@ tidyBDMethods <- function(bdms, dat = NULL) {
 #'        (default = NULL)
 #'
 #' @return
-#' A named vector of meta data for the specified BDMethod.
+#' A named vector of meta data for the specified BDMethod object, or
+#' a tibble of meta data if a list of BDMethod objects specified.
 #'
+#' @export
 #' @importFrom rlang eval_tidy
 #' @author Patrick Kimes
 tidyBDMethod <- function(bdm, dat = NULL) {
@@ -60,6 +33,16 @@ tidyBDMethod <- function(bdm, dat = NULL) {
     }
 
     c(tidyf, tidyp, tidym)
+}
+
+
+#' @param bdms a list of BDMethod objects
+#' 
+#' @rdname tidyBDMethod
+#' @author Patrick Kimes
+tidyBDMethods <- function(bdms, dat = NULL) {
+    df <- lapply(bdms, tidyBDMethod, dat = dat)
+    dplyr::bind_rows(df)
 }
 
 

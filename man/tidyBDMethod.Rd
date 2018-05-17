@@ -2,9 +2,12 @@
 % Please edit documentation in R/BDMethod-tidy.R
 \name{tidyBDMethod}
 \alias{tidyBDMethod}
+\alias{tidyBDMethods}
 \title{Tidy BDMethod Data}
 \usage{
 tidyBDMethod(bdm, dat = NULL)
+
+tidyBDMethods(bdms, dat = NULL)
 }
 \arguments{
 \item{bdm}{a BDMethod object}
@@ -12,14 +15,18 @@ tidyBDMethod(bdm, dat = NULL)
 \item{dat}{optional data object to use when evaluating any
 unevaluated expressionsin \code{bdm} meta data.
 (default = NULL)}
+
+\item{bdms}{a list of BDMethod objects}
 }
 \value{
 A named vector of meta data for the specified BDMethod.
 }
 \description{
 A helper function to create tabular info for a single
-BDMethod object.
+BDMethod object or a list of BDMethod objects.
 }
 \author{
+Patrick Kimes
+
 Patrick Kimes
 }

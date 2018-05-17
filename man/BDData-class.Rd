@@ -14,7 +14,7 @@ a BenchDesign object.
 \item{\code{data}}{a list or MD5 hash of the data.}
 
 \item{\code{type}}{a character string indicating whether the data slot
-contains the 'data' or a 'hash' of the data.}
+contains the 'data' or a 'md5hash' of the data.}
 }}
 
 \author{
