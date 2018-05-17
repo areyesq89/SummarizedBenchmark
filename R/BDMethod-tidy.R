@@ -97,7 +97,7 @@ tidyBDMethodMeta <- function(meta) {
     if (!is.null(meta_pkgfunc)) {
         tidyf <- tidyBDMethodFunction(meta_pkgfunc)
     } else if (!is.null(meta_pkgname) | !is.null(meta_pkgvers)) {
-        tidyf <- c(func.pkg = meta_pkgname, func.pkg.vers = meta_pkgvers)
+        tidyf <- list(func.pkg = meta_pkgname, func.pkg.vers = meta_pkgvers)
     } else {
         tidyf <- NULL
     }

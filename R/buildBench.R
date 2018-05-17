@@ -117,15 +117,15 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     assay_names <- lapply(bd@methods, function(x) names(x@post))
     uassays <- unique(unlist(assay_names))
     nassays <- length(uassays)
-    
+
     ## fill in missing functions
-    bd@methods <- lapply(bd@methods, function(x) { x@post <- x@post[uassays]; x })
+    bd@methods <- lapply(bd@methods, function(x) { x@post <- x@post[uassays]; names(x@post) <- uassays; x })
     
     fillpost <- function(mp) {
-        lapply(mp, function(y) { ifelse(is.null(y), function(z) { NA }, y) })
+        lapply(mp, function(y) { ifelse(is.null(y), function(z) { rep(NA, length(z)) }, y) })
     }
     bd@methods <- lapply(bd@methods, function(x) { x@post <- fillpost(x@post); x })
-    
+
     ## ---------------------------------------------------------------------------------
     
     
