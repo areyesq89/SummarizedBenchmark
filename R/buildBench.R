@@ -116,18 +116,18 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
              "Please specify at least one method to build SummarizedBenchmark.")
     }
 
-    ## match @post functions across BDMethods in the BenchDessign
-    bdx <- expandPostFunctions(bd)
+    ## clean up NULL @post slots in BenchDesign
+    bd <- makePostLists(bd)
 
     ## determine final post function names and count
-    uassays <- names(bdx@methods[[1]]@post)
+    uassays <- names(bd@methods[[1]]@post)
     nassays <- length(uassays)
 
     ## check validity of sortIDs value (unit logical or data column name)
     stopifnot(length(sortIDs) == 1)
     stopifnot(is.logical(sortIDs) || is.character(sortIDs))
     if (is.character(sortIDs)) {
-        if (sortIDs %in% names(bdx@data@data)) {
+        if (sortIDs %in% names(bd@data@data)) {
             sortID_col <- sortIDs
             sortIDs <- TRUE
         } else {
@@ -142,7 +142,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         if (length(truthCols) == 1 && is.null(names(truthCols)))
             names(truthCols) <- "default"
 
-        stopifnot(truthCols %in% names(bdx@data@data))
+        stopifnot(truthCols %in% names(bd@data@data))
         stopifnot(length(truthCols) <= nassays)
         stopifnot(names(truthCols) %in% uassays)
         stopifnot(!is.null(names(truthCols)))
@@ -154,7 +154,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     }
     
     ## check if ftCols are in data
-    if (!is.null(ftCols) && !all(ftCols %in% names(bdx@data@data))) {
+    if (!is.null(ftCols) && !all(ftCols %in% names(bd@data@data))) {
         stop("Invalid ftCols specification. ",
              "ftCols must be a subset of the column names of the input data.")
     }
@@ -164,42 +164,42 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     
     ## assay: evaluate all functions
     if (parallel) {
-        a <- evalMethodsParallel(bdx, catchErrors, BPPARAM)
+        a <- evalMethodsParallel(bd, catchErrors, BPPARAM)
     } else {
-        a <- evalMethods(bdx, catchErrors)
-    }
-    
-    ## handle multi-assay separately
-    if (sortIDs) {
-        if (any(unlist(lapply(a, function(x) { lapply(x, function(y) { is.null(names(y)) }) })))) {
-            stop("If sortIDs = TRUE, all methods must return a named list or vector.")
-        }
-        a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
-        a <- lapply(a, function(x) { x[!is.null(x)] })
-        a <- .list2mat(a)
-        if (!is.null(sortID_col)) {
-            ## reorder by specified ID column
-            a <- lapply(a, .expandrows, rid = bdx@data@data[[sortID_col]])
-        }
-    } else {
-        ## only keep non-missing (NULL) results and explicitly simplify
-        a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
-        a <- lapply(a, function(x) x[!unlist(lapply(x, is.null))])
-        a <- lapply(a, simplify2array, higher = FALSE)
+        a <- evalMethods(bd, catchErrors)
     }
 
+    ## reshape results / method:post -> post:method
+    a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
+    a <- lapply(a, function(x) x[!unlist(lapply(x, is.null))])
+
+    ## turn list of eval results to matrices - specify output row order
+    if (!is.null(sortID_col)) {
+        siVals <- bd@data@data[[sortID_col]]
+    } else if (length(a) > 1) {
+        siVals <- lapply(a, lapply, names)
+        if (any(unlist(lapply(siVals, lapply, is.null))))
+            siVals <- NULL
+        else 
+            siVals <- unique(unlist(siVals))
+    } else {
+        siVals <- NULL
+    }
+    a <- lapply(a, eval2assay, si = sortIDs, siv = siVals)
+
+    
     ## fill in missing methods with NAs, return in fixed order
     a <- lapply(a, function(x) {
-        ms <- setdiff(names(bx@methods), colnames(x))
+        ms <- setdiff(names(bd@methods), colnames(x))
         msl <- list()
         msl[ms] <- NA
         x <- do.call(cbind, c(list(x), msl))
-        x[, names(bdx@methods)]
+        x[, names(bd@methods)]
     })
     names(a) <- uassays
     
     ## colData: method information
-    df <- tidyBDMethods(bdx@methods, dat = bdx@data@data)
+    df <- tidyBDMethods(bd@methods, dat = bd@data@data)
     
     ## performanceMetrics: empty
     pf <- rep(list("bench" = list()), nassays)
@@ -208,23 +208,19 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## metadata: record sessionInfo
     md <- list(sessionInfo = sessionInfo())
-
-    ## BenchDesign: replace data with MD5 hash
-    if (!keepData) {
-        bdx@data <- BDDataHash(bdx@data)
-    }
     
     ## list of initialization parameters
     sbParams <- list(assays = a,
                      colData = df,
                      performanceMetrics = pf,
                      metadata = md,
-                     BenchDesign = bdx)
+                     BenchDesign = bd)
     
     ## pull out grouthTruth if available
     if (!is.null(truthCols)) {
-        sbParams[["groundTruth"]] <- DataFrame(bdx@data@data[truthCols])
-        
+        sbParams[["groundTruth"]] <- DataFrame(bd@data@data[truthCols])
+        names(sbParams[["groundTruth"]]) <- truthCols
+
         if (length(a) == 1 && names(a) == "default") {
             ## rename assay to match groundTruth
             names(sbParams[["assays"]]) <- truthCols
@@ -237,9 +233,15 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## add feature columns if specified
     if (!is.null(ftCols)) {
-        sbParams[["ftData"]] <- DataFrame(bdx@data@data[ftCols])
+        sbParams[["ftData"]] <- DataFrame(bd@data@data[ftCols])
+        names(sbParams[["ftData"]]) <- ftCols
     }
     
+    ## BenchDesign: replace data with MD5 hash
+    if (!keepData) {
+        sbParams[["BenchDesign"]]@data <- BDDataHash(sbParams[["BenchDesign"]]@data)
+    }
+
     do.call(SummarizedBenchmark, sbParams)
 }
 
@@ -247,17 +249,15 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
 ## helper function to take list of "method = value-vector" pairs,
 ## match on value names and return as single data.frame
-.list2mat <- function(x) {
-    lapply(x, function(z) {
-        z <- dplyr::tibble(.method = names(z),
-                           .id = lapply(z, names),
-                           .val = z)
-        z <- tidyr::unnest(z)
-        z <- tidyr::spread(z, .method, .val)
-        z <- data.frame(dplyr::select(z, -.id),
-                        row.names = z$.id)
-        as(z, "matrix")
-    })
+.list2mat <- function(z) {
+    z <- dplyr::tibble(.method = names(z),
+                       .id = lapply(z, names),
+                       .val = z)
+    z <- tidyr::unnest(z)
+    z <- tidyr::spread(z, .method, .val)
+    z <- data.frame(dplyr::select(z, -.id),
+                    row.names = z$.id)
+    as(z, "matrix")
 }
 
 
@@ -308,32 +308,35 @@ evalMethodsParallel <- function(bd, ce, BPPARAM) {
 
 
 
-## helper function to expand '@post' slot of all methods to contain same set of functions
-expandPostFunctions <- function(db) {
-    ## determine full set of assay/post function names
+## helper function to make all post slots in a BenchDesign non-NULL list
+makePostLists <- function(db) {
     uassays <- unique(unlist(lapply(db@methods, function(x) names(x@post))))
 
-    ## define default base::identify function for methods w/ no @post slot
     base_fnl <- list(default = base::identity)
-
-    ## if a single post function was named, we'll use that as the assay/post name
     if (length(uassays) == 1) {
         names(base_fnl) <- uassays
     }
 
-    ## fill post-processing methods with default identify function if not specified
     db@methods <- lapply(db@methods, function(x) { if (length(x@post) < 1) { x@post <- base_fnl }; x })
-
-    ## check full set of assay/post function names
-    ## uassays <- unique(unlist(lapply(db@methods, function(x) names(x@post))))
-
-    ## fill in missing functions
-    ## db@methods <- lapply(db@methods, function(x) { x@post <- x@post[uassays]; names(x@post) <- uassays; x })
-    ## db@methods <- lapply(db@methods, function(x) { x@post <- fillpost(x@post); x })
+    return(db)
 }
 
-## helper function to fill NULL post functions with dummy function returning all NAs
-fillpost <- function(mp) {
-    lapply(mp, function(y) { ifelse(is.null(y), function(z) { rep(NA, length(z)) }, y) })
-}
 
+
+eval2assay <- function(al, si, siv) {
+    if (si && any(is.null(lapply(al, names))))
+        stop("If sortIDs = TRUE, all methods must return a named list or vector.")
+    if (si) {
+        alr <- .list2mat(al)
+        if (!is.null(siv)) {
+            alr <- .expandrows(alr, rid = siv)
+        }
+    } else {
+        alr <- simplify2array(al, higher = FALSE)
+        if (!is(alr, "matrix")) {
+            warning("Method outputs have different lengths. Trying with 'sortIDs = TRUE'.")
+            alr <- eval2assay(al, TRUE, siv)
+        }
+    }
+    return(alr)
+}
