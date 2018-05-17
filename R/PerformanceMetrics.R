@@ -287,7 +287,8 @@ tidyUpMetrics <- function( object ){
     stop("No performance metrics were found. Check ?estimatePerformanceMetrics for further information")
   }
   valueCols <- colnames(res)[isPerformanceMetric]
-  tidyRes <- gather( as.data.frame(res), keys=valueCols )
+  tidyRes <- data.frame(res, label = rownames(res), check.names = FALSE)
+  tidyRes <- gather( tidyRes, keys=valueCols )
   mData <- as.data.frame( elementMetadata(res)[isPerformanceMetric,] )
   rownames(mData) <- valueCols
   mData[["colType"]] <- NULL
