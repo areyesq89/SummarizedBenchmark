@@ -36,8 +36,8 @@ compareBDData <- function(x, y) {
     if (!is(x, "BDData") || !is(y, "BDData"))
         stop("Must specify two BDData objects to compare.")
     sameType <- ifelse(x@type == y@type, x@type, FALSE)
-    x <- BDDataHash(x)
-    y <- BDDataHash(y)
+    x <- HashBDData(x)
+    y <- HashBDData(y)
     sameData <- x@data == y@data
     list(data = sameData, type = sameType)
 }

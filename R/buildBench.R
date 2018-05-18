@@ -240,7 +240,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     
     ## BenchDesign: replace data with MD5 hash
     if (!keepData) {
-        sbParams[["BenchDesign"]]@data <- BDDataHash(sbParams[["BenchDesign"]]@data)
+        sbParams[["BenchDesign"]]@data <- HashBDData(sbParams[["BenchDesign"]]@data)
     }
 
     do.call(SummarizedBenchmark, sbParams)

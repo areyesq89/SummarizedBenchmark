@@ -44,7 +44,7 @@ setMethod("BDData", signature(data = "BDData"), function(data) { data })
 #' @importFrom digest digest
 #' @export
 #' @author Patrick Kimes
-BDDataHash <- function(bdd) {
+HashBDData <- function(bdd) {
     stopifnot(is(bdd, "BDData"))
     if (bdd@type == "md5hash")
         return(bdd)
