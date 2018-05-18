@@ -9,7 +9,7 @@
 \alias{show,BDMethod-method}
 \title{BDMethod class}
 \usage{
-BDMethod(f, params = rlang::quos(), post = NULL, meta = NULL)
+BDMethod(f, params = rlang::quos(), post = NULL, meta = NULL, ...)
 
 \S4method{BDMethod}{quosure}(f, params = rlang::quos(), post = NULL,
   meta = NULL)

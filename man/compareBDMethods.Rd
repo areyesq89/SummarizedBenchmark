@@ -2,15 +2,14 @@
 % Please edit documentation in R/BenchDesign-comparisons.R
 \name{compareBDMethods}
 \alias{compareBDMethods}
-\title{Simple comparison of two BDMethod objects based on
-meta data.}
+\title{Compare BDMethod objects}
 \usage{
-compareBDMethods(bdm1, bdm2)
+compareBDMethods(x, y)
 }
 \arguments{
-\item{bdm1}{a \code{BDMethod} object}
+\item{x}{a \code{BDMethod} object}
 
-\item{bdm2}{a \code{BDMethod} object}
+\item{y}{a \code{BDMethod} object}
 }
 \value{
 logical value indicating whether the two objects produced the same

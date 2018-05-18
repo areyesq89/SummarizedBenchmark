@@ -14,8 +14,8 @@
 #' @importFrom rlang enquo
 #' @export
 #' @author Patrick Kimes
-setGeneric("BDMethod",
-           function(f, params = rlang::quos(), post = NULL, meta = NULL) standardGeneric("BDMethod"))
+setGeneric("BDMethod", valueClass = "BDMethod",
+           function(f, params = rlang::quos(), post = NULL, meta = NULL, ...) standardGeneric("BDMethod"))
 
 .BDMethod.quo <- function(f, params = rlang::quos(), post = NULL, meta = NULL) {
     fc <- rlang::get_expr(f)
@@ -26,6 +26,10 @@ setGeneric("BDMethod",
     new("BDMethod", f = f, fc = fc, params = params, post = post, meta = meta)
 }
 
+.BDMethod.bd <- function(f, label = NULL) {
+    f@methods[[label]]
+}
+
 .BDMethod.fun <- function(f, params = rlang::quos(), post = NULL, meta = NULL) {
     fc <- substitute(f)
     if (is(post, "function")) {
@@ -34,6 +38,8 @@ setGeneric("BDMethod",
     new("BDMethod", f = f, fc = fc, params = params, post = post, meta = meta)
 }
 
+
 #' @rdname BDMethod-class
 setMethod("BDMethod", signature(f = "quosure"), .BDMethod.quo)
+setMethod("BDMethod", signature(f = "BenchDesign"), .BDMethod.bd)
 setMethod("BDMethod", signature(f = "ANY"), .BDMethod.fun)

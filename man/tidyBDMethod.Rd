@@ -19,7 +19,8 @@ unevaluated expressionsin \code{bdm} meta data.
 \item{bdms}{a list of BDMethod objects}
 }
 \value{
-A named vector of meta data for the specified BDMethod.
+A named vector of meta data for the specified BDMethod object, or
+a tibble of meta data if a list of BDMethod objects specified.
 }
 \description{
 A helper function to create tabular info for a single
