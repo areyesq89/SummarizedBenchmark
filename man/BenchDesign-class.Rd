@@ -16,9 +16,13 @@ BenchDesign(..., methods = NULL, data = NULL)
 \S4method{show}{BenchDesign}(object)
 }
 \arguments{
-\item{...}{named set of \code{BDMethod} objects.}
+\item{...}{named set of \code{BDMethod} objects and/or unnamed
+\code{BenchDesign} objects. Only the methods of any \code{BenchDesign}
+object will be used, and the data slot of the objects will be
+ignored.}
 
-\item{methods}{named set of \code{BDMethod} objects as a list. (default = NULL)}
+\item{methods}{named set of \code{BDMethod} objects and/or unnamed
+\code{BenchDesign} objects as a list. (default = NULL)}
 
 \item{data}{optional data.frame or other list object to be
 used in the benchmark. (default = NULL)}
