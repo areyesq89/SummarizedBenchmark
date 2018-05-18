@@ -8,7 +8,7 @@
 #' @aliases truthdat txi
 #' @docType data
 #' @keywords data SummarizedBenchmark
-#' @example
+#' @examples
 #' data( sb )
 NULL
 
@@ -21,6 +21,6 @@ NULL
 #' @source Mouse BodyMap (Li et al, 2014). SRA accession numbers SRR5273705, SRR5273689, SRR5273699 and SRR5273683.
 #' @docType data
 #' @keywords data
-#' @example
+#' @examples
 #' data( quantSB )
 NULL
