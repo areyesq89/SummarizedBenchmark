@@ -24,7 +24,9 @@ Depends: R (>= 3.5),
          BiocParallel,
          ggplot2,
          mclust,
-         dplyr
+         dplyr,
+         digest,
+         sessioninfo
 Suggests: iCOBRA,
           BiocStyle,
           knitr,

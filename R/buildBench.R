@@ -85,8 +85,9 @@
 #' sb <- buildBench(bench, data = df)
 #' 
 #' @import BiocParallel
+#' @importFrom sessioninfo session_info
 #' @importFrom dplyr bind_rows
-#' @importFrom utils packageName packageVersion sessionInfo
+#' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes
 buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs = FALSE,
@@ -207,7 +208,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     pf <- SimpleList(pf)
 
     ## metadata: record sessionInfo
-    md <- list(sessionInfo = sessionInfo())
+    md <- list(sessionInfo = sessioninfo::session_info())
     
     ## list of initialization parameters
     sbParams <- list(assays = a,
