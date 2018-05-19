@@ -200,7 +200,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     names(a) <- uassays
     
     ## colData: method information
-    df <- tidyBDMethods(bd@methods, dat = bd@data@data)
+    df <- tidyBDMethod(bd)
     
     ## performanceMetrics: empty
     pf <- rep(list("bench" = list()), nassays)
@@ -285,7 +285,7 @@ evalMethod <- function(bdm, lab, dat, ce) {
             if (ce) {
                 message("!!  original message: \n",
                         "!!  ", e)
-                return(NA)
+                return(NULL)
             } else {
                 stop(e)
             }

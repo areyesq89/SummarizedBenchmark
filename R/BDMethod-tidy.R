@@ -42,7 +42,12 @@ setGeneric("tidyBDMethod",
 }
 
 .tidyBDMethod.bd <- function(obj, dat, label = FALSE) {
-    tidyBDMethod(obj@methods, dat, label)
+    if (!is.null(dat))
+        tidyBDMethod(obj@methods, dat, label)
+    else if (!is.null(obj@data) && obj@data@type == "data")
+        tidyBDMethod(obj@methods, obj@data@data, label)
+    else
+        tidyBDMethod(obj@methods, NULL, label)
 }
 
 #' @rdname tidyBDMethod
