@@ -85,7 +85,11 @@ setClass("BenchDesign", representation(data = "BDDataOrNULL", methods = "list"))
 setValidity("BenchDesign",
             function(object) {
                 if (length(object@methods) > 0 && is.null(names(object@methods)))
-                    stop("The slot 'methods' must be a named list of BDMethods, else should be length zero.")
+                    stop("The slot 'methods' must be a named list of BDMethods, methods were unnamed.")
+                if (length(object@methods) > 0 && any(names(object@methods) == ""))
+                    stop("The slot 'methods' must be a named list of BDMethods, some methods were unnamed.")
+                if (length(object@methods) > 0 && any(duplicated(object@methods)))
+                    stop("The slot 'methods' must be a named list of BDMethods, some methods were duplicated.")
                 if (length(object@methods) > 0 && !all(sapply(object@methods, is, "BDMethod")))
                     stop("The slot 'methods' must be a named list of BDMethods, else should be length zero.")
                 TRUE
