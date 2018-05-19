@@ -6,7 +6,7 @@
 #' @param bdm a BDMethod object
 #' @param dat optional data object to use when evaluating any
 #'        unevaluated expressionsin \code{bdm} meta data.
-#'        (default = NULL)
+#'        (default = NULL)xo
 #'
 #' @return
 #' A named vector of meta data for the specified BDMethod object, or
@@ -15,17 +15,18 @@
 #' @export
 #' @importFrom rlang eval_tidy
 #' @author Patrick Kimes
-tidyBDMethod <- function(bdm, dat = NULL) {
-    if(!is(bdm, "BDMethod"))
-        stop("Must specify a BDMethod object.")
-    bdm@meta <- lapply(bdm@meta, rlang::eval_tidy, data = dat)
+setGeneric("tidyBDMethod",
+           function(obj, dat = NULL, ...) standardGeneric("tidyBDMethod"))
+
+.tidyBDMethod.bdm <- function(obj, dat) {
+    obj@meta <- lapply(obj@meta, rlang::eval_tidy, data = dat)
     
-    tidyp <- tidyBDMethodParams(bdm@params)
-    tidymf <- tidyBDMethodMeta(bdm@meta)
+    tidyp <- tidyBDMethodParams(obj@params)
+    tidymf <- tidyBDMethodMeta(obj@meta)
     tidym <- tidymf$tidym
 
     if (is.null(tidymf$tidyf)) {
-        tidyf <- tidyBDMethodFunction(bdm@f)
+        tidyf <- tidyBDMethodFunction(obj@f)
         tidyf$func.pkg.manual <- FALSE
     } else {
         tidyf <- tidymf$tidyf
@@ -35,15 +36,19 @@ tidyBDMethod <- function(bdm, dat = NULL) {
     c(tidyf, tidyp, tidym)
 }
 
-
-#' @param bdms a list of BDMethod objects
-#' 
-#' @rdname tidyBDMethod
-#' @author Patrick Kimes
-tidyBDMethods <- function(bdms, dat = NULL) {
-    df <- lapply(bdms, tidyBDMethod, dat = dat)
-    dplyr::bind_rows(df)
+.tidyBDMethod.list <- function(obj, dat, label = FALSE) {
+    df <- lapply(obj, tidyBDMethod, dat = dat)
+    dplyr::bind_rows(df, .id = if(label) { "label" } else { NULL })
 }
+
+.tidyBDMethod.bd <- function(obj, dat, label = FALSE) {
+    tidyBDMethod(obj@methods, dat, label)
+}
+
+#' @rdname tidyBDMethod
+setMethod("tidyBDMethod", signature(obj = "BDMethod"), .tidyBDMethod.bdm)
+setMethod("tidyBDMethod", signature(obj = "list"), .tidyBDMethod.list)
+setMethod("tidyBDMethod", signature(obj = "BenchDesign"), .tidyBDMethod.bd)
 
 
 tidyBDMethodFunction <- function(f) {
