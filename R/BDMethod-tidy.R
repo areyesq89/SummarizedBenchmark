@@ -53,6 +53,7 @@ setGeneric("tidyBDMethod",
 #' @rdname tidyBDMethod
 setMethod("tidyBDMethod", signature(obj = "BDMethod"), .tidyBDMethod.bdm)
 setMethod("tidyBDMethod", signature(obj = "list"), .tidyBDMethod.list)
+setMethod("tidyBDMethod", signature(obj = "SimpleList"), .tidyBDMethod.list)
 setMethod("tidyBDMethod", signature(obj = "BenchDesign"), .tidyBDMethod.bd)
 
 

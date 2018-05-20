@@ -109,7 +109,7 @@ modifyMethod.BenchDesign <- function(bd, label, params, .overwrite = FALSE) {
     }
 
     ## easiest way to create modified BDMethod w/ m@f, m@fc
-    bd <- BDMethod(f = m@f, post = new_post, meta = new_meta,
+    bd <- BDMethod(x = m@f, post = new_post, meta = new_meta,
                    params = new_params)
     bd@fc <- m@fc
     bd

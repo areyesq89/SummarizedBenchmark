@@ -4,26 +4,31 @@
 \docType{class}
 \name{BDMethod-class}
 \alias{BDMethod-class}
+\alias{BDMethod-class}
 \alias{BDMethod}
 \alias{BDMethod,quosure-method}
 \alias{show,BDMethod-method}
 \title{BDMethod class}
 \usage{
-BDMethod(f, params = rlang::quos(), post = NULL, meta = NULL, ...)
+BDMethod(x, params = rlang::quos(), post = NULL, meta = NULL, ...)
 
-\S4method{BDMethod}{quosure}(f, params = rlang::quos(), post = NULL,
-  meta = NULL)
+\S4method{BDMethod}{quosure}(x, params = rlang::quos(), post = NULL,
+  meta = NULL, ...)
 
 \S4method{show}{BDMethod}(object)
 }
 \arguments{
-\item{f}{a function to be benchmarked}
+\item{x}{a function or BenchDesign object}
 
-\item{params}{a list of quosures specifying function parameters}
+\item{params}{a list of quosures specifying function parameters.
+(default = code{rlang::quos()})}
 
-\item{post}{a list of functions to be applied to the output of \code{f}}
+\item{post}{a list of functions to be applied to the output of \code{x}.
+(default = NULL)}
 
-\item{meta}{a list of meta data}
+\item{meta}{a list of meta data. (default = NULL)}
+
+\item{id}{a index or character string. (default = 1)}
 }
 \value{
 BDMethod object
@@ -32,7 +37,10 @@ BDMethod object
 Container for individual methods to be compared as part of
 a BenchDesign object.
 
-Initializes a new BenchDesign object for benchmarking methods.
+Extension of the SimpleList class to contain a list of BDMethod
+objects.
+
+Initializes a new BenchDesign method (BDMethod) object for benchmarking methods.
 }
 \section{Slots}{
 
@@ -49,6 +57,8 @@ Initializes a new BenchDesign object for benchmarking methods.
 }}
 
 \author{
+Patrick Kimes
+
 Patrick Kimes
 
 Patrick Kimes

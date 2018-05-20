@@ -13,10 +13,13 @@
 #' @export
 #' @importFrom dplyr all_equal
 #' @author Patrick Kimes
-compareBDMethods <- function(x, y) {
+compareBDMethod <- function(x, y) {
     if(!is(y, "BDMethod") || !is(y, "BDMethod"))
         stop("Must specify two BDMethod objects to compare.")
-    dplyr::all_equal(tidyBDMethod(x), tidyBDMethod(y))
+    res_meta <- dplyr::all_equal(tidyBDMethod(x), tidyBDMethod(y))
+    res_func <- isTRUE(all.equal(x@f, y@f))
+    res_post <- isTRUE(all.equal(x@post, y@post))
+    
 }
 
 
@@ -59,7 +62,11 @@ compareBDData <- function(x, y) {
 #' @param x a SummarizedBenchmark or BenchDesign object
 #' @param y an optional second SummarizedBenchmark or BenchDesign object
 #'        (default = NULL)
-#' @param ...
+#' @param functions a logical whether to check if both main and post
+#'        functions are also identical using \code{all.equal}. (default = TRUE
+#'        except when \code{x} is a SummarizedBenchmark object and \code{y} is
+#'        NULL)
+#' @param ... other parameters
 #' 
 #' @return
 #' list of comparison results
@@ -79,35 +86,79 @@ compareBDData <- function(x, y) {
 setGeneric("compareBenchDesigns",
            function(x, y = NULL, ...) standardGeneric("compareBenchDesigns"))
 
-.compare.sb <- function(x, y, ...) {
-    .compare.sb.bd(x, x@BenchDesign)
+.compare.sb <- function(x, y, functions = FALSE, ...) {
+    .compare.sb.bd(x, x@BenchDesign, functions = functions)
 }
 
-.compare.sb.sb <- function(x, y, ...) {
-    x <- colData(x)[, elementMetadata(colData(x))$colType == "methodInformation"]
-    y <- colData(y)[, elementMetadata(colData(y))$colType == "methodInformation"]
+.compare.sb.sb <- function(x, y, functions = TRUE, ...) {
+    x <- .sb2tidymeta(x)
+##    x <- dplyr::mutate(x, f = BenchDesign(x)
+    y <- .sb2tidymeta(x)
     .compare.meta(x, y)
 }
 
-.compare.sb.bd <- function(x, y, ...) {
-    x <- colData(x)[, elementMetadata(colData(x))$colType == "methodInformation"]
-    y <- tidyBDMethod(y)
+.compare.sb.bd <- function(x, y, functions = TRUE, ...) {
+    x <- .sb2tidymeta(x)
+    y <- tidyBDMethod(y, label = TRUE)
     .compare.meta(x, y)
 }
 
-.compare.bd.sb <- function(x, y, ...) {
-    .compare.sb.bd(y, x, ...)
+.compare.bd.sb <- function(x, y, functions = TRUE, ...) {
+    x <- tidyBDMethod(x, label = TRUE)
+    y <- .sb2tidymeta(x)
+    .compare.meta(x, y)
 }
 
-.compare.bd.bd <- function(x, y, ...) {
-    xm <- tidyBDMethod(x)
-    ym <- tidyBDMethod(y)
-    .compare.meta(xm, ym)
-    .compare.data(x@data, y@data)
+.compare.bd.bd <- function(x, y, functions = TRUE, ...) {
+    xm <- tidyBDMethod(x, label = TRUE)
+    ym <- tidyBDMethod(y, label = TRUE)
+    res_met <- .compare.meta(xm, ym)
+    res_dat <- compareBDData(x@data, y@data)
+    return(list(methods = res_met, data = res_data))
+    
+    ##func.identical <- isTRUE(all.equal())
+    ##post.identical <- ## sort by names, and just run mapply(all.equal)
 }
 
+## helper to compare functions (both main and post)
+.compare.funs <- function(x, y, ...) {
+    isTRUE(is.equal(x@f, y@f))
+}
+
+## helper to compare data
+.compare.data <- function(x, y, ...) {
+}
+
+## helper to compare method meta data
 .compare.meta <- function(x, y, ...) {
-    TRUE
+    stopifnot(tibble::is_tibble(x), tibble::is_tibble(y))
+    
+    xy <- dplyr::bind_rows(x = x, y = y, .id = "comp.id")
+    return(xy)
+    ## -- need to be able to combine things later....
+    ## func.*  [package version info]
+    ## param.* [parameters used]
+    ## meta.*  [misc. metadata elements]
+    ## function (just direct comparison?)
+    ## posts (just direct comparison?)
+    ##
+    ## ## rough design of output
+    ## res_met <- tibble(label = methods,
+    ##                   object = c("both", "x", "y"),
+    ##                   equal = c(TRUE, FALSE, NA),
+    ##                   func = c(TRUE, FALSE, NA),
+    ##                   versions = c(TRUE, FALSE, NA),
+    ##                   params = c(TRUE, FALSE, NA),
+    ##                   meta = c(TRUE, FALSE, NA))
+    
+    return(list(methods = res_met, data = NULL))
+}
+
+## helper function to extract metadata from SummarizedBenchmark coldata
+.sb2tidymeta <- function(x) {
+    xdf <- colData(x)[, elementMetadata(colData(x))$colType == "methodInformation", drop = FALSE]
+    xdf <- dplyr::as_tibble(as.data.frame(xdf, optional = TRUE))
+    dplyr::mutate(xdf, label = colnames(x))
 }
 
 #' @rdname compareBenchDesigns

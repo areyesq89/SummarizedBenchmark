@@ -8,7 +8,8 @@
 \usage{
 compareBenchDesigns(x, y = NULL, ...)
 
-\S4method{compareBenchDesigns}{SummarizedBenchmark,missing}(x, y = NULL, ...)
+\S4method{compareBenchDesigns}{SummarizedBenchmark,missing}(x, y,
+  functions = FALSE, ...)
 }
 \arguments{
 \item{x}{a SummarizedBenchmark or BenchDesign object}
@@ -16,7 +17,12 @@ compareBenchDesigns(x, y = NULL, ...)
 \item{y}{an optional second SummarizedBenchmark or BenchDesign object
 (default = NULL)}
 
-\item{...}{}
+\item{...}{other parameters}
+
+\item{functions}{a logical whether to check if both main and post
+functions are also identical using \code{all.equal}. (default = TRUE
+except when \code{x} is a SummarizedBenchmark object and \code{y} is
+NULL)}
 }
 \value{
 list of comparison results

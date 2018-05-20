@@ -318,7 +318,8 @@ makePostLists <- function(db) {
         names(base_fnl) <- uassays
     }
 
-    db@methods <- lapply(db@methods, function(x) { if (length(x@post) < 1) { x@post <- base_fnl }; x })
+    dbml <- lapply(db@methods, function(x) { if (length(x@post) < 1) { x@post <- base_fnl }; x })
+    db@methods <- BDMethodList(dbml)
     return(db)
 }
 

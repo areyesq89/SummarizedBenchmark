@@ -56,7 +56,7 @@ setValidity("BDMethod",
                 meta <- object@meta
                 if (!is.null(post) && is.null(names(post)))
                     stop("The slot 'post' must be a named list, else should be NULL.")
-                if (!is.null(post) && any(names(post) == ""))
+                if (!is.null(post) && any(!nzchar(names(post))))
                     stop("The slot 'post' must be a named list, else should be NULL.")
                 if (!is.null(post) && any(duplicated(names(post))))
                     stop("The slot 'post' must be a named list, else should be NULL.")
@@ -64,8 +64,32 @@ setValidity("BDMethod",
                     stop("The slot 'post' must be a list of functions, else should be NULL.")
                 if (!is.null(meta) && is.null(names(meta)))
                     stop("The slot 'meta' must be a named list, else should be NULL.")
-                if (!is.null(meta) && any(names(meta) == ""))
+                if (!is.null(meta) && any(!nzchar(names(meta))))
                     stop("The slot 'meta' must be a named list, else should be NULL.")
+                TRUE
+            })
+
+
+#' BDMethodList class
+#'
+#' Extension of the SimpleList class to contain a list of BDMethod
+#' objects.
+#'
+#' @exportClass BDMethod
+#' @name BDMethod-class
+#' @author Patrick Kimes
+setClass("BDMethodList", contains = "SimpleList")
+
+setValidity("BDMethodList",
+            function(object) {
+                if (!all(unlist(lapply(object, is, "BDMethod"))))
+                    stop("All entries must be named BDMethod objects.")
+                if (length(object) > 0 && is.null(names(object)))
+                    stop("All entries must be named BDMethod objects, methods were unnamed.")
+                if (length(object) > 0 && any(!nzchar(names(object))))
+                    stop("All entries must be named BDMethod objects, some methods were unnamed.")
+                if (length(object) > 0 && any(duplicated(names(object))))
+                    stop("All entries must be named BDMethod objects, some method names were duplicated.")
                 TRUE
             })
 
@@ -80,20 +104,7 @@ setValidity("BDMethod",
 #' @exportClass BenchDesign
 #' @name BenchDesign-class
 #' @author Patrick Kimes
-setClass("BenchDesign", representation(data = "BDDataOrNULL", methods = "list"))
-
-setValidity("BenchDesign",
-            function(object) {
-                if (length(object@methods) > 0 && is.null(names(object@methods)))
-                    stop("The slot 'methods' must be a named list of BDMethods, methods were unnamed.")
-                if (length(object@methods) > 0 && any(names(object@methods) == ""))
-                    stop("The slot 'methods' must be a named list of BDMethods, some methods were unnamed.")
-                if (length(object@methods) > 0 && any(duplicated(object@methods)))
-                    stop("The slot 'methods' must be a named list of BDMethods, some methods were duplicated.")
-                if (length(object@methods) > 0 && !all(sapply(object@methods, is, "BDMethod")))
-                    stop("The slot 'methods' must be a named list of BDMethods, else should be length zero.")
-                TRUE
-            })
+setClass("BenchDesign", representation(data = "BDDataOrNULL", methods = "BDMethodList"))
 
 
 setClassUnion("BenchDesignOrNULL", c("BenchDesign", "NULL"))
