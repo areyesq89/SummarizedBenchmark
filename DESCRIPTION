@@ -11,10 +11,40 @@ Description: This package defines the BenchDesign and SummarizedBenchmark classe
     This class provides an integrated interface to store metadata such as method parameters and software 
     versions as well as ground truths (when these are available) and evaluation metrics.
 biocViews: Software, Infrastructure
-Depends: R (>= 3.5), tidyr, SummarizedExperiment, S4Vectors, BiocGenerics, methods, UpSetR,
-rlang, stringr, utils, BiocParallel, ggplot2, mclust, dplyr, digest, sessioninfo, crayon
-Suggests: iCOBRA, BiocStyle, knitr, magrittr, IHW, qvalue, testthat, DESeq2, edgeR, limma,
-          tximport, readr, scRNAseq, splatter, scater, rnaseqcomp, biomaRt
+Depends: R (>= 3.5),
+         tidyr,
+         SummarizedExperiment,
+         S4Vectors,
+         BiocGenerics,
+         methods,
+         UpSetR,
+         rlang,
+         stringr,
+         utils,
+         BiocParallel,
+         ggplot2,
+         mclust,
+         dplyr,
+         digest,
+         sessioninfo,
+         crayon
+Suggests: iCOBRA,
+          BiocStyle,
+          knitr,
+          magrittr,
+          IHW,
+          qvalue,
+          testthat,
+          DESeq2,
+          edgeR,
+          limma,
+          tximport,
+          readr,
+          scRNAseq,
+          splatter,
+          scater,
+          rnaseqcomp,
+          biomaRt
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
