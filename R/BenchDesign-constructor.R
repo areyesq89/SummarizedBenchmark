@@ -83,3 +83,12 @@ setReplaceMethod("BDMethod",
                      x
                  })
 
+#' @rdname BenchDesign-class
+#' @exportMethod "BDMethod<-"
+setReplaceMethod("BDMethod",
+                 signature(x = "BenchDesign", i = "character", value = "NULL"),
+                 function (x, i, value) {
+                     x@methods[[i]] <- value
+                     x
+                 })
+

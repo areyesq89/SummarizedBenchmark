@@ -43,7 +43,7 @@ setGeneric("BDMethodList", valueClass = "BDMethodList",
     if (any(ml_is_bd)) {
         ml[ml_is_bd] <- lapply(ml[ml_is_bd], BDMethodList)
     }
-    if (any(ml_is_bd | ml_is_bdml)) {
+    if (any(ml_is_bd | ml_is_list)) {
         ml[ml_is_bd | ml_is_list] <- lapply(ml[ml_is_bd | ml_is_list], as.list)
         ml <- rlang::flatten(ml)
     }
@@ -52,8 +52,11 @@ setGeneric("BDMethodList", valueClass = "BDMethodList",
                            any(!nzchar(names(ml))) ||
                            any(duplicated(names(ml)))))
         stop("Methods must be specified with unique names.")
-    
-    new("BDMethodList", S4Vectors::SimpleList(ml))
+
+    if (is(ml, "List"))
+        return(new("BDMethodList", ml))
+    else 
+        return(new("BDMethodList", S4Vectors::SimpleList(ml)))
 }
 
 .BDMethodList.bd <- function(..., object) {
