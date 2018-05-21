@@ -10,7 +10,7 @@
 #' @rdname BDData-class
 #' @export
 #' @author Patrick Kimes
-setGeneric("BDData", valueClass = "BDData",
+setGeneric("BDData", valueClass = "BDDataOrNULL",
            function(data) standardGeneric("BDData"))
 
 .BDData.default <- function(data) {

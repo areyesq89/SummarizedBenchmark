@@ -37,7 +37,7 @@ setGeneric("BenchDesign",
         return(BenchDesign(methods = ml[[1]]))
     
     bdml <- BDMethodList(..., object = methods)
-    if (!is.null(data)) {
+    if (!is.null(data) && !is(data, "BDData")) {
         data <- new("BDData", data = data,
                     type = ifelse(is(data, "character"), "md5hash", "data"))
     }

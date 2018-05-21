@@ -53,8 +53,12 @@ compareBDMethod <- function(x, y) {
 #' 
 ## check if data is the same
 compareBDData <- function(x, y) {
+    if (is.null(x) && is.null(y))
+        return(list(data = NULL, type = TRUE))
+    if (is.null(x) || is.null(y))
+        return(list(data = NULL, type = FALSE))
     if (!is(x, "BDData") || !is(y, "BDData"))
-        stop("Must specify two BDData objects to compare.")
+        stop("Must specify two BDData or NULL objects to compare.")
     sameType <- ifelse(x@type == y@type, x@type, FALSE)
     x <- HashBDData(x)
     y <- HashBDData(y)
@@ -79,10 +83,6 @@ compareBDData <- function(x, y) {
 #' @param x a SummarizedBenchmark or BenchDesign object
 #' @param y an optional second SummarizedBenchmark or BenchDesign object
 #'        (default = NULL)
-#' @param functions a logical whether to check if both main and post
-#'        functions are also identical using \code{all.equal}. (default = TRUE
-#'        except when \code{x} is a SummarizedBenchmark object and \code{y} is
-#'        NULL)
 #' @param ... other parameters
 #' 
 #' @return
@@ -211,83 +211,3 @@ setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "Summa
 setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "BenchDesign"), .compare.base)
 setMethod("compareBenchDesigns", signature(x = "BenchDesign", y = "SummarizedBenchmark"), .compare.base)
 setMethod("compareBenchDesigns", signature(x = "BenchDesign", y = "BenchDesign"), .compare.base)
-
-
-#' Print Comparison of BenchDesign objects
-#'
-#' Simple comparison of two BenchDesign objects based on
-#' methods meta data and data MD5 hashs.
-#'
-#' @param x a \code{BenchDesign} object
-#' @param y a \code{BenchDesign} object
-#'
-#' @return
-#' logical value indicating whether the two objects have
-#' methods producing the same meta data and data with the
-#' same MD5 hashes.
-#' 
-#' @export
-#' @author Patrick Kimes
-printCompareBenchDesigns <- function(x, y) {
-    if (!is(x, "BenchDesign") || !is(y, "BenchDesign"))
-        stop("Must specify two BenchDesign objects to compare.")
-
-    if (!is.null(x@data) && !is.null(y@data)) {
-        bdd <- compareBDData(x@data, y@data)
-    } else {
-        bdd <- list(data = NA, type = ifelse(is.null(x@data) && is.null(y@data), "NULL", FALSE))
-    }
-
-    cat(stringr::str_pad("BenchDesign Comparison ", 60, "right", "-"), "\n")
-    cat("  benchmark data:\n")
-    cat("    type: ")
-    if (isFALSE(bdd$type)) 
-        cat(crayon::red("unequal"),
-            "(x:", ifelse(is.null(x@data), "NULL", ifelse(x@data@type == "data", "data,", "MD5 hash,")),
-            "y:", ifelse(is.null(y@data), "NULL", ifelse(y@data@type == "data", "data)", "MD5 hash)")), "\n")
-    else
-        cat(crayon::green("equal"), paste0("(", ifelse(bdd$type == "data", "data", "MD5 hash"), ")"), "\n")
-    cat("    MD5 hash: ")
-    if (is.na(bdd$data))
-        cat(crayon::yellow("NA\n"))
-    else
-        cat(ifelse(bdd$data, crayon::green("equal"), crayon::red("unequal")), "\n")
-
-    xmn <- names(x@methods)
-    ymn <- names(y@methods)
-    xmo <- setdiff(xmn, ymn)
-    ymo <- setdiff(ymn, xmn)
-    xym <- intersect(xmn, ymn)
-    
-    cat("  benchmark methods:\n")
-    if (length(xym) > 0) {
-        xymc <- lapply(xym, function(mn) compareBDMethods(x@methods[[mn]], y@methods[[mn]]))
-        xymc <- unlist(lapply(xymc, isTRUE))
-    }
-
-    cat(crayon::green("      equal: "))
-    if (length(xym) > 0 && sum(xymc) > 0)
-        cat(paste(xym[xymc], collapse = ", "), "\n")
-    else
-        cat("-\n")
-
-    cat(crayon::red("    unequal: "))
-    if (length(xym) > 0 && sum(!xymc) > 0)
-        cat(paste(xym[!xymc], collapse = ", "), "\n")
-    else
-        cat("-\n")
-
-    cat(crayon::yellow("     x only: "))
-    if (length(xmo) > 0)
-        cat(paste(xmo, collapse = ", "), "\n")
-    else
-        cat("-\n")
-    
-    cat(crayon::yellow("     y only: "))
-    if (length(ymo) > 0)
-        cat(paste(ymo, collapse = ", "), "\n")
-    else
-        cat("-\n")
-}
-
-

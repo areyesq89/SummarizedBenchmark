@@ -93,6 +93,13 @@
 buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs = FALSE,
                        keepData = FALSE, catchErrors = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
+    ## capture args for future analysis
+    arglist <- match.call()
+    arglist <- as.list(arglist)[-1]
+    arglist <- lapply(arglist, eval)
+    arglist <- arglist[names(arglist) != "bd"]
+    arglist <- arglist[names(arglist) != "data"]
+    
     if (!is.null(data) && !is.list(data)) {
         stop("If specified, 'data' must be a list or data.frame object.")
     }
@@ -197,7 +204,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         x[, names(bd@methods), drop = FALSE]
     })
     names(a) <- uassays
-    
+
     ## colData: method information
     df <- tidyBDMethod(bd)
     
@@ -207,7 +214,9 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     pf <- SimpleList(pf)
 
     ## metadata: record sessionInfo
-    md <- list(sessionInfo = sessioninfo::session_info())
+    md <- list(sessions = list(list(methods = names(bd@methods),
+                                    parameters = arglist,
+                                    sessionInfo = sessioninfo::session_info())))
     
     ## list of initialization parameters
     sbParams <- list(assays = a,
@@ -339,5 +348,7 @@ eval2assay <- function(al, si, siv) {
             alr <- eval2assay(al, TRUE, siv)
         }
     }
+    if (is.null(siv))
+        rownames(alr) <- NULL
     return(alr)
 }

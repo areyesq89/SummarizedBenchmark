@@ -4,7 +4,8 @@
 \alias{updateBench}
 \title{Update SummarizedBenchmark object}
 \usage{
-updateBench(sb, bd = NULL, dryrun = TRUE, version = FALSE, ...)
+updateBench(sb, bd = NULL, dryrun = TRUE, version = FALSE,
+  keepAll = TRUE, reuseParams = TRUE, ...)
 }
 \arguments{
 \item{sb}{a \code{SummarizedBenchmark} object}
@@ -16,6 +17,13 @@ be updated rather than actually running any methods. (default = TRUE)}
 
 \item{version}{logical whether to re-run methods with only package
 version differences. (default = FALSE)}
+
+\item{keepAll}{logical whether to keep methods run in original SummarizedBenchmark
+but not in new BenchDesign. Only used if \code{bd} is not NULL. (default = TRUE)}
+
+\item{reuseParams}{logical whether to reuse parameters from \code{buildBench} call
+used to create \code{SummarizedBenchmark} object (if available). Directly
+specified \code{buildBench} parameters still take precedence. (default = TRUE)}
 
 \item{...}{optional parameters to pass to \code{\link{buildBench}}.}
 }
