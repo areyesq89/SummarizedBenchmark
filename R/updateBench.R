@@ -27,6 +27,9 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
         stop("Data used to generate original SummarizedBenchmark is unavailable.\n",
              "The data must be available to ensure that the same data is being used to ",
              "evaluate any new or updated methods.")
+
+    if (is.null(bd))
+        bd <- BenchDesign(sb)
     
     ## capture buildBench parameters
     bbp <- list(...)
@@ -81,12 +84,16 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     bdd <- .select.bddata(sb, bd)
     bdnew <- BenchDesign(methods = bdm, data = bdd)
 
-    ## run new buildBench
-    sbnew <- do.call(buildBench, c(list(bd = bdnew), bbp))
-
-    ## combine old and new results
-    sbnew <- .combineSummarizedBenchmarks(sb, sbnew)
-
+    if (length(bdm)) {
+        ## run new buildBench
+        sbnew <- do.call(buildBench, c(list(bd = bdnew), bbp))
+        
+        ## combine old and new results
+        sbnew <- .combineSummarizedBenchmarks(sb, sbnew)
+    } else {
+        sbnew <- sb
+    }
+    
     ## return results
     return(sbnew)
 }
@@ -104,8 +111,8 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
             return(BDData(sb))
         else
             stop("Need to provide non-hash data set.\n",
-                 "Specified objects only contain MD5 hash data sets.",
-                 "MD5 hash =", BDData(sb)@data, ".\n",
+                 "Specified objects only contain MD5 hash data sets.\n",
+                 "MD5 hash = ", BDData(sb)@data, ".\n",
                  "MD5 hash values can be checked using digest::digest.")
     } else { 
         stop("Need to provide non-NULL and non-hash data set.\n",
@@ -140,6 +147,17 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     sb1 <- sb1[, names(bd1)]
 
     ## combine column data as expanded parameter sets in each object before merging
+    emd1 <- dplyr::as_tibble(as.data.frame(elementMetadata(colData(sb1)), optional = TRUE))
+    emd1 <- dplyr::mutate(emd1, colid = colnames(colData(sb1)))
+    emd2 <- dplyr::as_tibble(as.data.frame(elementMetadata(colData(sb2)), optional = TRUE))
+    emd2 <- dplyr::mutate(emd2, colid = colnames(colData(sb2)))
+    emd <- dplyr::bind_rows(emd1, emd2)
+    emd <- dplyr::distinct(emd)
+    if (any(duplicated(emd$colid)))
+        stop("Duplicated column IDs with inconsistent elementMetaData.")
+    emd_id <- emd$colid
+    emd <- DataFrame(dplyr::select(emd, -colid))
+    
     coldat1 <- colData(sb1)
     coldat1 <- as.data.frame(coldat1, optional = TRUE)
     coldat1 <- dplyr::as_tibble(coldat1, rownames = "label")
@@ -151,6 +169,9 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     colData(sb1) <- coldat[colnames(sb1), , drop = FALSE]
     colData(sb2) <- coldat[colnames(sb2), , drop = FALSE]
 
+    elementMetadata(colData(sb1)) <- emd[match(colnames(colData(sb1)), emd_id), , drop = FALSE]
+    elementMetadata(colData(sb2)) <- emd[match(colnames(colData(sb2)), emd_id), , drop = FALSE]
+    
     ## no special check on row data
     
     ## combine session informations into sessions of 1 object before merging
