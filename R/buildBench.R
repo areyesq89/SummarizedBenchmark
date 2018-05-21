@@ -187,7 +187,6 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         siVals <- NULL
     }
     a <- lapply(a, eval2assay, si = sortIDs, siv = siVals)
-
     
     ## fill in missing methods with NAs, return in fixed order
     a <- lapply(a, function(x) {
@@ -195,7 +194,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         msl <- list()
         msl[ms] <- NA
         x <- do.call(cbind, c(list(x), msl))
-        x[, names(bd@methods)]
+        x[, names(bd@methods), drop = FALSE]
     })
     names(a) <- uassays
     
