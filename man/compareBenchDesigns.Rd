@@ -17,11 +17,6 @@ compareBenchDesigns(x, y = NULL, ...)
 (default = NULL)}
 
 \item{...}{other parameters}
-
-\item{functions}{a logical whether to check if both main and post
-functions are also identical using \code{all.equal}. (default = TRUE
-except when \code{x} is a SummarizedBenchmark object and \code{y} is
-NULL)}
 }
 \value{
 list of comparison results
