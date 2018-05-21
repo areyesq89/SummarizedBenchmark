@@ -9,7 +9,6 @@
 #'
 #' @rdname BDData-class
 #' @export
-#' @author Patrick Kimes
 setGeneric("BDData", valueClass = "BDDataOrNULL",
            function(data) standardGeneric("BDData"))
 

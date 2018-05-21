@@ -16,7 +16,6 @@
 #' @rdname BDMethod-class
 #' @importFrom rlang enquo
 #' @export
-#' @author Patrick Kimes
 setGeneric("BDMethod", valueClass = "BDMethod",
            function(x, params = rlang::quos(), post = NULL, meta = NULL, ...) standardGeneric("BDMethod"))
 

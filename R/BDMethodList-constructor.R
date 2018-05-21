@@ -13,7 +13,6 @@
 #' @importFrom rlang flatten
 #' @rdname BDMethodList-class
 #' @export
-#' @author Patrick Kimes
 setGeneric("BDMethodList", valueClass = "BDMethodList",
            function(..., object = NULL) standardGeneric("BDMethodList"))
 

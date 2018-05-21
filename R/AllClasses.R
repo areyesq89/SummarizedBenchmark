@@ -76,7 +76,7 @@ setValidity("BDMethod",
 #' objects.
 #'
 #' @exportClass BDMethod
-#' @name BDMethod-class
+#' @name BDMethodList-class
 #' @author Patrick Kimes
 setClass("BDMethodList", contains = "SimpleList")
 
