@@ -136,14 +136,14 @@ sb <- sb %>%
         assay = "bench",
         evalMetric = "zerosPerCell",
         evalFunction = function(query, truth) {
-            list(colMeans(assay(query[[1]], "counts") == 0))
+            colMeans(assay(query[[1]], "counts") == 0)
         }) %>%
     addPerformanceMetric(
         assay = "bench",
         evalMetric = "zerosPerGene",
         evalFunction = function(query, truth) {
-            list(rowMeans(assay(query[[1]], "counts") == 0))
-        })
+            rowMeans(assay(query[[1]], "counts") == 0)
+        } )
 ```
 
 Next, the metrics are calculated using `estimatePerformanceMetrics`. For plotting, we only keep the `label`, `value`, and `performanceMetric` columns of the returned table.
@@ -158,7 +158,7 @@ Notice that the `value` is a list for each method and metric. These vectors can 
 
 ```{r check-performance-metrics}
 sbmets <- tidyr::unnest(sbmets)
-head(sbmets)
+head( sbmets )
 ```
 
 Finally, the performance metrics can be explored using standard plotting functions.

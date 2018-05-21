@@ -63,6 +63,9 @@ addPerformanceMetric <- function( object, evalMetric, assay, evalFunction=NULL )
   object
 }
 
+is.scalar <- function(x){
+  is.atomic(x) && length(x) == 1L
+}
 
 #' @describeIn estimateMetrics Estimate performance metrics for a given assay
 #' @title Estimate performance metrics.
@@ -143,8 +146,9 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=
     vecArgs <- formalArgs( f )[ !formalArgs( f ) %in% c("query", "truth") ]
     passArgs <- list(truth=assayTruth)
     eleMD <- DataFrame( colType="performanceMetric", assay=assay, performanceMetric=nf )
+#    vf <- Vectorize( f, vectorize.args=vecArgs, SIMPLIFY=FALSE)
     if( length( vecArgs ) > 0 ){
-      vf <- Vectorize( f, vectorize.args=vecArgs )
+      vf <- Vectorize( f, vectorize.args=vecArgs, SIMPLIFY=FALSE)
       defaultArgs <- formals(f)[vecArgs[!vecArgs %in% names( passArgs )]]
       extraDotArgs <- allDotArgs[names(allDotArgs) %in% formalArgs(f)]
       if( length( extraDotArgs ) > 0 ){
@@ -159,7 +163,7 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=
       vf <- f
       resNRow <- 1
     }
-    indRes <- sapply( seq_len( ncol( assayData ) ), function( i ){
+    indRes <- lapply( seq_len( ncol( assayData ) ), function( i ){
       assayRes <- do.call( vf, c( list(query=assayData[,i]), passArgs ) )
       if( all( is.na( assayData[,i] ) ) ){
         rep( NA, length( assayRes ) )
@@ -167,13 +171,25 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=
         assayRes
       }
     } )
-    resDF <- DataFrame( t( matrix( indRes, nrow=resNRow ) ) )
-    elementMetadata( resDF ) <- eleMD
-    if( resNRow > 1 ){
-      colnames( resDF ) <- paste( nf, seq_len( ncol( resDF ) ), sep=".")
+    resDF <- DataFrame( row.names=colnames(assayData) )
+    if( length(vecArgs) > 0 ){
+      if( resNRow > 1 ){
+        resColNames <- paste( nf, seq_len( resNRow ), sep="." )
+      }else{
+        resColNames <- nf
+      }
+      for( i in seq_len( length(resColNames) ) ){
+        resInd <- lapply( indRes, "[[", i )
+        if( all( sapply( resInd, is.scalar ) ) ){
+          resInd <- unlist(resInd, recursive=FALSE)
+        }
+        resDF[[resColNames[i]]] <- resInd
+      }
     }else{
-      colnames( resDF ) <- nf
+      resColNames <- nf
+      resDF[[resColNames]] <- indRes
     }
+    elementMetadata( resDF ) <- eleMD
     resDF
   } )
   names( res ) <- names( allFunctions )
