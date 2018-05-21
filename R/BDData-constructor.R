@@ -25,9 +25,14 @@ setGeneric("BDData", valueClass = "BDData",
     data@data
 }
 
+.BDData.sb <- function(data) {
+    BDData(BenchDesign(data))
+}
+
 #' @rdname BDData-class
 setMethod("BDData", signature(data = "ANY"), .BDData.default)
 setMethod("BDData", signature(data = "BenchDesign"), .BDData.bd)
+setMethod("BDData", signature(data = "SummarizedBenchmark"), .BDData.sb)
 setMethod("BDData", signature(data = "BDData"), function(data) { data })
 
 

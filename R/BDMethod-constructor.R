@@ -8,7 +8,7 @@
 #' @param post a list of functions to be applied to the output of \code{x}.
 #'        (default = NULL)
 #' @param meta a list of meta data. (default = NULL)
-#' @param id a index or character string. (default = 1)
+#' @param i an numeric or characeter index. (default = 1)
 #' 
 #' @return
 #' BDMethod object
@@ -29,13 +29,13 @@ setGeneric("BDMethod", valueClass = "BDMethod",
     new("BDMethod", f = f, fc = fc, params = params, post = post, meta = meta)
 }
 
-.BDMethod.bd <- function(x, id = 1) {
-    stopifnot(is(id, "character") || is(id, "numeric"))
-    x@methods[[id]]
+.BDMethod.bd <- function(x, i = 1) {
+    stopifnot(is(i, "character") || is(i, "numeric"))
+    x@methods[[i]]
 }
 
-.BDMethod.sb <- function(x, id = 1) {
-    BDMethod(BenchDesign(x), id = id)
+.BDMethod.sb <- function(x, i = 1) {
+    BDMethod(BenchDesign(x), i = i)
 }
 
 .BDMethod.fun <- function(x, params, post, meta, ...) {

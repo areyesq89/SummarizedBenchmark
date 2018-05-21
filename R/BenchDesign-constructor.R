@@ -31,6 +31,11 @@ setGeneric("BenchDesign",
 
 
 .BenchDesign <- function(..., methods, data) {
+    ## add shortcut for just a single SummarizedBenchmark object (want to return w/ data)
+    ml <- list(...)
+    if (length(ml) == 1 && is.null(methods) && is.null(data) && is(ml[[1]], "SummarizedBenchmark"))
+        return(BenchDesign(methods = ml[[1]]))
+    
     bdml <- BDMethodList(..., object = methods)
     if (!is.null(data)) {
         data <- new("BDData", data = data,

@@ -28,7 +28,7 @@ BDMethod(x, params = rlang::quos(), post = NULL, meta = NULL, ...)
 
 \item{meta}{a list of meta data. (default = NULL)}
 
-\item{id}{a index or character string. (default = 1)}
+\item{i}{an numeric or characeter index. (default = 1)}
 }
 \value{
 BDMethod object
