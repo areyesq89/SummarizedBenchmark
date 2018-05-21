@@ -52,3 +52,34 @@ setGeneric("BenchDesign",
 #' @rdname BenchDesign-class
 setMethod("BenchDesign", signature(methods = "ANY", data = "ANY"), .BenchDesign)
 setMethod("BenchDesign", signature(methods = "SummarizedBenchmark", data = "ANY"), .BenchDesign.sb)
+
+
+#' @rdname BenchDesign-class
+#' @export
+setGeneric("BDMethodList<-", 
+           function(x, ..., value) standardGeneric("BDMethodList<-"))
+
+#' @rdname BenchDesign-class
+#' @exportMethod "BDMethodList<-"
+setReplaceMethod("BDMethodList",
+                 signature(x = "BenchDesign", value = "BDMethodList"),
+                 function (x, value) {
+                     x@methods <- value
+                     x
+                 })
+
+
+#' @rdname BenchDesign-class
+#' @export
+setGeneric("BDMethod<-", 
+           function(x, i, ..., value) standardGeneric("BDMethod<-"))
+
+#' @rdname BenchDesign-class
+#' @exportMethod "BDMethod<-"
+setReplaceMethod("BDMethod",
+                 signature(x = "BenchDesign", i = "character", value = "BDMethod"),
+                 function (x, i, value) {
+                     x@methods[[i]] <- value
+                     x
+                 })
+
