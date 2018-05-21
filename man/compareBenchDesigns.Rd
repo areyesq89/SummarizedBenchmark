@@ -8,8 +8,7 @@
 \usage{
 compareBenchDesigns(x, y = NULL, ...)
 
-\S4method{compareBenchDesigns}{SummarizedBenchmark,missing}(x, y,
-  functions = FALSE, ...)
+\S4method{compareBenchDesigns}{SummarizedBenchmark,missing}(x, y = NULL, ...)
 }
 \arguments{
 \item{x}{a SummarizedBenchmark or BenchDesign object}

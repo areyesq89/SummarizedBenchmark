@@ -16,10 +16,27 @@
 compareBDMethod <- function(x, y) {
     if(!is(y, "BDMethod") || !is(y, "BDMethod"))
         stop("Must specify two BDMethod objects to compare.")
-    res_meta <- dplyr::all_equal(tidyBDMethod(x), tidyBDMethod(y))
-    res_func <- isTRUE(all.equal(x@f, y@f))
-    res_post <- isTRUE(all.equal(x@post, y@post))
+    xt <- dplyr::as_tibble(tidyBDMethod(x))
+    yt <- dplyr::as_tibble(tidyBDMethod(y))
+
+    ## compare main and post functions
+    res_fn <- all.equal(x@f, y@f)
+    res_fp <- all.equal(x@post, y@post)
+
+    ## check function info
+    res_v <- dplyr::all_equal(dplyr::select(xt, starts_with("func.")), dplyr::select(yt, starts_with("func.")))
+    res_v <- isTRUE(res_v)
     
+    ## check parameter info
+    res_p <- dplyr::all_equal(dplyr::select(xt, starts_with("param.")), dplyr::select(yt, starts_with("param.")))
+    res_p <- isTRUE(res_p)
+    
+    ## check metadata info
+    res_m <- dplyr::all_equal(dplyr::select(xt, starts_with("meta.")), dplyr::select(yt, starts_with("meta.")))
+    res_m <- isTRUE(res_m)
+    
+    list(f = isTRUE(res_fn), version = isTRUE(res_v), params = isTRUE(res_p),
+         meta = isTRUE(res_m), post = isTRUE(res_fp))
 }
 
 
@@ -86,87 +103,114 @@ compareBDData <- function(x, y) {
 setGeneric("compareBenchDesigns",
            function(x, y = NULL, ...) standardGeneric("compareBenchDesigns"))
 
-.compare.sb <- function(x, y, functions = FALSE, ...) {
-    .compare.sb.bd(x, x@BenchDesign, functions = functions)
+.compare.sb <- function(x, y, ...) {
+    .compare.base(x, x@BenchDesign, functions = functions)
 }
 
-.compare.sb.sb <- function(x, y, functions = TRUE, ...) {
-    x <- .sb2tidymeta(x)
-##    x <- dplyr::mutate(x, f = BenchDesign(x)
-    y <- .sb2tidymeta(x)
-    .compare.meta(x, y)
-}
-
-.compare.sb.bd <- function(x, y, functions = TRUE, ...) {
-    x <- .sb2tidymeta(x)
-    y <- tidyBDMethod(y, label = TRUE)
-    .compare.meta(x, y)
-}
-
-.compare.bd.sb <- function(x, y, functions = TRUE, ...) {
-    x <- tidyBDMethod(x, label = TRUE)
-    y <- .sb2tidymeta(x)
-    .compare.meta(x, y)
-}
-
-.compare.bd.bd <- function(x, y, functions = TRUE, ...) {
-    xm <- tidyBDMethod(x, label = TRUE)
-    ym <- tidyBDMethod(y, label = TRUE)
-    res_met <- .compare.meta(xm, ym)
-    res_dat <- compareBDData(x@data, y@data)
-    return(list(methods = res_met, data = res_data))
+.compare.base <- function(x, y, ...) {
+    xt <- .tidyForComparison(x) 
+    yt <- .tidyForComparison(y)
     
-    ##func.identical <- isTRUE(all.equal())
-    ##post.identical <- ## sort by names, and just run mapply(all.equal)
+    res_met <- .compare.meta(xt, yt)
+    res_dat <- compareBDData(BDData(x), BDData(y))
+
+    return(list(methods = res_met, data = res_dat))
 }
 
-## helper to compare functions (both main and post)
-.compare.funs <- function(x, y, ...) {
-    isTRUE(is.equal(x@f, y@f))
-}
-
-## helper to compare data
-.compare.data <- function(x, y, ...) {
-}
 
 ## helper to compare method meta data
+## NOTE: not using compareBDMethod since SummarizedBenchmarks need special handling.
+##       lapply BDMethod is simpler, but currently not meant for checking SB metadata columns.
+##       .compare.meta also returns nice tabular output.
+##       columns should be consistent w/ compareBDMethod
 .compare.meta <- function(x, y, ...) {
     stopifnot(tibble::is_tibble(x), tibble::is_tibble(y))
+
+    ## determine unique
+    mxo <- setdiff(x$label, y$label)
+    myo <- setdiff(y$label, x$label)
+    mxy <- intersect(x$label, y$label)
+
+    xj <- dplyr::filter(x, label %in% mxy)
+    yj <- dplyr::filter(y, label %in% mxy)
+
+    ## check function info
+    xyv <- lapply(mxy, function(l) {
+        isTRUE(dplyr::all_equal(dplyr::select(dplyr::filter(xj, label == l), starts_with("func.")),
+                                dplyr::select(dplyr::filter(yj, label == l), starts_with("func."))))
+    })
+    names(xyv) <- mxy
+
+    ## check parameter info
+    xyp <- lapply(mxy, function(l) {
+        isTRUE(dplyr::all_equal(dplyr::select(dplyr::filter(xj, label == l), starts_with("param.")),
+                                dplyr::select(dplyr::filter(yj, label == l), starts_with("param."))))
+    })
+    names(xyp) <- mxy
     
-    xy <- dplyr::bind_rows(x = x, y = y, .id = "comp.id")
-    return(xy)
-    ## -- need to be able to combine things later....
-    ## func.*  [package version info]
-    ## param.* [parameters used]
-    ## meta.*  [misc. metadata elements]
-    ## function (just direct comparison?)
-    ## posts (just direct comparison?)
-    ##
-    ## ## rough design of output
-    ## res_met <- tibble(label = methods,
-    ##                   object = c("both", "x", "y"),
-    ##                   equal = c(TRUE, FALSE, NA),
-    ##                   func = c(TRUE, FALSE, NA),
-    ##                   versions = c(TRUE, FALSE, NA),
-    ##                   params = c(TRUE, FALSE, NA),
-    ##                   meta = c(TRUE, FALSE, NA))
+    ## check metadata info
+    xym <- lapply(mxy, function(l) {
+        isTRUE(dplyr::all_equal(dplyr::select(dplyr::filter(xj, label == l), starts_with("meta.")),
+                                dplyr::select(dplyr::filter(yj, label == l), starts_with("meta."))))
+    })
+    names(xym) <- mxy
+
+    ## check functions
+    xyfn <- lapply(mxy, function(l) {
+        isTRUE(all.equal(dplyr::filter(xj, label == l)$f, dplyr::filter(yj, label == l)$f))
+    })
+    names(xyfn) <- mxy
+
+    ## check post functions
+    xyfp <- lapply(mxy, function(l) {
+        isTRUE(all.equal(dplyr::filter(xj, label == l)$post, dplyr::filter(yj, label == l)$post))
+    })
+    names(xyfp) <- mxy
+
+    ## combine all contrasts
+    mxy <- dplyr::bind_rows(list(f = xyfn, version = xyv, params = xyp, meta = xym, post = xyfp),
+                            .id = "comparison")
+    mxy <- tidyr::gather(mxy, label, value, -comparison)
+    mxy <- tidyr::spread(mxy, comparison, value)
+
+    ## add in rows for xonly, yonly methods
+    mxy <- dplyr::bind_rows(Both = mxy,
+                             xOnly = if (length(mxo)) { dplyr::tibble(label = mxo) },
+                             yOnly = if (length(myo)) { dplyr::tibble(label = myo) },
+                             .id = "overlap")
     
-    return(list(methods = res_met, data = NULL))
+    return(list(res = mxy, x, y))
 }
 
 ## helper function to extract metadata from SummarizedBenchmark coldata
-.sb2tidymeta <- function(x) {
-    xdf <- colData(x)[, elementMetadata(colData(x))$colType == "methodInformation", drop = FALSE]
-    xdf <- dplyr::as_tibble(as.data.frame(xdf, optional = TRUE))
-    dplyr::mutate(xdf, label = colnames(x))
+.tidyForComparison <- function(x) {
+    if (is(x, "SummarizedBenchmark")) {
+        xt <- colData(x)[, elementMetadata(colData(x))$colType == "methodInformation", drop = FALSE]
+        xt <- dplyr::as_tibble(as.data.frame(xt, optional = TRUE))
+        xt <- dplyr::mutate(xt, label = colnames(x))
+    } else if (is(x, "BenchDesign")) {
+        ## clean up empty @post slots in BenchDesign for comparison
+        x <- makePostLists(x)
+        xt <- tidyBDMethod(x, label = TRUE)
+    }
+    
+    xf <- lapply(BDMethodList(x), slot, "f")
+    xf <- dplyr::tibble(label = names(xf), f = xf)
+    xp <- lapply(BDMethodList(x), slot, "post")
+    xp <- dplyr::tibble(label = names(xp), post = xp)
+
+    xt <- dplyr::left_join(xt, xf, by = "label")
+    xt <- dplyr::left_join(xt, xp, by = "label")
+
+    xt
 }
 
 #' @rdname compareBenchDesigns
 setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "missing"), .compare.sb)
-setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "SummarizedBenchmark"), .compare.sb.sb)
-setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "BenchDesign"), .compare.sb.bd)
-setMethod("compareBenchDesigns", signature(x = "BenchDesign", y = "SummarizedBenchmark"), .compare.sb.bd)
-setMethod("compareBenchDesigns", signature(x = "BenchDesign", y = "BenchDesign"), .compare.bd.bd)
+setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "SummarizedBenchmark"), .compare.base)
+setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "BenchDesign"), .compare.base)
+setMethod("compareBenchDesigns", signature(x = "BenchDesign", y = "SummarizedBenchmark"), .compare.base)
+setMethod("compareBenchDesigns", signature(x = "BenchDesign", y = "BenchDesign"), .compare.base)
 
 
 #' Print Comparison of BenchDesign objects
