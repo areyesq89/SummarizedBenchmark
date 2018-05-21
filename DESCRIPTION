@@ -1,7 +1,7 @@
 Package: SummarizedBenchmark
 Type: Package
 Title: Classes and methods for performing benchmark comparisons
-Version: 1.1.3
+Version: 1.1.4
 Author: Alejandro Reyes <alejandro.reyes.ds@gmail.com>, Patrick Kimes <patrick.kimes@gmail.com>
 Maintainer: Alejandro Reyes <alejandro.reyes.ds@gmail.com>, Patrick Kimes <patrick.kimes@gmail.com>
 Description: This package defines the BenchDesign and SummarizedBenchmark classes for building,
