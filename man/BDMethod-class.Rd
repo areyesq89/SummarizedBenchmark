@@ -4,7 +4,6 @@
 \docType{class}
 \name{BDMethod-class}
 \alias{BDMethod-class}
-\alias{BDMethod-class}
 \alias{BDMethod}
 \alias{BDMethod,quosure-method}
 \alias{show,BDMethod-method}
@@ -37,9 +36,6 @@ BDMethod object
 Container for individual methods to be compared as part of
 a BenchDesign object.
 
-Extension of the SimpleList class to contain a list of BDMethod
-objects.
-
 Initializes a new BenchDesign method (BDMethod) object for benchmarking methods.
 }
 \section{Slots}{
@@ -57,9 +53,5 @@ Initializes a new BenchDesign method (BDMethod) object for benchmarking methods.
 }}
 
 \author{
-Patrick Kimes
-
-Patrick Kimes
-
 Patrick Kimes
 }

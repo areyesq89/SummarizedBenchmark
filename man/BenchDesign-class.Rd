@@ -11,6 +11,8 @@
 \alias{BDMethod<-}
 \alias{BDMethod<-,BenchDesign,character,BDMethod-method}
 \alias{BDMethod<-,BenchDesign,character,NULL-method}
+\alias{BDData<-}
+\alias{BDData<-,BenchDesign,BDDataOrNULL-method}
 \alias{show,BenchDesign-method}
 \title{BenchDesign class}
 \usage{
@@ -27,6 +29,10 @@ BDMethod(x, i, ...) <- value
 \S4method{BDMethod}{BenchDesign,character,BDMethod}(x, i) <- value
 
 \S4method{BDMethod}{BenchDesign,character,`NULL`}(x, i) <- value
+
+BDData(x, ...) <- value
+
+\S4method{BDData}{BenchDesign,BDDataOrNULL}(x) <- value
 
 \S4method{show}{BenchDesign}(object)
 }

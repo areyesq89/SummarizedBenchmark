@@ -34,6 +34,4 @@ contains the 'data' or a 'md5hash' of the data.}
 
 \author{
 Patrick Kimes
-
-Patrick Kimes
 }
