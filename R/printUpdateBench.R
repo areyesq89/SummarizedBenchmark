@@ -85,7 +85,7 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
                     istr <- crayon::red(istr)
                 cat(istr)
             } else {
-                istr <- c(metres[i, c("label", "oldfn", "rerun"), drop = TRUE], rep("-", 5))
+                istr <- c(metres[i, c("label", "rerun", "oldfn"), drop = TRUE], rep("-", 5))
                 istr <- .methodrow(istr)
                 if (metres$overlap[i] == "yOnly") {
                     cat(crayon::red(istr))
