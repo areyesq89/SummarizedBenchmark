@@ -16,7 +16,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r echo=FALSE, include=FALSE}
@@ -93,13 +93,13 @@ The *data.frame* of adjusted p-values and q-values can be used to compare the me
 
 While this approach can work well for smaller comparisons, it can quickly become overwhelming and unweildy as the number of methods and parameters increases. Furthermore, once each method is applied and the final *data.frame* (`adj`) is constructed, there is no way to determine *how* each value was calculated. While an informative name can be used to "label" each method (as done above), this does not capture the full complexity, e.g. parameters and context, where the function was evaluated. One solution might involve manually recording function calls and parameters in a separate *data.frame* with the hope of maintaining synchrony with the output *data.frame*. However, this is prone to errors, e.g. during fast "copy and paste" operations or additions and delations of parameter combinations. An alternative (and hopefully better) solution, is to use the framework of the *SummarizedBenchmark* package.
 
-In the *SummarizedBenchmark* approach, a *BenchDesign* is first constructed with the data as the sole input. (A *BenchDesign* can also be constructed without any data input. This approach is described in a later section.)
+In the *SummarizedBenchmark* approach, a *BenchDesign* is constructed with the data and any number of methods. A *BenchDesign* can also be constructed without any data or method inputs. Methods and the data can be added or removed from the object modularly in a few different ways, as will be described in the following section. For simplicity, we first show how to construct the *BenchDesign* with just the data set as input. The data object, here `tdat`, must be passed explicitly to the `data=` parameter.
 
 ```{r}
 b <- BenchDesign(data = tdat)
 ```
 
-Then, each method of interest is added to the *BenchDesign* using `addMethod()`.
+Then, each method of interest can be added to the *BenchDesign* using `addMethod()`.
 
 ```{r}
 b <- addMethod(bd = b, label = "bonf", func = p.adjust,
@@ -129,7 +129,13 @@ b <- b %>%
 
 For some methods, such as the q-value approach above, it may be necessary to call a "post-processing" function on the primary method to extract the desired output (here, the q-values). This should be specified using the optional `post =` parameter. 
 
-Now, the *BenchDesign* object contains three methods. This can be verified using the `printMethods()` function.
+Now, the *BenchDesign* object contains three methods. This can be verified either by calling on the object.
+
+```{r}
+b
+```
+
+More details about each method can be seen by using the `printMethods()` function.
 
 ```{r}
 printMethods(b)
@@ -153,12 +159,33 @@ Metadata for the methods is contained in the `colData()` of the same object, wit
 colData(sb)
 ```
 
-In addition to columns for the functions and parameters specified with `addMethod()` (`func, post, label, param.*`), the `colData()` includes several other columns added during the `buildBench()` process. Most notably,  columns for the package name and version of `func` if available (`pkg_name`, `pkg_vers`). 
+In addition to columns for the functions and parameters specified with `addMethod()` (`func, post, label, param.*`), the `colData()` includes several other columns added during the `buildBench()` process. Most notably,  columns for the package name and version of `func` if available (`func.pkg`, `func.pkg.vers`). 
 
 When available, ground truth data is contained in the `rowData()` of the *SummarizedBenchmark* object.
 
 ```{r}
 rowData(sb)
+```
+
+Additionally, the *BenchDesign* object is also stored as part of the *SummarizedBenchmark* object, and can be accessed by simply passing the object to the `BenchDesign()` constructor. 
+
+```{r}
+BenchDesign(sb)
+```
+
+Notice, however, unlike the original *BenchDesign* above, the data is stored as `type: md5hash`. To prevent bloat when the data set is large, by default, only a MD5 hash computed using `digest::digest()` is stored with the benchmarking results. The complete data can be stored rather than just the hash by specifying `keepData = TRUE` when calling `buildBench()`. A simple helper function, `compareBDData()`, can be used to verify that while the data *type* may be different between the original *BenchDesign* and the *BenchDesign* stored in the results, the referenced data sets are the same (i.e. have matching MD5 hash values).
+
+```{r}
+compareBDData(b, BenchDesign(sb))
+```
+
+Finally, information about the R session where the methods were executed is stored in the metadata of the *SummarizedBenchmark* as an entry in a list called `sessions`. The package supports rerunning benchmark experiments, and for this purpose, each new session is stored as a new entry in the `sessions` list. Since this experiment has only been executed once, the list only has a single entry in the `sessions` list. In addition to storing the session info and list of methods evaluated during the session, the list also keeps track of the non-default parameters specified to the `buildBench()` call, i.e. `truthCols = "H"`.
+
+```{r}
+mp <- getOption("max.print")
+options(max.print = 10)
+metadata(sb)$sessions[[1]]
+options(max.print = mp)
 ```
 
 An important advantage of building on the existing *SummarizedExperiment* class and Bioconductor infrastructure to save the results is that the metadata is tighly linked to the data. Thus, it is possible, for example, to subset the data while keeping the link to its respective metadata in a single step. For example, the code below extracts the data for only the first two methods.
@@ -232,6 +259,78 @@ tidyUpMetrics(sb) %>%
   dplyr:::filter(label == "bonf", alpha == 0.1, performanceMetric == "TPR") %>%
   dplyr:::select(value)
 ```
+
+# Working with BenchDesigns
+
+Before moving on to the second case study, we describe the anatomy of the *BenchDesign* class in a little bit more detail. As noted in the previous section, *BenchDesign* objects are composed of a data set and methods. Formally, the methods are stored in the *BenchDesign* as a *BDMethodList* and the data as a *BDData* object. As would be expected, the *BDMethodList* is a list (`List`) of *BDMethod* objects, each containing the definition of a method to be compared in the benchmark experiment. The general structure is illustrated in the figure below. 
+
+![BenchDesign class structure](summarizedbenchmark-figure2.png)
+
+Continuing with the *BenchDesign* constructed in the example above, we can access the list of methods and data set using the `BDMethodList()` and `BDData()` functions.
+
+```{r}
+BDMethodList(b)
+BDData(b)
+```
+
+The list of methods inherits from the *SimpleList* class, and supports several useful accessor and setter features.
+
+```{r}
+BDMethodList(b)[["bonf"]]
+```
+
+This interface allows for adding new methods by creating a new named entry in the *BDMethodList* of the *BenchDesign* object.
+
+```{r}
+BDMethodList(b)[["bonf2"]] <- BDMethodList(b)[["bonf"]]
+b
+```
+
+Methods can also be removed by setting the list value to NULL. An equivalent convenience function, `dropMethod()` also exists for removing methods using syntax similar to `addMethod()`.
+
+```{r}
+BDMethodList(b)[["bonf"]] <- NULL
+b
+```
+
+New *BDMethod* objects can be constructed with the `BDMethod()` constructor. The constructor takes the same input parameters as the `addMethod()` convenience function. 
+
+```{r}
+bdm_bonf <- BDMethod(x = p.adjust, 
+                     params = rlang::quos(p = pval, 
+                                          method = "bonferroni"))
+bdm_bonf
+```
+
+Directly modifying the *BDMethodList* object provides an alternative and more modular approach to adding methods to a *BenchDesign* object than `addMethod()`.
+
+```{r}
+BDMethodList(b)[["bonf"]] <- bdm_bonf
+b
+```
+
+The *BDData* object of a *BenchDesign* can also be similarly extracted and modified. As with methods, the data set may be removed by setting the value to NULL.
+
+```{r}
+BDData(b) <- NULL
+b
+```
+
+A new data set can be constructed using the `BDData()` function and used to replace the data set in a *BenchDesign* object.
+
+```{r}
+bdd <- BDData(data = tdat)
+BDData(b) <- bdd
+b
+```
+
+The helper function `hashBDData()` can be called on either *BDData* or *BenchDesign* objects to convert the data to a MD5 hash.
+
+```{r}
+b <- hashBDData(b)
+b
+```
+
 
 # Differential Expression Case Study
 
@@ -638,17 +737,9 @@ printMethod(bde, "deseq2_v1")
 printMethod(bde, "deseq2_v2")
 ```
 
-## Removing Methods in a BenchDesign
-
-After constructing a *BenchDesign*, it may become clear that a single method or parameter setting is no longer relevant to the comparison. In this case, the method can be easily dropped from the *BenchDesign* by specifying the *BenchDesign* and method name to `dropMethod()`.
-
-```{r}
-dropMethod(bd, "deseq2")
-```
-
 ## Reusing a BenchDesign Across Data Sets
 
-When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single *BenchDesign* object across multiple data sets. While the *BenchDesign* objects in the examples above were all initialized with a data set, this is not necessary. 
+When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single *BenchDesign* object across multiple data sets. As mentioned early on, a *BenchDesign* can be intialized without any methods or data set. 
 
 ```{r}
 bdnull <- BenchDesign()
@@ -669,13 +760,13 @@ bdnull <- bdnull %>%
                                    method = "BH"))
 ```
 
-While not mentioned above, the `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the *BenchDesign* object.
+The `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the *BenchDesign* object.
 
 ```{r}
 buildBench(bdnull, data = tdat)
 ```
 
-By specifying data during the `buildBench()` step the exact same benchmark comparison, as defined in the common *BenchDesign* object, can be carried out consistently across multiple data sets. While this approach works even if the common *BenchDesign* object contains a default data set, it is recommended that the *BenchDesign* be created without any data to avoid errors if the design is going to be reunsed across data sets.
+By specifying data during the `buildBench()` step, the exact same benchmark comparison, as defined in the common *BenchDesign* object, can be carried out consistently across multiple data sets. While this approach works even if the common *BenchDesign* object contains a default data set, it is recommended that the *BenchDesign* be created without any data to avoid errors if the design is going to be reused across data sets.
 
 # Related Work
 
