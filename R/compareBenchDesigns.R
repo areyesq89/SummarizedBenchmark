@@ -45,14 +45,19 @@ compareBDMethod <- function(x, y) {
 #' Simple comparison of two BDData objects based on
 #' comparing both type and data hash.
 #' 
-#' @param x a \code{BDData} object
-#' @param y a \code{BDData} object
+#' @param x a \code{BDData} or \code{BenchDesign} object
+#' @param y a \code{BDData} or \code{BenchDesign} object
 #' 
 #' @return
 #' list of two values giving agreement of "data" and "type".
 #' 
-## check if data is the same
+#' @export
+#' @author Patrick Kimes
 compareBDData <- function(x, y) {
+    if (is(x, "BenchDesign"))
+        x <- BDData(x)
+    if (is(y, "BenchDesign"))
+        y <- BDData(y)
     if (is.null(x) && is.null(y))
         return(list(data = NULL, type = TRUE))
     if (is.null(x) || is.null(y))
@@ -65,6 +70,7 @@ compareBDData <- function(x, y) {
     sameData <- x@data == y@data
     list(data = sameData, type = sameType)
 }
+
 
 
 #' Compare BenchDesign objects
