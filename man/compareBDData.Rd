@@ -7,9 +7,9 @@
 compareBDData(x, y)
 }
 \arguments{
-\item{x}{a \code{BDData} object}
+\item{x}{a \code{BDData} or \code{BenchDesign} object}
 
-\item{y}{a \code{BDData} object}
+\item{y}{a \code{BDData} or \code{BenchDesign} object}
 }
 \value{
 list of two values giving agreement of "data" and "type".
@@ -17,4 +17,7 @@ list of two values giving agreement of "data" and "type".
 \description{
 Simple comparison of two BDData objects based on
 comparing both type and data hash.
+}
+\author{
+Patrick Kimes
 }

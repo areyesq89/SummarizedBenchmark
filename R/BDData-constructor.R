@@ -40,17 +40,29 @@ setMethod("BDData", signature(data = "BDData"), function(data) { data })
 #' Simple converting function to replace data object in
 #' BDData object with MD5 hash value.
 #'
-#' @param bdd a \code{BDData} object
+#' @param object a \code{BDData} or \code{BenchDesign} object
 #'
 #' @return
-#' \code{BDData} object with type = "md5hash".
+#' an object of the same class as \code{object} with data
+#' converted to a MD5 hash.
 #' 
 #' @importFrom digest digest
 #' @export
 #' @author Patrick Kimes
-HashBDData <- function(bdd) {
-    stopifnot(is(bdd, "BDData"))
-    if (bdd@type == "md5hash")
-        return(bdd)
-    BDData(digest::digest(bdd@data, algo = "md5"))
+setGeneric("hashBDData", 
+           function(object) standardGeneric("hashBDData"))
+
+.hashBDData <- function(object) {
+    if (object@type == "md5hash")
+        return(object)
+    BDData(digest::digest(object@data, algo = "md5"))
 }
+
+.hashBDData.bd <- function(object) {
+    BDData(object) <- hashBDData(BDData(object))
+    object
+}
+
+#' @rdname hashBDData
+setMethod("hashBDData", signature(object = "BDData"), .hashBDData)
+setMethod("hashBDData", signature(object = "BenchDesign"), .hashBDData.bd)
