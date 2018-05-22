@@ -167,37 +167,7 @@ When available, ground truth data is contained in the `rowData()` of the *Summar
 rowData(sb)
 ```
 
-Additionally, the *BenchDesign* object is also stored as part of the *SummarizedBenchmark* object, and can be accessed by simply passing the object to the `BenchDesign()` constructor. 
-
-```{r}
-BenchDesign(sb)
-```
-
-Notice, however, unlike the original *BenchDesign* above, the data is stored as `type: md5hash`. To prevent bloat when the data set is large, by default, only a MD5 hash computed using `digest::digest()` is stored with the benchmarking results. The complete data can be stored rather than just the hash by specifying `keepData = TRUE` when calling `buildBench()`. A simple helper function, `compareBDData()`, can be used to verify that while the data *type* may be different between the original *BenchDesign* and the *BenchDesign* stored in the results, the referenced data sets are the same (i.e. have matching MD5 hash values).
-
-```{r}
-compareBDData(b, BenchDesign(sb))
-```
-
-Finally, information about the R session where the methods were executed is stored in the metadata of the *SummarizedBenchmark* as an entry in a list called `sessions`. The package supports rerunning benchmark experiments, and for this purpose, each new session is stored as a new entry in the `sessions` list. Since this experiment has only been executed once, the list only has a single entry in the `sessions` list. In addition to storing the session info and list of methods evaluated during the session, the list also keeps track of the non-default parameters specified to the `buildBench()` call, i.e. `truthCols = "H"`.
-
-```{r}
-mp <- getOption("max.print")
-options(max.print = 10)
-metadata(sb)$sessions[[1]]
-options(max.print = mp)
-```
-
-An important advantage of building on the existing *SummarizedExperiment* class and Bioconductor infrastructure to save the results is that the metadata is tighly linked to the data. Thus, it is possible, for example, to subset the data while keeping the link to its respective metadata in a single step. For example, the code below extracts the data for only the first two methods.
- 
-```{r}
-sbSub <- sb[, 1:2]
-colData(sbSub)
-```
-
-In addition, the *SummarizedBenchmark* class contains an additional slot where users can define performance metrics to evaluate the different methods.
-
-Since different benchmarking experiments may require the use of different metrics to evaluate the performance of the methods, the *SummarizedBenchmark* class provides a flexible way to define performance metrics. We can define performance metrics using the function `addPerformanceMetric()` by providing a *SummarizedBenchmark* object, a name of the metric, an assay name, and the function that defines it. Importantly, the function must contain the following two arguments: query (referring to a vector of values being evaluated, i.e. the output of one method) and truth (referring to the vector of ground truths). If further arguments are provided to the performance function, these must contain default values. 
+In addition, the *SummarizedBenchmark* class contains an additional slot where users can define performance metrics to evaluate the different methods. Since different benchmarking experiments may require the use of different metrics to evaluate the performance of the methods, the *SummarizedBenchmark* class provides a flexible way to define performance metrics. We can define performance metrics using the function `addPerformanceMetric()` by providing a *SummarizedBenchmark* object, a name of the metric, an assay name, and the function that defines it. Importantly, the function must contain the following two arguments: query (referring to a vector of values being evaluated, i.e. the output of one method) and truth (referring to the vector of ground truths). If further arguments are provided to the performance function, these must contain default values. 
 
 For our example, we define the performance metric "TPR" (True Positive Rate) that calculates the fraction of true positives recovered given an alpha value. This performance metric uses the `H` assay of our *SummarizedBenchmark* example object.
 
@@ -260,9 +230,13 @@ tidyUpMetrics(sb) %>%
   dplyr:::select(value)
 ```
 
-# Working with BenchDesigns
+# Class Details
 
-Before moving on to the second case study, we describe the anatomy of the *BenchDesign* class in a little bit more detail. As noted in the previous section, *BenchDesign* objects are composed of a data set and methods. Formally, the methods are stored in the *BenchDesign* as a *BDMethodList* and the data as a *BDData* object. As would be expected, the *BDMethodList* is a list (`List`) of *BDMethod* objects, each containing the definition of a method to be compared in the benchmark experiment. The general structure is illustrated in the figure below. 
+Before moving to the second case study, we describe the anatomy of the *BenchDesign* and *SummarizedBenchmark* classes in a little bit more detail. 
+
+## BenchDesign
+
+As noted in the previous section, *BenchDesign* objects are composed of a data set and methods. Formally, the methods are stored in the *BenchDesign* as a *BDMethodList* and the data as a *BDData* object. As would be expected, the *BDMethodList* is a list (`List`) of *BDMethod* objects, each containing the definition of a method to be compared in the benchmark experiment. The general structure is illustrated in the figure below. 
 
 ![BenchDesign class structure](summarizedbenchmark-figure2.png)
 
@@ -331,6 +305,41 @@ b <- hashBDData(b)
 b
 ```
 
+We drop the `"bonf2"` method from the object to return to the same set of methods used to generate the *SummarizedBenchmark* object.
+
+```{r}
+BDMethodList(b)[["bonf2"]] <- NULL
+```
+
+## SummarizedBenchmark
+
+As described above, the *SummarizedBenchmark* class builds on the existing *SummarizedExperiment* class and Bioconductor infrastructure. By doing so, saved results are tightly linked to metadata. Thus, it is possible, for example, to easily subset the results without losing references to the respective metadata. For example, the code below extracts the data for only the first two methods.
+ 
+```{r}
+sbSub <- sb[, 1:2]
+colData(sbSub)
+```
+
+Building on the *SummarizedExperiment* class, in addition to the slot for `performanceMetrics` described above, the *SummarizedBenchmark* class also includes a slot which stores a copy of the *BenchDesign* object used to generate the results with `buildBench()`. The *BenchDesign* can be accessed by simply passing the object to `BenchDesign()`. 
+
+```{r}
+BenchDesign(sb)
+```
+
+Notice, however, unlike the original *BenchDesign* above, the data is stored as a MD5 hash. To prevent bloat when the data set is large, by default, only a MD5 hash computed using `digest::digest()` is stored with the benchmarking results. This behavior can be changed by setting `keepData = TRUE` when calling `buildBench()`, in which case, the complete data set will be stored as part of the *BenchDesign* and *SummarizedBenchmark* objects. A simple helper function, `compareBDData()`, can be used to verify that while the data *type* may be different between the data originally used to construct the *SummarizedBenchmark* and the data stored with the *SummarizedBenchmark*, the referenced data sets are the same (i.e. have matching MD5 hash values). 
+
+```{r}
+compareBDData(BDData(tdat), BenchDesign(sb))
+```
+
+Finally, information about the R session where the methods were executed is stored in the metadata of the *SummarizedBenchmark* as an entry in a list called `sessions`. The package supports rerunning benchmark experiments, and for this purpose, each new session is stored as a new entry in the `sessions` list. Since this experiment has only been executed once, the list only has a single entry in the `sessions` list. In addition to storing the session info and list of methods evaluated during the session, the list also keeps track of the non-default parameters specified to the `buildBench()` call, i.e. `truthCols = "H"`.
+
+```{r}
+mp <- getOption("max.print")
+options(max.print = 10)
+metadata(sb)$sessions[[1]]
+options(max.print = mp)
+```
 
 # Differential Expression Case Study
 
