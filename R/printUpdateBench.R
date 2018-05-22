@@ -43,7 +43,7 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
         } else {
             cat(crayon::green$bold("  benchmark data:"), crayon::green("unchanged\n"))
             cat("    MD5 hash: ") 
-            cat(HashBDData(sbdat)@data, "\n")
+            cat(hashBDData(sbdat)@data, "\n")
             if (sbdat@type == "data")
                 cat("    names:", names(sbdat@data), "\n")
             else
@@ -59,11 +59,11 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
         } else {
             cat("\n")
             cat("    BenchDesign\n")
-            cat("      MD5 hash: ", HashBDData(bddat)@data, "\n")
+            cat("      MD5 hash: ", hashBDData(bddat)@data, "\n")
             cat("      names:", names(bddat@data), "\n")
         }
         cat("    SummarizedBenchmark\n")
-        cat("      MD5 hash: ", HashBDData(sbdat)@data, "\n")
+        cat("      MD5 hash: ", hashBDData(sbdat)@data, "\n")
         if (sbdat@type == "md5hash")
             cat("      names: ??\n")
         else
