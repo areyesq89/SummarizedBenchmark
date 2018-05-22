@@ -47,7 +47,8 @@ In this vignette, we first illustrate the basic use of both the *BenchDesign* an
 # Quickstart Case Study
 
 ```{r}
-library("SummarizedBenchmark")
+##library("SummarizedBenchmark")
+devtools::load_all()
 library("magrittr")
 ```
 
@@ -96,7 +97,7 @@ While this approach can work well for smaller comparisons, it can quickly become
 In the *SummarizedBenchmark* approach, a *BenchDesign* is first constructed with the data as the sole input. (A *BenchDesign* can also be constructed without any data input. This approach is described in a later section.)
 
 ```{r}
-b <- BenchDesign(tdat)
+b <- BenchDesign(data = tdat)
 ```
 
 Then, each method of interest is added to the *BenchDesign* using `addMethod()`.
@@ -164,7 +165,7 @@ rowData(sb)
 An important advantage of building on the existing *SummarizedExperiment* class and Bioconductor infrastructure to save the results is that the metadata is tighly linked to the data. Thus, it is possible, for example, to subset the data while keeping the link to its respective metadata in a single step. For example, the code below extracts the data for only the first two methods.
  
 ```{r}
-sbSub <- sb[,1:2]
+sbSub <- sb[, 1:2]
 colData(sbSub)
 ```
 
@@ -186,7 +187,6 @@ sb <- addPerformanceMetric(
 )
 
 performanceMetrics(sb)[["H"]]
-
 ```
 
 Having defined all the desired performance metrics, the function `estimatePerformanceMetrics()` calculates these for each method. Parameters for the performance functions can be passed here. In the case below, we specify several `alpha =` values to be used for calculating the performance metrics with each function.
@@ -247,8 +247,8 @@ In this more advanced case study, we use a simulated data set from [@Soneson_201
 
 ```{r loadingSoneson}
 data("soneson2016")
-head( txi$counts )
-head( truthdat )
+head(txi$counts)
+head(truthdat)
 ```
 ## Benchmark Set-Up and Execution
 
@@ -279,7 +279,7 @@ mydat <- list(coldat = mycoldat,
 As before, the *BenchDesign* is constructed with the data as the sole input.
 
 ```{r}
-bd <- BenchDesign(mydat)
+bd <- BenchDesign(data = mydat)
 ```
 
 For simplicity, we focus on comparing only the p-values returned by each method after testing for differential expression between the two conditions. However, later in this vignette, we also show how multiple metrics (p-values and log-fold change) can be compared in a single *BenchDesign* object.
@@ -459,7 +459,7 @@ voom_lfc <- function(x) {
 The primary wrapper function and a list of accessor functions are passed to `func =` and `post =` respectively.
 
 ```{r}
-bd <- BenchDesign(mydat) %>%
+bd <- BenchDesign(data = mydat) %>%
     addMethod(label = "deseq2",
               func = deseq2_run,
               post = list(pv = deseq2_pv,
@@ -529,7 +529,7 @@ Metadata for methods are stored in the `colData()` of *SummarizedBenchmark* obje
 As an example, we construct a *BenchDesign* object again using the differential expression example. The *BenchDesign* is created with two methods, `r BiocStyle::Biocpkg("DESeq2")` and `r BiocStyle::Biocpkg("edgeR")`. Each method is specified with the optional `meta =` parameter. We can verify that the manually defined metadata column (`meta.reason`) is available in the `colData()` of the generated *SummarizedBenchmark*.
 
 ```{r}
-BenchDesign(mydat) %>%
+tempbd <- BenchDesign(data = mydat) %>%
     addMethod(label = "deseq2",
               func = deseq2_pvals,
               meta = list(reason = "recommended by friend X"),
@@ -544,8 +544,8 @@ BenchDesign(mydat) %>%
               params = rlang::quos(countData = cntdat,
                                    group = coldat$condition,
                                    design = ~coldat$condition)
-              ) %>%
-    buildBench() %>%
+              )
+buildBench(tempbd) %>%
     colData()
 ```
 
@@ -560,7 +560,7 @@ The `meta =` parameter will handle the following named list entries as special v
 The following example illustrates the behavior when using either `pkg_func` or `pkg_name` and `pkg_vers` with the `meta` optional parameter.
 
 ```{r}
-BenchDesign(mydat) %>%
+tempbd <- BenchDesign(data = mydat) %>%
     addMethod(label = "deseq2",
               func = deseq2_pvals,
               meta = list(pkg_func = rlang::quo(DESeq2::DESeq)),
@@ -576,8 +576,8 @@ BenchDesign(mydat) %>%
               params = rlang::quos(countData = cntdat,
                                    group = coldat$condition,
                                    design = ~coldat$condition)
-              ) %>%
-    buildBench() %>%
+              )
+buildBench(tempbd) %>%
     colData()
 ```
 
@@ -644,8 +644,7 @@ printMethod(bde, "deseq2_v2")
 After constructing a *BenchDesign*, it may become clear that a single method or parameter setting is no longer relevant to the comparison. In this case, the method can be easily dropped from the *BenchDesign* by specifying the *BenchDesign* and method name to `dropMethod()`.
 
 ```{r}
-dropMethod(bd, "deseq2") %>%
-    printMethods()
+dropMethod(bd, "deseq2")
 ```
 
 ## Reusing a BenchDesign Across Data Sets
