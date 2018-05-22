@@ -37,7 +37,7 @@ dropMethod.BenchDesign <- function(bd, label) {
         stop("Specified method is not defined in BenchDesign.")
     }
 
-    bd@methods[label] <- NULL
+    bd@methods[[label]] <- NULL
     return(bd)
 }
 
