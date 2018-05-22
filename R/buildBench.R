@@ -193,6 +193,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     } else {
         siVals <- NULL
     }
+    
     a <- lapply(a, eval2assay, si = sortIDs, siv = siVals)
     
     ## fill in missing methods with NAs, return in fixed order
@@ -344,8 +345,11 @@ eval2assay <- function(al, si, siv) {
     } else {
         alr <- simplify2array(al, higher = FALSE)
         if (!is(alr, "matrix")) {
-            warning("Method outputs have different lengths. Trying with 'sortIDs = TRUE'.")
-            alr <- eval2assay(al, TRUE, siv)
+            if (is(alr, "list")) {
+                alr <- rbind(alr)
+            } else {
+                alr <- rbind(al)
+            }
         }
     }
     if (is.null(siv))
