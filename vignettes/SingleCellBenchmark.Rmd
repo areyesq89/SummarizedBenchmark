@@ -133,13 +133,13 @@ While (conveniently) functions already existed for comparing the simulated data 
 ```{r add-performance-metrics}
 sb <- sb %>%
     addPerformanceMetric(
-        assay = "bench",
+        assay = "default",
         evalMetric = "zerosPerCell",
         evalFunction = function(query, truth) {
             colMeans(assay(query[[1]], "counts") == 0)
         }) %>%
     addPerformanceMetric(
-        assay = "bench",
+        assay = "default",
         evalMetric = "zerosPerGene",
         evalFunction = function(query, truth) {
             rowMeans(assay(query[[1]], "counts") == 0)
@@ -158,7 +158,7 @@ Notice that the `value` is a list for each method and metric. These vectors can 
 
 ```{r check-performance-metrics}
 sbmets <- tidyr::unnest(sbmets)
-head( sbmets )
+head(sbmets)
 ```
 
 Finally, the performance metrics can be explored using standard plotting functions.
@@ -169,6 +169,7 @@ ggplot(sbmets, aes(x = label, y = value,
     geom_boxplot(alpha = 1/2) +
     xlab("method") +
     scale_color_discrete("method") + 
+    scale_fill_discrete("method") + 
     facet_grid(performanceMetric ~ .) +
     theme_bw()
 ```

@@ -47,8 +47,7 @@ In this vignette, we first illustrate the basic use of both the *BenchDesign* an
 # Quickstart Case Study
 
 ```{r}
-##library("SummarizedBenchmark")
-devtools::load_all()
+library("SummarizedBenchmark")
 library("magrittr")
 ```
 
