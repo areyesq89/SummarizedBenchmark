@@ -1,7 +1,7 @@
 #' Update SummarizedBenchmark object
 #'
 #' Update SummarizedBenchmark results with new methods.
-#' 
+#'
 #' @param sb a \code{SummarizedBenchmark} object
 #' @param bd a \code{BenchDesign} object
 #' @param dryrun logical whether to just print description of what would
@@ -14,7 +14,7 @@
 #'        used to create \code{SummarizedBenchmark} object (if available). Directly
 #'        specified \code{buildBench} parameters still take precedence. (default = TRUE)
 #' @param ... optional parameters to pass to \code{\link{buildBench}}.
-#' 
+#'
 #' @return
 #' SumamrizedBenchmark object.
 #'
@@ -30,7 +30,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
 
     if (is.null(bd))
         bd <- BenchDesign(sb)
-    
+
     ## capture buildBench parameters
     bbp <- list(...)
     if ("data" %in% names(bbp)) {
@@ -49,14 +49,14 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
         oldbbp <- old_sessions[[n_sessions]]$parameters
         bbp <- replace(oldbbp, names(bbp), bbp)
     }
-    
+
     ## combine methods list if want to keep all
     if (!is.null(bd) && keepAll) {
         sbonly <- setdiff(names(BDMethodList(sb)), names(BDMethodList(bd)))
         BDMethodList(bd) <- c(BDMethodList(bd), BDMethodList(sb)[sbonly])
     }
 
-    
+
     ## just print verbose description of actions if specified
     if (dryrun) {
         printUpdateBench(sb, bd, version = version)
@@ -64,8 +64,8 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     }
 
     ## compare methods
-    res <- compareBenchDesigns(sb, bd)    
-    
+    res <- compareBenchDesigns(sb, bd)
+
     ## need to run 'yOnly' methods
     newrun_set <- dplyr::filter(res$methods$res, overlap == "yOnly")$label
 
@@ -78,24 +78,28 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     } else {
         rerun_set <- dplyr::filter(rerun_set, !f | !meta | !params | !post)$label
     }
-    
+
     ## construct method list and pick data set
     bdm <- BDMethodList(bd)[c(newrun_set, rerun_set)]
     bdd <- .select.bddata(sb, bd)
     bdnew <- BenchDesign(methods = bdm, data = bdd)
 
+    ## run buildBench only if needed
     if (length(bdm)) {
-        ## run new buildBench
-        sbnew <- do.call(buildBench, c(list(bd = bdnew), bbp))
-        
-        ## combine old and new results
-        sbnew <- .combineSummarizedBenchmarks(sb, sbnew)
-    } else {
-        sbnew <- sb
+        sbnew <- tryCatch(
+            do.call(buildBench, c(list(bd = bdnew), bbp)),
+            error = function(e) {
+                message("!! error caught while in updating methods w/ buildBench !!\n",
+                        "!! returning original SummarizedBenchmark object        !!\n",
+                        "!! original message: \n", e)
+                return(NULL)
+            })
+        if (!is.null(sbnew))
+            sb <- .combineSummarizedBenchmarks(sb, sbnew)
     }
-    
+
     ## return results
-    return(sbnew)
+    return(sb)
 }
 
 
@@ -114,7 +118,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
                  "Specified objects only contain MD5 hash data sets.\n",
                  "MD5 hash = ", BDData(sb)@data, ".\n",
                  "MD5 hash values can be checked using digest::digest.")
-    } else { 
+    } else {
         stop("Need to provide non-NULL and non-hash data set.\n",
              "Specified objects only contain MD5 hash or NULL data sets.\n",
              "SummarizedBenchmark MD5 hash =", BDData(sb)@data, ".\n",
@@ -130,7 +134,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
 ## NOTE: This is not meant to be for general use. Here, sb2 is assumed to
 ##       be a newer SummarizedBenchmark object created from running
 ##       updateBench with sb1 and a newer BenchDesign object. Therefore,
-##       if the same method is run in both, the results from 
+##       if the same method is run in both, the results from
 ## @author Patrick Kimes
 .combineSummarizedBenchmarks <- function(sb1, sb2) {
     stopifnot(is(sb1, "SummarizedBenchmark"), is(sb2, "SummarizedBenchmark"))
@@ -157,7 +161,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
         stop("Duplicated column IDs with inconsistent elementMetaData.")
     emd_id <- emd$colid
     emd <- DataFrame(dplyr::select(emd, -colid))
-    
+
     coldat1 <- colData(sb1)
     coldat1 <- as.data.frame(coldat1, optional = TRUE)
     coldat1 <- dplyr::as_tibble(coldat1, rownames = "label")
@@ -171,8 +175,19 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
 
     elementMetadata(colData(sb1)) <- emd[match(colnames(colData(sb1)), emd_id), , drop = FALSE]
     elementMetadata(colData(sb2)) <- emd[match(colnames(colData(sb2)), emd_id), , drop = FALSE]
+
+    ## combine assay sets by filling in missing assays with NA assays
+    aNames1 <- assayNames(sb1)
+    aNames2 <- assayNames(sb2)
+    aNames1o <- setdiff(aNames1, aNames2)
+    aNames2o <- setdiff(aNames2, aNames1)
+    for (i in aNames1o)
+        assay(sb2, i) <- matrix(NA, nrow = nrow(sb2), ncol = ncol(sb2))
+    for (i in aNames2o)
+        assay(sb1, i) <- matrix(NA, nrow = nrow(sb1), ncol = ncol(sb1))
     
-    ## no special check on row data
+    ## if row dimensions don't match, just return as list of the original 2 inputs
+
     
     ## combine session informations into sessions of 1 object before merging
     sess1 <- metadata(sb1)$sessions
