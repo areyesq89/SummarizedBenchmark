@@ -179,31 +179,31 @@ b <- BenchDesign() %>%
               func = runKallisto,
               params = rlang::quos(sample = sample,
                                    args = "-t 16"),
-              meta = list(version = getKallistoVersion())
+              meta = list(version = rlang::quo(getKallistoVersion()))
               ) %>%
     addMethod(label = "kallisto-bias",
               func = runKallisto,
               params = rlang::quos(sample = sample,
                                    args = "--bias -t 16"),
-              meta = list(version = getKallistoVersion())
+              meta = list(version = rlang::quo(getKallistoVersion()))
               ) %>%
     addMethod(label = "salmon-default",
               func = runSalmon,
               params = rlang::quos(sample = sample,
                                    args = "-l IU -p 16"),
-              meta = list(version = getSalmonVersion())
+              meta = list(version = rlang::quo(getSalmonVersion()))
               ) %>%
     addMethod(label = "salmon-gcBias",
               func = runSalmon,
               params = rlang::quos(sample=sample,
                                    args="-l IU --gcBias -p 16"),
-              meta = list(version = getSalmonVersion())
+              meta = list(version = rlang::quo(getSalmonVersion()))
               ) %>%
     addMethod(label = "sailfish-default",
               func = runSailfish,
               params = rlang::quos(sample=sample,
                                    args="-l IU -p 16"),
-              meta = list(version = getSailfishVersion())
+              meta = list(version = rlang::quo(getSailfishVersion()))
               )
 
 printMethods(b)
