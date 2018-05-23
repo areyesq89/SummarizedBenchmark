@@ -25,7 +25,7 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
     metres <- dplyr::mutate(metres, rerun = rerun | overlap == "yOnly")
     metres <- dplyr::mutate(metres, oldfn = overlap != "yOnly")
 
-    ## need to rerun all
+    ## need to rerun all if data is new
     if (!isTRUE(res$data$data)) {
         metres <- dplyr::mutate(metres, rerun = TRUE)
     }
@@ -33,7 +33,7 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
     sbdat <- BDData(sb)
     bddat <- BDData(bd)
     
-    cat(stringr::str_pad(crayon::bold("Update SummarizedBenchmark (dryrun) "), 60, "right", "-"), "\n")
+    cat(stringr::str_pad(crayon::bold("Update SummarizedBenchmark (dryrun) "), 70, "right", "-"), "\n")
     if (isTRUE(res$data$data)) {
         if (!isFALSE(res$data$type) && res$data$type == "md5hash") {
             cat(crayon::yellow$bold("  benchmark data:"), crayon::yellow("unchanged (full data missing)\n"))
@@ -70,28 +70,34 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
             cat("      names:", names(sbdat@data), "\n")
     }
 
+    metres <- dplyr::mutate_if(metres, is.logical, `!`)
+    metres <- dplyr::mutate(metres, rerun = !rerun)
     metres <- dplyr::mutate_if(metres, is.logical, dplyr::funs(ifelse(., "Y", "N")))
-    metres$rerun[metres$overlap == "xOnly"] <- "X"
+    metres$rerun[metres$overlap == "xOnly"] <- "Drop"
     
     cat(crayon::bold("  benchmark methods:\n"))
     if (nrow(metres)) {
-        header <- .methodrow(c("Method", "Run", "Ran", "fn", "pm", "me", "po", "ve"))
-        cat(crayon::bold(header))
+        header1 <- paste0(stringr::str_pad("    |", 18, "right"), stringr::str_pad("| Need to", 10), "  |",
+                          stringr::str_pad("Outdated", 31, "both"), "|\n")
+        header2 <- .methodrow(c("Method", "(Re)Run", "Func", "Param", "Meta", "Post", "Vers"))
+        cat(crayon::bold(header1))
+        cat(crayon::bold(header2))
         for (i in seq_len(nrow(metres))) {
             if (metres$overlap[i] == "Both") {
-                istr <- metres[i, c("label", "rerun", "oldfn", "f", "params", "meta", "post", "version"), drop = TRUE]
+                istr <- metres[i, c("label", "rerun", "f", "params", "meta", "post", "version"), drop = TRUE]
                 istr <- .methodrow(istr)
-                if (metres$rerun[i] == "Y") 
-                    istr <- crayon::red(istr)
+                ## if (metres$rerun[i] == "Y") 
+                ##     istr <- crayon::red(istr)
                 cat(istr)
             } else {
-                istr <- c(metres[i, c("label", "rerun", "oldfn"), drop = TRUE], rep("-", 5))
+                istr <- c(metres[i, c("label", "rerun"), drop = TRUE], rep("-", 5))
                 istr <- .methodrow(istr)
-                if (metres$overlap[i] == "yOnly") {
-                    cat(crayon::red(istr))
-                } else if (metres$overlap[i] == "xOnly") {
-                    cat(crayon::silver(istr))
-                }
+                ## if (metres$overlap[i] == "yOnly") {
+                ##     cat(crayon::red(istr))
+                ## } else if (metres$overlap[i] == "xOnly") {
+                ##     cat(crayon::silver(istr))
+                ## }
+                cat(istr)
             }
         }
     } else {
@@ -102,12 +108,25 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
 
 ## standard row format
 .methodrow <- function(x, n) {
-    paste0("    ", stringr::str_pad(stringr::str_trunc(x[1], 11), 12, "right"),
-           .loglab(x[2], 5), .loglab(x[3], 5), "  |", .loglab(x[4], 4), .loglab(x[5], 4),
-           .loglab(x[6], 4), .loglab(x[7], 4), .loglab(x[8], 4),"\n")
+    method_label <- stringr::str_pad(stringr::str_trunc(x[1], 12), 12, "right")
+    if (x[2] == "Y") {
+        method_label <- crayon::red(method_label)
+    } else if (x[2] == "N") {
+        method_label <- crayon::green(method_label)
+    }
+    paste0("    | ", method_label, " |", .loglab(x[2], 8), "  |",
+           .loglab(x[3], 6), .loglab(x[4], 6), .loglab(x[5], 6), .loglab(x[6], 6),
+           .loglab(x[7], 6), " |\n")
 }
 
 ## standard column format
 .loglab <- function(x, n) {
-    stringr::str_pad(x, n, "left")
+    xp <- stringr::str_pad(x, n, "left")
+    if (x == "Y") 
+        crayon::red(xp)
+    else if (x == "N")
+        crayon::green(xp)
+    else
+        xp
 }
+
