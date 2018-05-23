@@ -154,10 +154,12 @@ setGeneric("compareBenchDesigns",
     })
     names(xyp) <- mxy
     
-    ## check metadata info
+    ## check metadata info - drop any NA columns (diffs can arise from other methods)
     xym <- lapply(mxy, function(l) {
-        isTRUE(dplyr::all_equal(dplyr::select(dplyr::filter(xj, label == l), starts_with("meta.")),
-                                dplyr::select(dplyr::filter(yj, label == l), starts_with("meta."))))
+        xna <- dplyr::select(dplyr::filter(xj, label == l), starts_with("meta."))
+        yna <- dplyr::select(dplyr::filter(yj, label == l), starts_with("meta."))
+        isTRUE(dplyr::all_equal(dplyr::select_if(xna, funs(!any(is.na(.)))),
+                                dplyr::select_if(yna, funs(!any(is.na(.))))))
     })
     names(xym) <- mxy
 
