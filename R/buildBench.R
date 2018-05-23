@@ -6,11 +6,11 @@
 #' \code{SummarizedBenchmark} also includes metadata for the methods
 #' in the \code{colData} of the returned object, metadata for the
 #' data in the \code{rowData}, and the session information generated
-#' by \code{sessionInfo()} in the \code{metadata}. 
-#' 
+#' by \code{sessionInfo()} in the \code{metadata}.
+#'
 #' @param bd \code{BenchDesign} object.
 #' @param data Data set to be used for benchmarking, will take priority over
-#'        data set originally specified to BenchDesign object. 
+#'        data set originally specified to BenchDesign object.
 #'        Ignored if NULL. (default = NULL)
 #' @param truthCols Character vector of column names in data set corresponding to
 #'        ground truth values for each assay. If specified, column will be added to
@@ -38,7 +38,7 @@
 #' @param BPPARAM Optional \code{BiocParallelParam} instance to be used when
 #'        \code{parallel} is TRUE. If not specified, the default instance from the
 #'        parameter registry is used.
-#' 
+#'
 #' @details
 #' Parallelization is performed across methods. Therefore, there is currently no benefit to
 #' specifying more cores than the total number of methods in the \code{BenchDesign}
@@ -62,8 +62,8 @@
 #'
 #' When a method specified in the BenchDesign does not have a postprocessing function specified
 #' to 'post', the trivial \code{base::identity} function is used as the default postprocessing
-#' function. 
-#' 
+#' function.
+#'
 #' @return
 #' \code{SummarizedBenchmark} object.
 #'
@@ -83,7 +83,7 @@
 #'
 #' ## evaluate benchmark experiment w/ data sepecified
 #' sb <- buildBench(bench, data = df)
-#' 
+#'
 #' @import BiocParallel
 #' @importFrom sessioninfo session_info
 #' @importFrom dplyr bind_rows
@@ -99,20 +99,20 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     arglist <- lapply(arglist, eval)
     arglist <- arglist[names(arglist) != "bd"]
     arglist <- arglist[names(arglist) != "data"]
-    
+
     if (!is.null(data) && !is.list(data)) {
         stop("If specified, 'data' must be a list or data.frame object.")
     }
     if (!is.null(data)) {
         bd@data <- new("BDData", data = data, type = "data")
     }
-    
+
     ## make sure data is provided
     if (is.null(bd@data)) {
         stop("data in BenchDesign is NULL.\n",
              "Please specify a non-NULL dataset to build SummarizedBenchmark.")
     }
-    
+
     if (bd@data@type != "data") {
         stop("data in BenchDesign is only a MD5 hash.\n",
              "Please specify a non-NULL dataset to build SummarizedBenchmark.")
@@ -147,29 +147,35 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## check if truthCols is in data and 1-dim vector
     if (!is.null(truthCols)) {
+        truthCols <- truthCols[names(truthCols) %in% uassays]
+        if (length(truthCols) == 0L)
+            truthCols <- NULL
+    }
+    if (!is.null(truthCols)) {
         if (length(truthCols) == 1 && is.null(names(truthCols)))
             names(truthCols) <- "default"
 
         stopifnot(truthCols %in% names(bd@data@data))
+
         stopifnot(length(truthCols) <= nassays)
         stopifnot(names(truthCols) %in% uassays)
         stopifnot(!is.null(names(truthCols)))
-        
+
         if (sortIDs && is.null(sortID_col))
             stop("If 'truthCols' is specified, 'sortIDs' can not simply be 'TRUE'.\n",
                  "Instead, specify a column in the data to use for sorting the output to ",
                  "match the order of the 'truthCols'.")
     }
-    
+
     ## check if ftCols are in data
     if (!is.null(ftCols) && !all(ftCols %in% names(bd@data@data))) {
         stop("Invalid ftCols specification. ",
              "ftCols must be a subset of the column names of the input data.")
     }
-        
-    ## check validity of parallel values (unit logical value) 
+
+    ## check validity of parallel values (unit logical value)
     stopifnot((length(parallel) == 1) && is.logical(parallel))
-    
+
     ## assay: evaluate all functions
     if (parallel) {
         a <- evalMethodsParallel(bd, catchErrors, BPPARAM)
@@ -188,27 +194,48 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         siVals <- lapply(a, lapply, names)
         if (any(unlist(lapply(siVals, lapply, is.null))))
             siVals <- NULL
-        else 
+        else
             siVals <- unique(unlist(siVals))
     } else {
         siVals <- NULL
     }
-    
-    a <- lapply(a, eval2assay, si = sortIDs, siv = siVals)
-    
-    ## fill in missing methods with NAs, return in fixed order
-    a <- lapply(a, function(x) {
-        ms <- setdiff(names(bd@methods), colnames(x))
-        msl <- list()
-        msl[ms] <- NA
-        x <- do.call(cbind, c(list(x), msl))
-        x[, names(bd@methods), drop = FALSE]
-    })
-    names(a) <- uassays
 
+    ## identify any assays with no methods returning results
+    aNAi <- unlist(lapply(a, length)) == 0L
+    a <- a[!aNAi]
+    
+    ## some assays might have only NA results
+    if (length(a) == 0L) {
+        stop("No method returned valid values for any assays!")
+    } else {
+        a <- lapply(a, eval2assay, si = sortIDs, siv = siVals)
+
+        ## fill in missing methods with NAs, return in fixed order
+        a <- lapply(a, function(x) {
+            ms <- setdiff(names(bd@methods), colnames(x))
+            msl <- list()
+            msl[ms] <- NA
+            x <- do.call(cbind, c(list(x), msl))
+            x[, names(bd@methods), drop = FALSE]
+        })
+        names(a) <- uassays[!aNAi]
+    }
+    
+    if (any(aNAi)) {
+        if (length(a) > 0L)
+            nr <- nrow(a[[1]])
+        else
+            nr <- 0
+        aNA <- matrix(nrow = nr, ncol = length(names(bd@methods)),
+                      dimnames = list(NULL, names(bd@methods)))
+        aNA <- rep(list(aNA), length(aNAi))
+        names(aNA) <- uassays[aNAi]
+        a <- c(a, aNA)
+    }
+    
     ## colData: method information
     df <- tidyBDMethod(bd)
-    
+
     ## performanceMetrics: empty
     pf <- rep(list("bench" = list()), nassays)
     names(pf) <- uassays
@@ -218,14 +245,14 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     md <- list(sessions = list(list(methods = names(bd@methods),
                                     parameters = arglist,
                                     sessionInfo = sessioninfo::session_info())))
-    
+
     ## list of initialization parameters
     sbParams <- list(assays = a,
                      colData = df,
                      performanceMetrics = pf,
                      metadata = md,
                      BenchDesign = bd)
-    
+
     ## pull out grouthTruth if available
     if (!is.null(truthCols)) {
         sbParams[["groundTruth"]] <- DataFrame(bd@data@data[truthCols])
@@ -246,7 +273,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         sbParams[["ftData"]] <- DataFrame(bd@data@data[ftCols])
         names(sbParams[["ftData"]]) <- ftCols
     }
-    
+
     ## BenchDesign: replace data with MD5 hash
     if (!keepData) {
         sbParams[["BenchDesign"]]@data <- hashBDData(sbParams[["BenchDesign"]]@data)
