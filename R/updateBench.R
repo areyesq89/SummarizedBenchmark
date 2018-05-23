@@ -30,7 +30,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
 
     if (is.null(bd))
         bd <- BenchDesign(sb)
-
+    
     ## capture buildBench parameters
     bbp <- list(...)
     if ("data" %in% names(bbp)) {
@@ -142,8 +142,8 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     ## combine BenchDesign objects
     bd1 <- BDMethodList(sb1)
     bd2 <- BDMethodList(sb2)
-    rerun_set <- setdiff(names(bd1), names(bd2))
-    bd1 <- bd1[rerun_set]
+    keep_set <- setdiff(names(bd1), names(bd2))
+    bd1 <- bd1[keep_set]
     bdd <- BDData(sb2)
     bd <- BenchDesign(methods = c(bd1, bd2), data = bdd)
 
@@ -191,7 +191,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     
     ## combine session informations into sessions of 1 object before merging
     sess1 <- metadata(sb1)$sessions
-    sess1 <- lapply(sess1, function(x) { x$methods <- setdiff(x$methods, rerun_set); x })
+    sess1 <- lapply(sess1, function(x) { x$methods <- setdiff(x$methods, names(bd2)); x })
     sess2 <- metadata(sb2)$sessions
     sess <- c(sess1, sess2)
     metadata(sb1)$sessions <- sess
