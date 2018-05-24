@@ -93,10 +93,8 @@
 buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs = FALSE,
                        keepData = FALSE, catchErrors = TRUE, parallel = FALSE, BPPARAM = bpparam()) {
 
-    ## capture args for future analysis
-    arglist <- match.call()
-    arglist <- as.list(arglist)[-1]
-    arglist <- lapply(arglist, eval)
+    ## ## capture args for future analysis
+    arglist <- as.list(environment())
     arglist <- arglist[names(arglist) != "bd"]
     arglist <- arglist[names(arglist) != "data"]
 
@@ -106,7 +104,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     if (!is.null(data)) {
         bd@data <- new("BDData", data = data, type = "data")
     }
-
+    
     ## make sure data is provided
     if (is.null(bd@data)) {
         stop("data in BenchDesign is NULL.\n",
@@ -147,19 +145,16 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## check if truthCols is in data and 1-dim vector
     if (!is.null(truthCols)) {
-        truthCols <- truthCols[names(truthCols) %in% uassays]
+        if (length(truthCols) == 1L && is.null(names(truthCols)))
+            names(truthCols) <- "default"
+        if (length(truthCols) > 1L)
+            truthCols <- truthCols[names(truthCols) %in% uassays]
         if (length(truthCols) == 0L)
             truthCols <- NULL
     }
     if (!is.null(truthCols)) {
-        if (length(truthCols) == 1 && is.null(names(truthCols)))
-            names(truthCols) <- "default"
-
         stopifnot(truthCols %in% names(bd@data@data))
-
         stopifnot(length(truthCols) <= nassays)
-        stopifnot(names(truthCols) %in% uassays)
-        stopifnot(!is.null(names(truthCols)))
 
         if (sortIDs && is.null(sortID_col))
             stop("If 'truthCols' is specified, 'sortIDs' can not simply be 'TRUE'.\n",
