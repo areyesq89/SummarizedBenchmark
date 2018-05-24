@@ -134,6 +134,11 @@ test_that("parallelization is accepted", {
     ## compare output run with and without parallelization
     sb <- buildBench(bd, parallel = FALSE)
     expect_silent(sb_par <- buildBench(bd, parallel = TRUE, BPPARAM = SerialParam()))
+    ## check that everything except session metadata is the same
+    expect_false(isTRUE(all.equal(metadata(sb)$sessions[[1]]$parameters,
+                                  metadata(sb_par)$sessions[[1]]$parameters)))
+    metadata(sb)$sessions[[1]]$parameters <- NULL
+    metadata(sb_par)$sessions[[1]]$parameters <- NULL
     expect_equal(sb, sb_par)
 })
 
@@ -168,7 +173,16 @@ test_that("errors thrown with inappropriate inputs", {
     expect_true(all(is.na(assay(sb, "a2")[, "bonf2"])))
     expect_equal(assay(sb, "a1")[, "bonf"] * 2, assay(sb, "a2")[, "bonf"])
     expect_equal(assay(sb, "a1")[, "bonf"], assay(sb, "a1")[, "bonf2"])
-    
+
+    ## check proper handling if truthCols unnamed when post specified as list 
+    bd <- addMethod(BenchDesign(data = tdat), label = "bonf",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
+                    post = list(a1 = function(x) { x * 1 }))
+    bd <- addMethod(bd, label = "bh",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
+                    post = list(a1 = function(x) { x }))
+    expect_silent(buildBench(bd, truthCols = "H"))
+
     ## check error if truthCols not column in original data
     bd <- addMethod(BenchDesign(data = tdat), label = "bonf", func = p.adjust,
                     params = rlang::quos(p = pval, method = "bonferroni"))
@@ -176,15 +190,6 @@ test_that("errors thrown with inappropriate inputs", {
                     params = rlang::quos(p = pval, method = "BH"))
     expect_error(buildBench(bd, truthCols = "apple"))
     
-    ## check error if truthCols names don't match assay names when post specified as list 
-    bd <- addMethod(BenchDesign(data = tdat), label = "bonf",
-                    func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
-                    post = list(a1 = function(x) { x * 1 }))
-    bd <- addMethod(bd, label = "bh",
-                    func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
-                    post = list(a1 = function(x) { x }))
-    expect_error(buildBench(bd, truthCols = "H"))
-
     ## check error if invalid ftCols is specified
     expect_error(buildBench(bd, ftCols = "apple"), "Invalid ftCols specification")
 })

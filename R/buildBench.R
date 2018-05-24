@@ -145,17 +145,17 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## check if truthCols is in data and 1-dim vector
     if (!is.null(truthCols)) {
-        if (length(truthCols) == 1L && is.null(names(truthCols)))
-            names(truthCols) <- "default"
-        if (length(truthCols) > 1L)
-            truthCols <- truthCols[names(truthCols) %in% uassays]
-        if (length(truthCols) == 0L)
-            truthCols <- NULL
-    }
-    if (!is.null(truthCols)) {
-        stopifnot(truthCols %in% names(bd@data@data))
-        stopifnot(length(truthCols) <= nassays)
+        if (is.null(names(truthCols)) && length(truthCols) == 1L && nassays == 1L) {
+            names(truthCols) <- uassays
+        }
 
+        if (is.null(names(truthCols)) || !all(names(truthCols) %in% uassays))
+            stop("Please specify truthCols as a named list with names matching \n",
+                 "assay names specified as post functions.")
+
+        if (!all(truthCols %in% names(bd@data@data)))
+            stop("Please specify only valid column names as truthCols.")
+        
         if (sortIDs && is.null(sortID_col))
             stop("If 'truthCols' is specified, 'sortIDs' can not simply be 'TRUE'.\n",
                  "Instead, specify a column in the data to use for sorting the output to ",
