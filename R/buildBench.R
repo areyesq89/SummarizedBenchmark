@@ -367,14 +367,11 @@ eval2assay <- function(al, si, siv) {
     } else {
         alr <- simplify2array(al, higher = FALSE)
         if (!is(alr, "matrix")) {
-            if (is(alr, "list")) {
-                alr <- rbind(alr)
-            } else {
-                alr <- rbind(al)
-            }
+            if (!all(unlist(lapply(al, is, "list"))))
+                warning("Method outputs could not be reduced to matrix.")
+            alr <- rbind(al)
         }
-    }
-    if (is.null(siv))
         rownames(alr) <- NULL
+    }
     return(alr)
 }

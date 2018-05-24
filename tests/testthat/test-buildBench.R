@@ -207,7 +207,7 @@ test_that("buildBench can handle sortIDs", {
     bd1 <- addMethod(bd1, label = "bcef",
                      func = function() { c(b = 11, c = 12, e = 13, f = 15) })
     ## check behavior when output has unequal lengths
-    expect_warning(buildBench(bd1), "different lengths")
+    expect_warning(buildBench(bd1), "could not be reduced")
 
     ## check behavior when sorting without ID column
     sb1a <- buildBench(bd1, sortIDs = TRUE)
