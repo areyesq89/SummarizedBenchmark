@@ -37,7 +37,8 @@ Using comparisons presented in [@Zappia_2017], we illustrate how the *Summarized
 # Building the BenchDesign
 
 ```{r}
-library("SummarizedBenchmark")
+devtools::load_all()
+##library("SummarizedBenchmark")
 library("magrittr")
 ```
 
@@ -74,23 +75,20 @@ bd <- BenchDesign() %>%
               func = splatSimulate,
               params = rlang::quos(params = splatEstimate(in_data),
                                    verbose = in_verbose,
-                                   seed = in_seed),
-              post = list) %>% 
+                                   seed = in_seed)) %>%
     addMethod(label = "simple",
               func = simpleSimulate,
               params = rlang::quos(params = simpleEstimate(in_data),
                                    verbose = in_verbose,
-                                   seed = in_seed), 
-              post = list) %>%
+                                   seed = in_seed)) %>%
     addMethod(label = "lun",
               func = lunSimulate,
               params = rlang::quos(params = lunEstimate(in_data),
                                    verbose = in_verbose,
-                                   seed = in_seed),
-              post = list)
+                                   seed = in_seed))
 ```
 
-Each simulator returns a single _SingleCellExperiment_ object containing the simulated scRNA-seq counts. However, to fit the _SummarizedBenchmark_ structure, each method in the _BenchDesign_ must return a vector or a list. To handle the non-standard output of the methods, we add `post = list` in each `addMethod` call to wrap each _SingleCellExperiment_ object in a list. 
+Each simulator returns a single _SingleCellExperiment_ object containing the simulated scRNA-seq counts. However, to fit the _SummarizedBenchmark_ structure, each method in the _BenchDesign_ must return a vector or a list. By default, if methods return objects which cannot be easily coerced to a matrix structure, the outputs from each assay is captured and combined using `rbind`. To prevent the warnings from printing, the user may specify `post = list` for all methods. However, note that this will result in all method output being wrapped in a list.
 
 # Running the Benchmark Experiment
 
@@ -100,7 +98,7 @@ Using the `"counts"` assay of the `fluidigm` data set as input, we generate simu
 fluidigm_dat <- list(in_data = assay(sce, "counts"),
                      in_verbose = FALSE,
                      in_seed = 19120128)
-sb <- buildBench(bd, data = fluidigm_dat)
+sb <- buildBench(bd, data = fluidigm_dat) 
 sb
 ```
 
