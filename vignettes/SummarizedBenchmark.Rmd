@@ -36,13 +36,17 @@ With `SummarizedBenchmark`, a complete benchmarking workflow is comprised of thr
 2. methods, and
 3. performance metrics.
 
-The first two (_data_ and _methods_) are necessary for carrying out the benchmark experiment, and the last (_performance metrics_) is essential for evaluating the results of the experiment. Following this approach, the `SummarizedBenchmark` package defines two types of objects: *BenchDesign* objects and *SummarizedBenchmark* objects. *BenchDesign* objects contain only the design of the benchmark experiment, namely the _data_ and _methods_, where a _method_ is defined as the combination of a function or algorithm and parameter settings. After constructing a *BenchDesign*, the experiment is executed to create a *SummarizedBenchmark* containing the results of applying the methods to the data. *SummarizedBenchmark* objects extend the Bioconductor `SummarizedExperiment` class, with the additional capability of working with _performance metrics_.  
+The first two (_data_ and _methods_) are necessary for carrying out the benchmark experiment, and the last (_performance metrics_) is essential for evaluating the results of the experiment. Following this approach, the `SummarizedBenchmark` package defines two primary types of objects: *BenchDesign* objects and *SummarizedBenchmark* objects. *BenchDesign* objects contain only the design of the benchmark experiment, namely the _data_ and _methods_, where a _method_ is defined as the combination of a function or algorithm and parameter settings. After constructing a *BenchDesign*, the experiment is executed to create a *SummarizedBenchmark* containing the results of applying the methods to the data. *SummarizedBenchmark* objects extend the Bioconductor `SummarizedExperiment` class, with the additional capability of working with _performance metrics_.  
 
 The basic framework is illustrated in the figure below. A *BenchDesign* is created with _methods_ and combined with _data_ to create a *SummarizedBenchmark*, which contains the output of applying the methods to the data. This output is then paired with _performance metrics_ specified by the user. Note that the same *BenchDesign* can be combined with several data sets to produce several *SummarizedBenchmark* objects with the corresponding outputs. For convenience, several default _performance metrics_ are implemented in the package, and can be added to *SummarizedBenchmark* objects using simple commands.  
 
 ![basic benchmarking class relationship](summarizedbenchmark-figure1.png)
 
 In this vignette, we first illustrate the basic use of both the *BenchDesign* and *SummarizedBenchmark* classes with a simple comparison of methods for p-value correction in the context of multiple hypothesis testing. Then, we describe more advanced features of the package with a case study comparing three methods for differential expression analysis.
+
+## Related Work
+
+Other frameworks for benchmarking methods in R, include `r BiocStyle::Biocpkg("iCOBRA")` (a package for comparing results of _"binary classification and ranking methods"_ with a Shiny web application for interactive analyses) and `r BiocStyle::Githubpkg("stephenslab/dsc")` (a framework for _"managing computational benchmarking experiments that compare several competing methods"_ written in Python but capable of running methods implemented in both Python and R).
 
 # Quickstart Case Study
 
@@ -91,9 +95,9 @@ head(adj)
 
 The *data.frame* of adjusted p-values and q-values can be used to compare the methods, either by directly parsing the table or using a framework like `r BiocStyle::Biocpkg("iCOBRA")`. Additionally, the *data.frame* can be saved as a `RDS` or `Rdata` object for future reference, eliminating the need for recomputing on the original data.  
 
-While this approach can work well for smaller comparisons, it can quickly become overwhelming and unweildy as the number of methods and parameters increases. Furthermore, once each method is applied and the final *data.frame* (`adj`) is constructed, there is no way to determine *how* each value was calculated. While an informative name can be used to "label" each method (as done above), this does not capture the full complexity, e.g. parameters and context, where the function was evaluated. One solution might involve manually recording function calls and parameters in a separate *data.frame* with the hope of maintaining synchrony with the output *data.frame*. However, this is prone to errors, e.g. during fast "copy and paste" operations or additions and delations of parameter combinations. An alternative (and hopefully better) solution, is to use the framework of the *SummarizedBenchmark* package.
+While this approach can work well for smaller comparisons, it can quickly become overwhelming and unweildy as the number of methods and parameters increases. Furthermore, once each method is applied and the final *data.frame* (`adj`) is constructed, there is no way to determine *how* each value was calculated. While an informative name can be used to "label" each method (as done above), this does not capture the full complexity, e.g. parameters and context, where the function was evaluated. One solution might involve manually recording function calls and parameters in a separate *data.frame* with the hope of maintaining synchrony with the output *data.frame*. However, this is prone to errors, e.g. during fast "copy and paste" operations or additions and deletions of parameter combinations. An alternative (and hopefully better) solution, is to use the framework of the *SummarizedBenchmark* package.
 
-In the *SummarizedBenchmark* approach, a *BenchDesign* is constructed with the data and any number of methods. A *BenchDesign* can also be constructed without any data or method inputs. Methods and the data can be added or removed from the object modularly in a few different ways, as will be described in the following section. For simplicity, we first show how to construct the *BenchDesign* with just the data set as input. The data object, here `tdat`, must be passed explicitly to the `data=` parameter.
+In the *SummarizedBenchmark* approach, a *BenchDesign* is constructed with the data and any number of methods. Optionally, a *BenchDesign* can also be constructed without any data or method inputs. Methods and data can be added or removed from the object modularly in a few different ways, as will be described in the following section. For simplicity, we first show how to construct the *BenchDesign* with just the data set as input. The data object, here `tdat`, must be passed explicitly to the `data =` parameter.
 
 ```{r}
 b <- BenchDesign(data = tdat)
@@ -506,15 +510,46 @@ From the plot above, it is evident that there is a large number of transcripts t
 SummarizedBenchmark::plotROC(sb, assay="status")
 ```
 
-# Advanced Features
+# Additional Features
 
 Here, we describe several additional features implemented in *SummarizedBenchmark* for building on the standard workflow described in the previous sections. The features are illustrated using the same differential expression example from above.
+
+## Reusing a BenchDesign Across Data Sets
+
+When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single *BenchDesign* object across multiple data sets. As mentioned early on, a *BenchDesign* can be intialized without any methods or data set. 
+
+```{r}
+bdnull <- BenchDesign()
+bdnull
+```
+
+As before, methods can be added to the *BenchDesign* with `addMethod()`, and the benchmark experiment run using `buildBench()`.
+
+```{r}
+bdnull <- bdnull %>%
+    addMethod(label = "bonf",
+              func = p.adjust,
+              params = rlang::quos(p = pval,
+                                   method = "bonferroni")) %>%
+    addMethod(label = "BH",
+              func = p.adjust,
+              params = rlang::quos(p = pval,
+                                   method = "BH"))
+```
+
+The `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the *BenchDesign* object.
+
+```{r}
+buildBench(bdnull, data = tdat)
+```
+
+By specifying data during the `buildBench()` step, the exact same benchmark comparison, as defined in the common *BenchDesign* object, can be carried out consistently across multiple data sets. While this approach works even if the common *BenchDesign* object contains a default data set, it is recommended that the *BenchDesign* be created without any data to avoid errors if the design is going to be reused across data sets.
 
 ## Storing Multiple Outputs
 
 The differential expression case study described above has assumed that we are interested in a single numeric vector for each method, namely, a vector of p-values. These p-values are stored as the sole `assay` in the *SummarizedBenchmark* object returned by `buildBench()`. However, in many cases, there are multiple values of interest to be compared across methods. For example, looking at the estimated log-fold changes in addition to p-values may be informative when comparing methods for differential expression.
 
-The *BenchDesign* framework supports multiple assays with the `post =` parameter of the `addMethod()` call. When zero or one function is specified to `post =` for all methods, as in the examples above, the results are stored as a single `assay`. However, if `post =` is passed a named list of functions, separate `assay`s will be created using the names and functions in each list. Since the `assay` names are taken from `post =`, all entries in the list must be named. Furthermore, if more than one `assay` is desired, the `post =` parameter must be specified for all methods. This is strictly enforced to avoid ambiguities when combining results across methods. 
+The *BenchDesign* framework supports multiple assays with the `post =` parameter of the `addMethod()` call. When zero or one function is specified to `post =` for all methods, as in the examples above, the results are stored as a single `assay`. However, if `post =` is passed a named list of functions, separate `assay`s will be created using the names and functions in each list. Since the `assay` names are taken from `post =`, all entries in the list must be named. Furthermore, since results are matched across methods using the assay names, if a method is missing a `post = ` function for a given assay name, the corresponding column in the `assay`s will be set to `NA`. 
 
 To track both p-values and log-fold change values for each method, we write new wrapper functions. Separate wrapper functions are written for first returning the primary analysis results, and separate accessor functions for extracting p-values and log-fold changes from the results. 
 
@@ -629,7 +664,68 @@ all(assay(sbp) == assay(sb), na.rm = TRUE)
 
 Details on how to specify the parallelization back-end can be found in the _Introduction to BiocParallel_ vignette for the `r BiocStyle::Biocpkg("BiocParallel")` package. Parallelization of `buildBench()` is carried out across the set of methods specified with `addMethod()`. There is no benefit to specifying more cores than the number of methods.
 
-## Manually Specifying Method Metadata
+## Updating Analyses
+
+Often, benchmarking analyses are performed in multiple steps, iteratively, with new methods added. Additionally, package versions may be updated. We continue with the example of comparing methods for differential expression. Suppose we have ran the analysis a few weeks or months ago, and are interested in checking if any methods need to be rerun, e.g. due to an update in a package. The package currently provides the `updateBench()` function. We can check to see if any methods need to be rerun by simply calling on `updateBench()` with `dryrun = TRUE`. 
+
+```{r}
+updateBench(sb = sb, dryrun = TRUE)
+```
+
+Notice that none of the methods need to be rerun. Suppose we decide to 
+
+```{r}
+bd2 <- modifyMethod(bd, "deseq2", rlang::quos(bd.meta = list(note = "modified post hoc")))
+updateBench(sb = sb, bd = bd2, dryrun = TRUE)
+```
+
+```{r}
+deseq2_ashr <- function(countData, colData, design, contrast) {
+    dds <- DESeqDataSetFromMatrix(countData,
+                                  colData = colData,
+                                  design = design)
+    dds <- DESeq(dds)
+    lfcShrink(dds, contrast = contrast, type = "ashr")
+}
+
+bd2 <- addMethod(bd2, "deseq2_ashr", 
+                 deseq2_ashr,
+                 post = list(lfc = deseq2_lfc),
+                 params = rlang::quos(countData = cntdat,
+                                      colData = coldat, 
+                                      design = ~condition,
+                                      contrast = c("condition", "2", "1")))
+
+updateBench(sb, bd2, dryrun = TRUE)
+```
+
+We run the update by specifying `dryrun = FALSE`.
+
+```{r}
+sb2 <- updateBench(sb, bd2, dryrun = FALSE)
+sb2
+```
+
+We can check the output.
+
+```{r}
+head(assay(sb2, "lfc"))
+```
+
+Additionally, we check the session metadata.
+
+```{r}
+lapply(metadata(sb2)$sessions, `[[`, "methods")
+```
+
+We can also compare the new *SummarizedBenchmark* object against the previous *BenchDesign*.
+
+```{r}
+updateBench(sb2, bd, keepAll = FALSE)
+```
+
+
+## Specifying Method Metadata
 
 Metadata for methods are stored in the `colData()` of *SummarizedBenchmark* objects. As metioned above, several default metadata columns are populated in the `colData()` of the *SummarizedBenchmark* object generated by a call to `buildBench()`. Sometimes it may be useful to include additional metadata columns beyond just the default columns. While this can be accomplished manually by modifying the `colData()` of the *SummarizedBenchmark* object post hoc, method metadata can also be specified at the `addMethod()` step using the `meta =` optional parameter. The `meta =` parameter accepts a named list of metadata information. Each list entry will be added to the `colData()` as a new column. To avoid collisions between metadata columns specified with `meta =` and the default set of columns, metadata specified using `meta =` will be added to `colData()` with `meta.` prefixed to the column name.  
 
@@ -658,7 +754,7 @@ buildBench(tempbd) %>%
 
 While all methods in this example had the `meta =` option specified, this is not necessary. It is completely acceptable to specify the `meta =` parameter for only a subset of methods.
 
-## Manually Modifying Version Metadata
+## Specifying Version Metadata
 
 Arguably, two of the most important pieces of metadata stored in the `colData()` of the *SummarizedBenchmark* returned by `buildBench()` are the relevant package name and version (`pkg_name`, `pkg_vers`). Determining the package name and version requires the primary "workhorse" function of the method be directly specified as `func =` in the `addMethod()` call. In some cases, this may not be possible, e.g. if the "workhorse" function is a wrapper as in the differential expression example above. However, there still might exist an important function for which we would like to track the package name and version. The `meta` parameter can help.  
 
@@ -745,45 +841,6 @@ bde <- expandMethod(bd, label = "deseq2",
 printMethod(bde, "deseq2_v1")
 printMethod(bde, "deseq2_v2")
 ```
-
-## Reusing a BenchDesign Across Data Sets
-
-When benchmarking several methods, it is generally considered good practice to apply the methods to more than just a single data set. Under the SummarizedBenchmark framework, this naturally translates to recycling the same set of methods defined in a single *BenchDesign* object across multiple data sets. As mentioned early on, a *BenchDesign* can be intialized without any methods or data set. 
-
-```{r}
-bdnull <- BenchDesign()
-bdnull
-```
-
-As before, methods can be added to the *BenchDesign* with `addMethod()`, and the benchmark experiment run using `buildBench()`.
-
-```{r}
-bdnull <- bdnull %>%
-    addMethod(label = "bonf",
-              func = p.adjust,
-              params = rlang::quos(p = pval,
-                                   method = "bonferroni")) %>%
-    addMethod(label = "BH",
-              func = p.adjust,
-              params = rlang::quos(p = pval,
-                                   method = "BH"))
-```
-
-The `buildBench()` method accepts an optional `data =` parameter. When specified, this data set is used to run the experiment, taking precedence over the data set specified in (or missing from) the *BenchDesign* object.
-
-```{r}
-buildBench(bdnull, data = tdat)
-```
-
-By specifying data during the `buildBench()` step, the exact same benchmark comparison, as defined in the common *BenchDesign* object, can be carried out consistently across multiple data sets. While this approach works even if the common *BenchDesign* object contains a default data set, it is recommended that the *BenchDesign* be created without any data to avoid errors if the design is going to be reused across data sets.
-
-# Related Work
-
-Related frameworks for benchmarking have been proposed in R, notably: `r BiocStyle::Biocpkg("iCOBRA")` (available on Bioconductor) and `r BiocStyle::Githubpkg("stephens999/dscr")` (available on GitHub). The *SummarizedBenchmark* package differs from both `r BiocStyle::Biocpkg("iCOBRA")` and `r BiocStyle::Githubpkg("stephens999/dscr")` in several important ways.
-
-First, while the `r BiocStyle::Biocpkg("iCOBRA")` package provides support for evaluating the results of a benchmark experiment, it does not include infrastructure for experiment setup and execution. In this way, while no equivalent to the *BenchDesign* class exists as part of the `r BiocStyle::Biocpkg("iCOBRA")` package, the `r BiocStyle::Biocpkg("iCOBRA")` *COBRAData* class is similar to our *SummarizedBenchmark* class. However, by extending the standard Bioconductor *SummarizedExperiment* class, the *SummarizedBenchmark* class has the advantage of following a well-known data structure and facilitating easier downstream analyses. Finally, it may not even be reasonable to directly compare `r BiocStyle::Biocpkg("iCOBRA")` and `SummarizedBenchmark`, as `r BiocStyle::Biocpkg("iCOBRA")` was developed explicitly for the purpose of comparing results of _"binary classification and ranking methods"_ with a web application (Shiny app) for interactive analyses. Our package is designed with the goal of handling a much larger collection of benchmark studies.
-
-In both design and structure, the *SummarizedBenchmark* framework is much closer to the `dscr` package. Similar to *SummarizedBenchmark*, the `r BiocStyle::Githubpkg("stephens999/dscr")` framework requires three components: data simulators, methods, and score functions. However, *SummarizedBenchmark* differs from `dscr` notably by extending the *SummarizedExperiment* class and linking benchmark metadata with results. 
 
 # References
 
