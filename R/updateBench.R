@@ -18,6 +18,7 @@
 #' @return
 #' SumamrizedBenchmark object.
 #'
+#' @importFrom crayon red yellow green bold
 #' @export
 #' @author Patrick Kimes
 updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll = TRUE,
@@ -50,17 +51,10 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
         bbp <- replace(oldbbp, names(bbp), bbp)
     }
 
-    ## combine methods list if want to keep all
-    if (!is.null(bd) && keepAll) {
-        sbonly <- setdiff(names(BDMethodList(sb)), names(BDMethodList(bd)))
-        BDMethodList(bd) <- c(BDMethodList(bd), BDMethodList(sb)[sbonly])
-    }
-
-
     ## just print verbose description of actions if specified
     if (dryrun) {
-        printUpdateBench(sb, bd, version = version)
-        return(invisible(NULL))
+        res <- .printUpdateBench(sb, bd, version = version, keepAll = keepAll)
+        return(invisible(res))
     }
 
     ## compare methods
@@ -94,10 +88,14 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
                         "!! original message: \n", e)
                 return(NULL)
             })
-        if (!is.null(sbnew))
+        if (!is.null(sbnew)) {
+            if (!keepAll)
+                sb <- sb[, intersect(names(BDMethodList(sb)),
+                                     names(BDMethodList(bd)))]
             sb <- .combineSummarizedBenchmarks(sb, sbnew)
+        }
     }
-
+    
     ## return results
     return(sb)
 }
@@ -138,7 +136,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
 ## @author Patrick Kimes
 .combineSummarizedBenchmarks <- function(sb1, sb2) {
     stopifnot(is(sb1, "SummarizedBenchmark"), is(sb2, "SummarizedBenchmark"))
-
+    
     ## combine BenchDesign objects
     bd1 <- BDMethodList(sb1)
     bd2 <- BDMethodList(sb2)

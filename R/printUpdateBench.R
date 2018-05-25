@@ -1,20 +1,25 @@
-#' Print Comparison of BenchDesign objects
-#'
-#' Simple comparison of two BenchDesign objects based on
-#' methods meta data and data MD5 hashs.
-#'
-#' @param x a BenchDesign or SummarizedBenchmark object
-#' @param y a BenchDesign or SummarizedBenchmark object
-#'
-#' @return
-#' logical value indicating whether the two objects have
-#' methods producing the same meta data and data with the
-#' same MD5 hashes.
-#'
-#' @importFrom crayon red yellow green bold
-#' @export
-#' @author Patrick Kimes
-printUpdateBench <- function(sb, bd, version = FALSE) {
+## Print Comparison of BenchDesign objects
+##
+## Internal function for printing the results of a comparison of the
+## methods executed in a SummarizedBenchmark object and a new BenchDesign
+## object.
+##
+## @param sb a SummarizedBenchmark object
+## @param bd a BenchDesign object
+## @param version logical whether to re-run methods with only package
+##        version differences. (default = FALSE)
+## @param keepAll logical whether to keep methods run in original SummarizedBenchmark
+##        but not in new BenchDesign. Only used if \code{bd} is not NULL. (default = TRUE)
+## 
+## logical value indicating whether the two objects have
+## methods producing the same meta data and data with the
+## same MD5 hashes.
+##
+## @author Patrick Kimes
+.printUpdateBench <- function(sb, bd, version, keepAll) {
+    stopifnot(is(sb, "SummarizedBenchmark"))
+    stopifnot(is(bd, "BenchDesign"))
+    
     res <- compareBenchDesigns(sb, bd)
 
     metres <- res$methods$res
@@ -73,7 +78,10 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
     metres <- dplyr::mutate_if(metres, is.logical, `!`)
     metres <- dplyr::mutate(metres, rerun = !rerun)
     metres <- dplyr::mutate_if(metres, is.logical, dplyr::funs(ifelse(., "Y", "N")))
-    metres$rerun[metres$overlap == "xOnly"] <- "Drop"
+    if (!keepAll)
+        metres$rerun[metres$overlap == "xOnly"] <- "Drop"
+    else
+        metres$rerun[metres$overlap == "xOnly"] <- "N"
     
     cat(crayon::bold("  benchmark methods:\n"))
     if (nrow(metres)) {
@@ -86,24 +94,17 @@ printUpdateBench <- function(sb, bd, version = FALSE) {
             if (metres$overlap[i] == "Both") {
                 istr <- metres[i, c("label", "rerun", "f", "params", "meta", "post", "version"), drop = TRUE]
                 istr <- .methodrow(istr)
-                ## if (metres$rerun[i] == "Y") 
-                ##     istr <- crayon::red(istr)
                 cat(istr)
             } else {
                 istr <- c(metres[i, c("label", "rerun"), drop = TRUE], rep("-", 5))
                 istr <- .methodrow(istr)
-                ## if (metres$overlap[i] == "yOnly") {
-                ##     cat(crayon::red(istr))
-                ## } else if (metres$overlap[i] == "xOnly") {
-                ##     cat(crayon::silver(istr))
-                ## }
                 cat(istr)
             }
         }
     } else {
         cat("    none\n")
     }
-    
+    invisible(res)
 }
 
 ## standard row format
