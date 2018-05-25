@@ -12,7 +12,7 @@ buildBench(bd, data = NULL, truthCols = NULL, ftCols = NULL,
 \item{bd}{\code{BenchDesign} object.}
 
 \item{data}{Data set to be used for benchmarking, will take priority over
-data set originally specified to BenchDesign object. 
+data set originally specified to BenchDesign object.
 Ignored if NULL. (default = NULL)}
 
 \item{truthCols}{Character vector of column names in data set corresponding to

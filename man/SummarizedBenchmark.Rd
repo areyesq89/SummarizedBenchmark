@@ -66,6 +66,7 @@ groundTruth <- groundTruth[rownames(assays[[1]]),]
 sb <- SummarizedBenchmark(
     assays=assays, colData=colData,
     groundTruth=groundTruth )
+colData(sb)$label <- rownames(colData(sb))
 
 }
 \author{
