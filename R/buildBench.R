@@ -99,7 +99,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     arglist <- arglist[names(arglist) != "data"]
 
     if (!is.null(data) && !is.list(data)) {
-        stop("If specified, 'data' must be a list or data.frame object.")
+        stop("\nIf specified, 'data' must be a list or data.frame object.\n")
     }
     if (!is.null(data)) {
         bd@data <- new("BDData", data = data, type = "data")
@@ -107,19 +107,19 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     
     ## make sure data is provided
     if (is.null(bd@data)) {
-        stop("data in BenchDesign is NULL.\n",
-             "Please specify a non-NULL dataset to build SummarizedBenchmark.")
+        stop("\ndata in BenchDesign is NULL.\n",
+             "Please specify a non-NULL dataset to build SummarizedBenchmark.\n")
     }
 
     if (bd@data@type != "data") {
-        stop("data in BenchDesign is only a MD5 hash.\n",
-             "Please specify a non-NULL dataset to build SummarizedBenchmark.")
+        stop("\ndata in BenchDesign is only a MD5 hash.\n",
+             "Please specify a non-NULL dataset to build SummarizedBenchmark.\n")
     }
 
     ## make sure methods are specified
     if (length(bd@methods) == 0) {
-        stop("list of methods in BenchDesign is empty.\n",
-             "Please specify at least one method to build SummarizedBenchmark.")
+        stop("\nlist of methods in BenchDesign is empty.\n",
+             "Please specify at least one method to build SummarizedBenchmark.\n")
     }
 
     ## clean up NULL @post slots in BenchDesign
@@ -137,7 +137,8 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
             sortID_col <- sortIDs
             sortIDs <- TRUE
         } else {
-            stop("Specified 'sortIDs' column is not in the specified data set.")
+            stop("\nInvalid 'sortIDs' specification.\n",
+                 "Please specify only valid column names for 'sortIDs'.\n")
         }
     } else {
         sortID_col <- NULL
@@ -149,23 +150,27 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
             names(truthCols) <- uassays
         }
 
-        if (is.null(names(truthCols)) || !all(names(truthCols) %in% uassays))
-            stop("Please specify truthCols as a named list with names matching \n",
-                 "assay names specified as post functions.")
+        if (!all(names(truthCols) %in% uassays))
+            warning("\nDropping 'truthCols' not matching assay names.\n")
 
-        if (!all(truthCols %in% names(bd@data@data)))
-            stop("Please specify only valid column names as truthCols.")
+        truthCols <- truthCols[names(truthCols) %in% uassays]
+        if (!length(truthCols))
+            truthCols <- NULL
         
-        if (sortIDs && is.null(sortID_col))
-            stop("If 'truthCols' is specified, 'sortIDs' can not simply be 'TRUE'.\n",
-                 "Instead, specify a column in the data to use for sorting the output to ",
-                 "match the order of the 'truthCols'.")
+        if (!is.null(truthCols) && !all(truthCols %in% names(bd@data@data)))
+            stop("\nInvalid 'truthCols' specification.\n",
+                 "Please specify only valid column names as 'truthCols'.\n")
+        
+        if (!is.null(truthCols) && sortIDs && is.null(sortID_col))
+            stop("\nIf 'truthCols' is specified, 'sortIDs' must specify a column\n",
+                 "in the data to use for sorting the output to match the order of\n",
+                 "the 'truthCols'.")
     }
 
     ## check if ftCols are in data
     if (!is.null(ftCols) && !all(ftCols %in% names(bd@data@data))) {
-        stop("Invalid ftCols specification. ",
-             "ftCols must be a subset of the column names of the input data.")
+        stop("\nInvalid ftCols specification.\n",
+             "Please only specify valid column names as 'ftCols'.\n")
     }
 
     ## check validity of parallel values (unit logical value)
@@ -211,7 +216,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     
     ## some assays might have only NA results
     if (length(a) == 0L) {
-        stop("No method returned valid values for any assays!")
+        stop("\nNo method returned valid values for any assays!\n")
     }
     
     ## fill in missing methods with NAs, return in fixed order
@@ -394,7 +399,7 @@ makePostLists <- function(db) {
 
 eval2assay <- function(al, si, siv) {
     if (si && any(is.null(lapply(al, names))))
-        stop("If sortIDs = TRUE, all methods must return a named list or vector.")
+        stop("\nIf sortIDs = TRUE, all methods must return a named list or vector.\n")
     if (si) {
         alr <- .list2mat(al)
         if (!is.null(siv)) {
@@ -404,7 +409,7 @@ eval2assay <- function(al, si, siv) {
         alr <- simplify2array(al, higher = FALSE)
         if (!is(alr, "matrix")) {
             if (!all(unlist(lapply(al, is, "list"))))
-                warning("Method outputs could not be reduced to matrix.")
+                warning("\nMethod outputs could not be reduced to matrix.\n")
             alr <- rbind(al)
         }
         rownames(alr) <- NULL
