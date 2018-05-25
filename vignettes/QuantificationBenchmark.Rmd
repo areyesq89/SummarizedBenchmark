@@ -273,11 +273,12 @@ tidyData <- data.frame(
   PC1=pcaRes$x[,"PC1"], 
   PC2=pcaRes$x[,"PC2"], 
   sample=colData( allSB )$sample[sampleIndexes], 
-  label=colData( allSB )$label[sampleIndexes] )
+  label=gsub("\\d+$", "", rownames( colData(allSB) ))[sampleIndexes] )
 
 tidyData <- tidyData %>%
   dplyr::mutate( 
-    method=gsub( "-.*$", "", label) )
+             method=gsub( "-.*$", "", label) )
+
 
 tidyData %>%
   ggplot( aes( PC1, PC2, colour=label ) ) +
@@ -312,8 +313,11 @@ houseMouse <-
   geneMap$ensembl_transcript_id[geneMap$hsapiens_homolog_ensembl_gene %in% 
                                   houseHuman]
 
+colData( allSB )$label <- gsub("\\d+$", "", rownames( colData( allSB ) ) )
+
 condInfo <- 
-  colData( allSB )[colData( allSB )$label == "kallisto-default","tissue"]
+    colData( allSB )[colData( allSB )$label == "kallisto-default","tissue"]
+
 replicateInfo <- condInfo
 evaluationFeature <- rep( TRUE, length.out = nrow( allSB ) )
 calibrationFeature <- 
