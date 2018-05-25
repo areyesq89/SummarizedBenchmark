@@ -249,7 +249,6 @@ The resulting `allSB` object has been precomputed and can be loaded by doing
 ```{r loadSB, message=FALSE}
 library(SummarizedBenchmark)
 data("quantSB")
-allSB
 ```
 
 Notice that this object contains both the software versions and used parameters.
@@ -265,9 +264,9 @@ The code above returns a *SummarizedBenchmark* object containing the transcript 
 ```{r pcaPlot}
 
 sampleIndexes <- which( colData( allSB )$sample %in% "SRR5273689" )
-keep <- !rowSums( is.na( assays( allSB )[["bench"]] ) ) > 0
+keep <- !rowSums( is.na( assays( allSB )[["default"]] ) ) > 0
 pcaRes <- 
-  prcomp(  log10( t( assays( allSB )[["bench"]][keep,sampleIndexes] ) + 1 ) )
+  prcomp(  log10( t( assays( allSB )[["default"]][keep,sampleIndexes] ) + 1 ) )
 varExp <- round( 100*(pcaRes$sdev/sum( pcaRes$sdev )), 2)
 
 tidyData <- data.frame( 
