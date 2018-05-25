@@ -76,7 +76,7 @@ system("gunzip -c reference/raw/transcriptome.fa.gz > reference/raw/transcriptom
 
 library(Biostrings)
 dnSt <- names( readDNAStringSet("reference/raw/transcriptome.fa.gz") )
-dnSt <- sapply( strsplit( dnSt, "\\|" ), "[[", 1 )
+dnSt <- sapply( strsplit( dnSt, "\\||\\." ), "[[", 1 )
 
 ```
 
@@ -129,7 +129,7 @@ runKallisto <- function( sample, args="" ){
                 type="kallisto", txOut=TRUE )
     counts <- ab$counts[,1]
     names(counts) <- 
-      sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+      sapply( strsplit( names( counts ), "\\||\\." ), "[[", 1 )
     counts
 }
 
@@ -145,7 +145,7 @@ runSalmon <- function( sample, args="-l A -p 4" ){
       tximport( file.path( output, "quant.sf" ), 
                 type="salmon", txOut=TRUE )$counts[,1]
     names( counts ) <- 
-      sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+      sapply( strsplit( names( counts ), "\\||\\." ), "[[", 1 )
     counts
 }
 
@@ -161,7 +161,7 @@ runSailfish <- function( sample, args="-l IU" ){
       tximport( file.path(output, "quant.sf"), 
                 type="sailfish", txOut=TRUE )$counts[,1]
     names( counts ) <- 
-      sapply( strsplit( names( counts ), "\\|" ), "[[", 1 )
+      sapply( strsplit( names( counts ), "\\||\\." ), "[[", 1 )
     counts
 }
 
@@ -182,29 +182,29 @@ b <- BenchDesign() %>%
               meta = list(version = rlang::quo(getKallistoVersion()))
               ) %>%
     addMethod(label = "kallisto-bias",
-              func = runKallisto,
-              params = rlang::quos(sample = sample,
-                                   args = "--bias -t 16"),
-              meta = list(version = rlang::quo(getKallistoVersion()))
-              ) %>%
-    addMethod(label = "salmon-default",
-              func = runSalmon,
-              params = rlang::quos(sample = sample,
-                                   args = "-l IU -p 16"),
-              meta = list(version = rlang::quo(getSalmonVersion()))
-              ) %>%
-    addMethod(label = "salmon-gcBias",
-              func = runSalmon,
-              params = rlang::quos(sample=sample,
-                                   args="-l IU --gcBias -p 16"),
-              meta = list(version = rlang::quo(getSalmonVersion()))
-              ) %>%
-    addMethod(label = "sailfish-default",
-              func = runSailfish,
-              params = rlang::quos(sample=sample,
-                                   args="-l IU -p 16"),
-              meta = list(version = rlang::quo(getSailfishVersion()))
-              )
+             func = runKallisto,
+             params = rlang::quos(sample = sample,
+                                  args = "--bias -t 16"),
+             meta = list(version = rlang::quo(getKallistoVersion()))
+             ) %>%
+   addMethod(label = "salmon-default",
+             func = runSalmon,
+             params = rlang::quos(sample = sample,
+                                  args = "-l IU -p 16"),
+             meta = list(version = rlang::quo(getSalmonVersion()))
+             ) %>%
+   addMethod(label = "salmon-gcBias",
+             func = runSalmon,
+             params = rlang::quos(sample=sample,
+                                  args="-l IU --gcBias -p 16"),
+             meta = list(version = rlang::quo(getSalmonVersion()))
+             ) %>%
+   addMethod(label = "sailfish-default",
+             func = runSailfish,
+             params = rlang::quos(sample=sample,
+                                  args="-l IU -p 16"),
+             meta = list(version = rlang::quo(getSailfishVersion()))
+             )
 
 printMethods(b)
 ```
@@ -213,33 +213,42 @@ Now, the next step is to run the benchmark experiment. Since we are running the 
 
 ```{r runBenchmark, eval=FALSE}
 
+dat <- list(txIDs=dnSt)
 allSB <- lapply(samples, function(sample) {
-    dat <- list( sample=sample, txIDs=dnSt )
-    sb <- buildBench( b, data=dat, sortIDs="txIDs")
+    dat[["sample"]] <- sample
+    sb <- buildBench( b, data=dat, sortIDs="txIDs",
+                     catchErrors=FALSE, parallel=TRUE,
+                     BPPARAM=MulticoreParam(2) )
     colData( sb )$sample <- sample
     sb
 } )
+
 allSB <- do.call( cbind, allSB )
 
 colData( allSB )$tissue <- 
   annotation$tissue[match( colData( allSB )$sample, 
                           annotation$sample )]
+
 ```
 
 To keep the pre-computed object small, we will save the quantifications for only 50,000 randomly sampled transcripts.
 
 ```{r subsample, eval=FALSE}
+   
 allSB <- allSB[rowSums( is.na( assay( allSB ) ) ) == 0,]
 set.seed(12)
-allSB <- allSB[sample( seq_along(allSB), 50000 ),]
-#save(allSB, file="../data/quantSB.rda", compress="xz", compression_level=9 )
+
+allSB <- allSB[sample( seq_len(nrow(allSB)), 50000 ),]
+
+#save(allSB, file="../data/quantSB.rda",
+#     compress="xz", compression_level=9 )
+
 ```
 The resulting `allSB` object has been precomputed and can be loaded by doing
 
 ```{r loadSB, message=FALSE}
 library(SummarizedBenchmark)
 data("quantSB")
-allSB
 ```
 
 Notice that this object contains both the software versions and used parameters.
@@ -255,20 +264,21 @@ The code above returns a *SummarizedBenchmark* object containing the transcript 
 ```{r pcaPlot}
 
 sampleIndexes <- which( colData( allSB )$sample %in% "SRR5273689" )
-keep <- !rowSums( is.na( assays( allSB )[["bench"]] ) ) > 0
+keep <- !rowSums( is.na( assays( allSB )[["default"]] ) ) > 0
 pcaRes <- 
-  prcomp(  log10( t( assays( allSB )[["bench"]][keep,sampleIndexes] ) + 1 ) )
+  prcomp(  log10( t( assays( allSB )[["default"]][keep,sampleIndexes] ) + 1 ) )
 varExp <- round( 100*(pcaRes$sdev/sum( pcaRes$sdev )), 2)
 
 tidyData <- data.frame( 
   PC1=pcaRes$x[,"PC1"], 
   PC2=pcaRes$x[,"PC2"], 
   sample=colData( allSB )$sample[sampleIndexes], 
-  label=colData( allSB )$label[sampleIndexes] )
+  label=gsub("\\d+$", "", rownames( colData(allSB) ))[sampleIndexes] )
 
 tidyData <- tidyData %>%
   dplyr::mutate( 
-    method=gsub( "-.*$", "", label) )
+             method=gsub( "-.*$", "", label) )
+
 
 tidyData %>%
   ggplot( aes( PC1, PC2, colour=label ) ) +
@@ -303,8 +313,11 @@ houseMouse <-
   geneMap$ensembl_transcript_id[geneMap$hsapiens_homolog_ensembl_gene %in% 
                                   houseHuman]
 
+colData( allSB )$label <- gsub("\\d+$", "", rownames( colData( allSB ) ) )
+
 condInfo <- 
-  colData( allSB )[colData( allSB )$label == "kallisto-default","tissue"]
+    colData( allSB )[colData( allSB )$label == "kallisto-default","tissue"]
+
 replicateInfo <- condInfo
 evaluationFeature <- rep( TRUE, length.out = nrow( allSB ) )
 calibrationFeature <- 

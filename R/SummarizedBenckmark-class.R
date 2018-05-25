@@ -51,7 +51,8 @@
 #' sb <- SummarizedBenchmark(
 #'     assays=assays, colData=colData,
 #'     groundTruth=groundTruth )
-#'
+#' colData(sb)$label <- rownames(colData(sb))
+#' 
 #' @return A \code{\link{SummarizedBenchmark}} object.
 #' @importFrom tidyr gather
 #' @importFrom S4Vectors DataFrame

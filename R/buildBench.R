@@ -302,7 +302,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     z <- tidyr::unnest(z)
     z <- tidyr::spread(z, .method, .val)
     z <- data.frame(dplyr::select(z, -.id),
-                    row.names = z$.id, check.names = FALSEx)
+                    row.names = z$.id, check.names=FALSE)
     as(z, "matrix")
 }
 
