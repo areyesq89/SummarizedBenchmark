@@ -83,7 +83,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
         sbnew <- tryCatch(
             do.call(buildBench, c(list(bd = bdnew), bbp)),
             error = function(e) {
-                message("!! error caught while in updating methods w/ buildBench !!\n",
+                message("!! error caught while updating methods in updateBench w/ buildBench !!\n",
                         "!! returning original SummarizedBenchmark object        !!\n",
                         "!! original message: \n", e)
                 return(NULL)
