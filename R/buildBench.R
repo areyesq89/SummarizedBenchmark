@@ -178,9 +178,19 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         a <- evalMethods(bd, catchErrors)
     }
 
+    ## determine how each method faired
+    a_res <- lapply(a, function(x) { x[unlist(lapply(x, is, "buildbench-error"))] })
+    a_res <- lapply(names(a), function(i) {
+        a_resi <- a_res[[i]]
+        a_resi[setdiff(uassays, names(a[[i]]))] <- "missing"
+        a_resi[setdiff(uassays, names(a_resi))] <- "success"
+        a_resi
+    })
+    names(a_res) <- names(a)
+        
     ## reshape results / method:post -> post:method
     a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
-    a <- lapply(a, function(x) x[!unlist(lapply(x, is.null))])
+    a <- lapply(a, function(x) x[!unlist(lapply(x, is, "buildbench-error"))])
 
     ## turn list of eval results to matrices - specify output row order
     if (!is.null(sortID_col)) {
@@ -202,20 +212,19 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     ## some assays might have only NA results
     if (length(a) == 0L) {
         stop("No method returned valid values for any assays!")
-    } else {
-        a <- lapply(a, eval2assay, si = sortIDs, siv = siVals)
-
-        ## fill in missing methods with NAs, return in fixed order
-        a <- lapply(a, function(x) {
-            ms <- setdiff(names(bd@methods), colnames(x))
-            msl <- list()
-            msl[ms] <- NA
-            x <- do.call(cbind, c(list(x), msl))
-            x[, names(bd@methods), drop = FALSE]
-        })
-        names(a) <- uassays[!aNAi]
     }
     
+    ## fill in missing methods with NAs, return in fixed order
+    a <- lapply(a, eval2assay, si = sortIDs, siv = siVals)
+    a <- lapply(a, function(x) {
+        ms <- setdiff(names(bd@methods), colnames(x))
+        msl <- list()
+        msl[ms] <- NA
+        x <- do.call(cbind, c(list(x), msl))
+        x[, names(bd@methods), drop = FALSE]
+    })
+    names(a) <- uassays[!aNAi]
+
     if (any(aNAi)) {
         if (length(a) > 0L)
             nr <- nrow(a[[1]])
@@ -229,8 +238,12 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     }
     
     ## colData: method information
-    df <- tidyBDMethod(bd)
-
+    df <- tidyBDMethod(bd, dat = bd@data@data)
+    
+    ## add session info to df
+    df$session.idx <- 1
+    ##df$session.result <- a_res[names(bd@methods)]
+    
     ## performanceMetrics: empty
     pf <- rep(list("bench" = list()), nassays)
     names(pf) <- uassays
@@ -238,6 +251,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
     ## metadata: record sessionInfo
     md <- list(sessions = list(list(methods = names(bd@methods),
+                                    results = a_res,
                                     parameters = arglist,
                                     sessionInfo = sessioninfo::session_info())))
 
@@ -288,7 +302,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     z <- tidyr::unnest(z)
     z <- tidyr::spread(z, .method, .val)
     z <- data.frame(dplyr::select(z, -.id),
-                    row.names = z$.id)
+                    row.names = z$.id, check.names = FALSEx)
     as(z, "matrix")
 }
 
@@ -306,21 +320,43 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
 
 ## helper to evaluate a single BDMethod
 evalMethod <- function(bdm, lab, dat, ce) {
+    ## define main function as an expression
     expr <- rlang::quo((bdm@f)(!!! bdm@params))
-    expr <- rlang::quo({ z <- (!! expr); lapply(bdm@post, function(zz) { zz(z) }) })
-    tryCatch(
-        rlang::eval_tidy(expr, dat),
-        error = function(e) {
-            message("!! error caught in buildBench !!\n",
-                    "!! error in method: ", lab)
-            if (ce) {
-                message("!!  original message: \n",
-                        "!!  ", e)
-                return(NULL)
-            } else {
-                stop(e)
-            }
+    ## first evaluate main function
+    z <- tryCatch(rlang::eval_tidy(expr, dat),
+                  error = function(e) {
+                      message("!! error caught in buildBench !!\n",
+                              "!! error in main function of method: '", lab, "'")
+                      if (ce) {
+                          message("!!  original message: \n",
+                                  "!!  ", conditionMessage(e))
+                          return(structure(conditionMessage(e), class = "buildbench-error",
+                                           origin = "main"))
+                      } else {
+                          stop(e)
+                      }})
+    ## return list of same error of length equal to post functions
+    if (is(z, "buildbench-error")) {
+        zres <- rep(list(z), length(bdm@post))
+    } else {
+        ## else run with post functions
+        zres <- lapply(names(bdm@post), function(zzi) {
+            tryCatch(bdm@post[[zzi]](z),
+                     error = function(e) {
+                         message("!! error caught in buildBench !!\n",
+                                 "!! error in method: '", lab, "', post: '", zzi, "'")
+                         if (ce) {
+                             message("!!  original message: \n",
+                                     "!!  ", conditionMessage(e))
+                             return(structure(conditionMessage(e), class = "buildbench-error",
+                                              origin = "post"))
+                         } else {
+                             stop(e)
+                         }})
         })
+    }
+    names(zres) <- names(bdm@post)
+    zres
 }
 
 

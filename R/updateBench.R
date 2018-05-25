@@ -176,6 +176,9 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     elementMetadata(colData(sb1)) <- emd[match(colnames(colData(sb1)), emd_id), , drop = FALSE]
     elementMetadata(colData(sb2)) <- emd[match(colnames(colData(sb2)), emd_id), , drop = FALSE]
 
+    ## increment session index for newer SB
+    coldat2$session.idx <- length(metadata(sb1)$sessions) + 1
+
     ## combine assay sets by filling in missing assays with NA assays
     aNames1 <- assayNames(sb1)
     aNames2 <- assayNames(sb2)
@@ -187,7 +190,6 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
         assay(sb1, i) <- matrix(NA, nrow = nrow(sb1), ncol = ncol(sb1))
     
     ## if row dimensions don't match, just return as list of the original 2 inputs
-
     
     ## combine session informations into sessions of 1 object before merging
     sess1 <- metadata(sb1)$sessions
