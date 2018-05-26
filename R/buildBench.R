@@ -195,10 +195,14 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
         
     ## reshape results / method:post -> post:method
     a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
-    a <- lapply(a, function(x) x[!unlist(lapply(x, is, "buildbench-error"))])
-    a <- lapply(a, function(x) x[!unlist(lapply(x, is.null))])
+    a <- lapply(a, function(x)
+        x[!unlist(lapply(x, function(zz) { is(zz, "buildbench-error") || is.null(zz) }))])
 
-    ## turn list of eval results to matrices - specify output row order
+    ## identify any assays with no methods returning results
+    aNAi <- unlist(lapply(a, length)) == 0L
+    a <- a[!aNAi]
+
+    ## determine output row order
     if (!is.null(sortID_col)) {
         siVals <- bd@data@data[[sortID_col]]
     } else if (length(a) > 1) {
@@ -210,10 +214,6 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     } else {
         siVals <- NULL
     }
-
-    ## identify any assays with no methods returning results
-    aNAi <- unlist(lapply(a, length)) == 0L
-    a <- a[!aNAi]
     
     ## some assays might have only NA results
     if (length(a) == 0L) {
@@ -232,13 +232,10 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     names(a) <- uassays[!aNAi]
 
     if (any(aNAi)) {
-        if (length(a) > 0L)
-            nr <- nrow(a[[1]])
-        else
-            nr <- 0
+        nr <- nrow(a[[1]])
         aNA <- matrix(nrow = nr, ncol = length(names(bd@methods)),
                       dimnames = list(NULL, names(bd@methods)))
-        aNA <- rep(list(aNA), length(aNAi))
+        aNA <- rep(list(aNA), sum(aNAi))
         names(aNA) <- uassays[aNAi]
         a <- c(a, aNA)
     }
