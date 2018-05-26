@@ -166,6 +166,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     coldat2 <- colData(sb2)
     coldat2 <- as.data.frame(coldat2, optional = TRUE)
     coldat2 <- dplyr::as_tibble(coldat2, rownames = "label")
+    coldat2$session.idx <- length(metadata(sb1)$sessions) + 1 ## increment session index for newer SB
     coldat <- dplyr::bind_rows(coldat1, coldat2)
     coldat <- DataFrame(dplyr::select(coldat, -label), row.names = coldat$label)
     colData(sb1) <- coldat[colnames(sb1), , drop = FALSE]
@@ -173,9 +174,6 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
 
     elementMetadata(colData(sb1)) <- emd[match(colnames(colData(sb1)), emd_id), , drop = FALSE]
     elementMetadata(colData(sb2)) <- emd[match(colnames(colData(sb2)), emd_id), , drop = FALSE]
-
-    ## increment session index for newer SB
-    coldat2$session.idx <- length(metadata(sb1)$sessions) + 1
 
     ## combine assay sets by filling in missing assays with NA assays
     aNames1 <- assayNames(sb1)
