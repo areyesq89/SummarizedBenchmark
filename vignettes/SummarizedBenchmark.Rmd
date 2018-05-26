@@ -718,10 +718,75 @@ Additionally, we check the session metadata.
 lapply(metadata(sb2)$sessions, `[[`, "methods")
 ```
 
+Also, notice that a session index is also stored in the column data of each method. This can be used to map methods quickly to the corresponding entry of the `sessions` list stored in the object metadata.
+
+```{r}
+colData(sb2)[, "session.idx", drop = FALSE]
+```
+
 We can also compare the new *SummarizedBenchmark* object against the previous *BenchDesign*.
 
 ```{r}
 updateBench(sb2, bd, keepAll = FALSE)
+```
+
+
+## Error Handling
+
+Not uncommonly, a single or a small subset of methods may fail. Ideally, all other methods should continue working and be returned. By default, Failed methods are handled (verbosely) and the values in the corresponding column are set to NA.
+
+```{r}
+bd <- BenchDesign(data = mydat) %>%
+    addMethod(label = "deseq2",
+              func = deseq2_run,
+              post = list(pv = deseq2_pv,
+                          lfc = function(x) { stop("This is bad!") }),
+              params = rlang::quos(countData = cntdat,
+                                   colData = coldat, 
+                                   design = ~condition,
+                                   contrast = c("condition", "2", "1"))
+              ) %>%
+    addMethod(label = "edgeR",
+              func = edgeR_run,
+              post = list(pv = edgeR_pv,
+                          lfc = edgeR_lfc),
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)
+              )
+bd
+```
+
+```{r}
+sbe <- buildBench(bd)
+sbe
+head(assay(sbe, "lfc"))
+metadata(sbe)$sessions[[1]]$results
+simplify2array(metadata(sbe)$sessions[[1]]$results)
+```
+
+Notice that while the method was running, the error message was also returned to the console in a user friendly format.
+
+We also demostrate how this might be useful when running methods in parallel using `parallel = TRUE` and specifying a timeout limit in seconds to the `BPPARAM`.
+
+```{r}
+bpp <- SerialParam()
+bptimeout(bpp) <- 1
+
+bdslow <- BenchDesign(data = tdat) %>%
+    addMethod("slowMethod", function() { Sys.sleep(5); rnorm(5) },
+              post = list(keepSlow = identity,
+                          makeSlower = function(x) { Sys.sleep(5); x })) %>%
+    addMethod("fastMethod", function() { rnorm(5) },
+              post = list(keepFast = identity,
+                          makeSlower = function(x) { Sys.sleep(5); x }))
+
+sbep <- buildBench(bdslow, parallel = TRUE, BPPARAM = bpp)
+sbep
+
+assays(sbep)
+metadata(sbep)$sessions[[1]]$results
+simplify2array(metadata(sbep)$sessions[[1]]$results)
 ```
 
 
