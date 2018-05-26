@@ -126,7 +126,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     bd <- makePostLists(bd)
 
     ## determine final post function names and count
-    uassays <- names(bd@methods[[1]]@post)
+    uassays <- unique(unlist(lapply(bd@methods, function(x) { names(x@post) })))
     nassays <- length(uassays)
 
     ## check validity of sortIDs value (unit logical or data column name)
@@ -196,6 +196,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     ## reshape results / method:post -> post:method
     a <- lapply(uassays, function(x) { lapply(a, `[[`, x) })
     a <- lapply(a, function(x) x[!unlist(lapply(x, is, "buildbench-error"))])
+    a <- lapply(a, function(x) x[!unlist(lapply(x, is.null))])
 
     ## turn list of eval results to matrices - specify output row order
     if (!is.null(sortID_col)) {
