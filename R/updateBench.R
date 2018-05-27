@@ -190,7 +190,8 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     
     ## combine session informations into sessions of 1 object before merging
     sess1 <- metadata(sb1)$sessions
-    sess1 <- lapply(sess1, function(x) { x$methods <- setdiff(x$methods, names(bd2)); x })
+    sess1 <- lapply(sess1, function(x) { x$methods <- intersect(x$methods, keep_set); x })
+    sess1 <- lapply(sess1, function(x) { x$results <- x$results[x$methods]; x })
     sess2 <- metadata(sb2)$sessions
     sess <- c(sess1, sess2)
     metadata(sb1)$sessions <- sess
