@@ -1,6 +1,4 @@
 library(SummarizedBenchmark)
-
-##library(SummarizedBenchmark)
 context("BDMethod and BDMethodList")
 
 ## sample SummarizedBenchmark object
