@@ -28,9 +28,13 @@ setGeneric("BDMethod", valueClass = "BDMethod",
     new("BDMethod", f = f, fc = fc, params = params, post = post, meta = meta)
 }
 
-.BDMethod.bd <- function(x, i = 1) {
+.BDMethod.bdml <- function(x, i = 1) {
     stopifnot(is(i, "character") || is(i, "numeric"))
-    x@methods[[i]]
+    x[[i]]
+}
+
+.BDMethod.bd <- function(x, i = 1) {
+    BDMethod(x@methods, i = i)
 }
 
 .BDMethod.sb <- function(x, i = 1) {
@@ -48,6 +52,50 @@ setGeneric("BDMethod", valueClass = "BDMethod",
 
 #' @rdname BDMethod-class
 setMethod("BDMethod", signature(x = "quosure"), .BDMethod.quo)
+setMethod("BDMethod", signature(x = "BDMethodList"), .BDMethod.bdml)
 setMethod("BDMethod", signature(x = "BenchDesign"), .BDMethod.bd)
 setMethod("BDMethod", signature(x = "SummarizedBenchmark"), .BDMethod.sb)
 setMethod("BDMethod", signature(x = "function"), .BDMethod.fun)
+
+
+#' @rdname BenchDesign-class
+#' @export
+setGeneric("BDMethod<-", 
+           function(x, i, ..., value) standardGeneric("BDMethod<-"))
+
+#' @rdname BenchDesign-class
+#' @exportMethod "BDMethod<-"
+setReplaceMethod("BDMethod",
+                 signature(x = "BenchDesign", i = "character", value = "BDMethod"),
+                 function (x, i, value) {
+                     x@methods[[i]] <- value
+                     x
+                 })
+
+#' @rdname BenchDesign-class
+#' @exportMethod "BDMethod<-"
+setReplaceMethod("BDMethod",
+                 signature(x = "BenchDesign", i = "character", value = "NULL"),
+                 function (x, i, value) {
+                     x@methods[[i]] <- value
+                     x
+                 })
+
+
+#' @rdname BDMethodList-class
+#' @exportMethod "BDMethod<-"
+setReplaceMethod("BDMethod",
+                 signature(x = "BDMethodList", i = "character", value = "BDMethod"),
+                 function (x, i, value) {
+                     x[[i]] <- value
+                     x
+                 })
+
+#' @rdname BDMethodList-class
+#' @exportMethod "BDMethod<-"
+setReplaceMethod("BDMethod",
+                 signature(x = "BDMethodList", i = "character", value = "NULL"),
+                 function (x, i, value) {
+                     x[[i]] <- value
+                     x
+                 })

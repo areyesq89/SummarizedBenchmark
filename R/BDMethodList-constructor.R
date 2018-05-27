@@ -82,3 +82,18 @@ setAs("List", "BDMethodList", function(from) {
 })
 
 
+#' @rdname BenchDesign-class
+#' @export
+setGeneric("BDMethodList<-", 
+           function(x, ..., value) standardGeneric("BDMethodList<-"))
+
+#' @rdname BenchDesign-class
+#' @exportMethod "BDMethodList<-"
+setReplaceMethod("BDMethodList",
+                 signature(x = "BenchDesign", value = "BDMethodList"),
+                 function (x, value) {
+                     x@methods <- value
+                     x
+                 })
+
+

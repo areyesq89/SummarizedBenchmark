@@ -66,3 +66,18 @@ setGeneric("hashBDData",
 #' @rdname hashBDData
 setMethod("hashBDData", signature(object = "BDData"), .hashBDData)
 setMethod("hashBDData", signature(object = "BenchDesign"), .hashBDData.bd)
+
+
+#' @rdname BenchDesign-class
+#' @export
+setGeneric("BDData<-", 
+           function(x, ..., value) standardGeneric("BDData<-"))
+
+#' @rdname BenchDesign-class
+#' @exportMethod "BDData<-"
+setReplaceMethod("BDData",
+                 signature(x = "BenchDesign", value = "BDDataOrNULL"),
+                 function (x, value) {
+                     x@data <- value
+                     x
+                 })
