@@ -11,6 +11,7 @@
 #' meta data.
 #'
 #' @export
+#' @importFrom tibble is_tibble
 #' @importFrom dplyr all_equal
 #' @author Patrick Kimes
 compareBDMethod <- function(x, y) {

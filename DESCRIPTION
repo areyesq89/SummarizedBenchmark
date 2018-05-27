@@ -27,7 +27,8 @@ Depends: R (>= 3.5),
          dplyr,
          digest,
          sessioninfo,
-         crayon
+         crayon,
+         tibble
 Suggests: iCOBRA,
           BiocStyle,
           knitr,
