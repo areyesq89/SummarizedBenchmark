@@ -34,12 +34,12 @@ the BenchDesigns should be extracted with \code{BenchDesign(sb)} and
 passed as inputs (see Examples).
 }
 \examples{
-data(sb)
+data(quantSB)
 
-compareBenchDesigns(sb)
+compareBenchDesigns(allSB)
 
 ## same as above
-compareBenchDesigns(sb, BenchDesign(sb))
+compareBenchDesigns(allSB, BenchDesign(allSB))
 
 }
 \author{

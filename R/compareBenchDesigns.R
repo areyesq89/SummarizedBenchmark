@@ -95,12 +95,12 @@ compareBDData <- function(x, y) {
 #' list of comparison results
 #'
 #' @examples
-#' data(sb)
+#' data(quantSB)
 #'
-#' compareBenchDesigns(sb)
+#' compareBenchDesigns(allSB)
 #'
 #' ## same as above
-#' compareBenchDesigns(sb, BenchDesign(sb))
+#' compareBenchDesigns(allSB, BenchDesign(allSB))
 #'
 #' @rdname compareBenchDesigns
 #' @importFrom rlang enquo
