@@ -796,46 +796,11 @@ As expected, the `deseq2` method must again be updated to return to match the or
 
 ## Error Handling
 
-Not uncommonly, a single or a small subset of methods may fail. Ideally, all other methods should continue working and be returned. By default, Failed methods are handled (verbosely) and the values in the corresponding column are set to NA.
+When running a large benchmark study, not uncommonly, a single or a small subset of methods may fail during execution. This may be the result of misspecified parameters, an underlying bug in the software, or any number of other reasons. By default, errors thrown by methods which fail during `buildBench()` or `updateBench()` are caught and handled in a user-friendly way. As long as a single method executes without any errors, a _SummarizedBenchmark_ object is returned as usual, with the assay columns of failed methods set to `NA`. Additionally, the corresponding error messages are stored in the metadata of the object for reference.
+
+As an example, consider the following example where we run case where we benchmark two simple methods. The first, `slowMethod` draws 5 random normal samples after waiting 5 seconds, and the second, `fastMethod` draws 5 random normal samples immediately. Each method is then passed through two post-processing functions, `keepSlow` and `makeSlower`, and `keepFast` and `makeSlower`, respectively. This results in three partially overlapping assays, `keepSlow`, `keepFast` and `makeSlower`. With this example, we also demonstrate how mismatched assays are handled across methods.  
 
 ```{r}
-bd <- BenchDesign(data = mydat) %>%
-    addMethod(label = "deseq2",
-              func = deseq2_run,
-              post = list(pv = deseq2_pv,
-                          lfc = function(x) { stop("This is bad!") }),
-              params = rlang::quos(countData = cntdat,
-                                   colData = coldat, 
-                                   design = ~condition,
-                                   contrast = c("condition", "2", "1"))
-              ) %>%
-    addMethod(label = "edgeR",
-              func = edgeR_run,
-              post = list(pv = edgeR_pv,
-                          lfc = edgeR_lfc),
-              params = rlang::quos(countData = cntdat,
-                                   group = coldat$condition,
-                                   design = ~coldat$condition)
-              )
-bd
-```
-
-```{r}
-sbe <- buildBench(bd)
-sbe
-head(assay(sbe, "lfc"))
-metadata(sbe)$sessions[[1]]$results
-simplify2array(metadata(sbe)$sessions[[1]]$results)
-```
-
-Notice that while the method was running, the error message was also returned to the console in a user friendly format.
-
-We also demostrate how this might be useful when running methods in parallel using `parallel = TRUE` and specifying a timeout limit in seconds to the `BPPARAM`.
-
-```{r}
-bpp <- SerialParam()
-bptimeout(bpp) <- 1
-
 bdslow <- BenchDesign(data = tdat) %>%
     addMethod("slowMethod", function() { Sys.sleep(5); rnorm(5) },
               post = list(keepSlow = identity,
@@ -843,14 +808,51 @@ bdslow <- BenchDesign(data = tdat) %>%
     addMethod("fastMethod", function() { rnorm(5) },
               post = list(keepFast = identity,
                           makeSlower = function(x) { Sys.sleep(5); x }))
+```
+
+We run these methods in parallel using `parallel = TRUE` and specify a timeout limit of 1 second for the `BPPARAM`. Naturally, `slowMethod` will fail, and `fastMethod` will fail during the `makeSlower` post-processing function.
+
+```{r}
+bpp <- SerialParam()
+bptimeout(bpp) <- 1
 
 sbep <- buildBench(bdslow, parallel = TRUE, BPPARAM = bpp)
-sbep
-
-assays(sbep)
-metadata(sbep)$sessions[[1]]$results
-simplify2array(metadata(sbep)$sessions[[1]]$results)
 ```
+
+Notice that during the execution process, errors caught by `buildBench()` are printed to the console along with the name of the failed method and post-processing function when appropriate. 
+
+We can verify that a valid _SummarizedBenchmark_ object is still returned with the the remaining results.
+
+```{r}
+sbep
+```
+
+We can also check the values of the assays.
+
+```{r}
+sapply(assayNames(sbep), assay, x = sbep, simplify = FALSE)
+```
+
+Notice that most columns contain only `NA` values. These columns correspond to both methods which returned errors, as well as methods missing post-processing functions, e.g. no `keepSlow` function was defined for the `fastMethod` method. While the `NA` values cannot be used to distinguish the sources of the `NA` values, this is documented in the `sessions` list of the _SummarizedBenchmark_ metadata. While the `sessions` object is a list containing information for all previous sessions, we are only interested in the current, first session. (For more details on why multiple sessions may be run, see Section  \@ref(updating-analyses).)
+
+```{r}
+names(metadata(sbep)$sessions[[1]])
+```
+
+In `sessions`, there is a `"results"` entry which includes a summary of the results for each combination of method and post-processing function (assay). The entries of `results` can take one of three values: `"success"`, `"missing"`, or an error message of class `buildbench-error`. The easiest way to view these resultsis by passing the `results` to the base R function, `simplify2array()`.
+
+```{r}
+sess1res <- metadata(sbep)$sessions[[1]]$results
+simplify2array(sess1res)
+```
+
+In the returned table, columns correspond to methods, and rows correspond to assays. We clearly see that many of the methods failed due to exceeding the specified time limit. If we check one of these entries more closesly, we see that it is indeed a `buildbench-error` object that occurred (`"origin"`) during the `"main"` function.
+
+```{r}
+sess1res$slowMethod$keepSlow
+```
+
+If this error handling is not wanted, and the user would like the benchmark experiment to terminate when an error is thrown, then the option `catchErrors = FALSE` can be specified to eiher `buildBench()` or `updateBench()`.
 
 ## Specifying Method Metadata
 
