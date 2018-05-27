@@ -18,6 +18,9 @@ compare results.
 \item{\code{performanceMetrics}}{A \code{\link{SimpleList}} of the same length
 as the number of \code{\link{assays}} containing performance
 functions to be compared with the ground truths.}
+
+\item{\code{BenchDesign}}{A \code{\link{BenchDesign}} originally used to generate the
+results in the object.}
 }}
 
 \examples{

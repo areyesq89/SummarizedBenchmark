@@ -121,7 +121,9 @@ setClassUnion("BenchDesignOrNULL", c("BenchDesign", "NULL"))
 #' @slot performanceMetrics A \code{\link{SimpleList}} of the same length
 #' as the number of \code{\link{assays}} containing performance
 #' functions to be compared with the ground truths.
-#'
+#' @slot BenchDesign A \code{\link{BenchDesign}} originally used to generate the
+#' results in the object.
+#' 
 #' @author Alejandro Reyes
 #'
 #' @aliases SummarizedBenchmark-class
