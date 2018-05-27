@@ -37,8 +37,7 @@ Using comparisons presented in [@Zappia_2017], we illustrate how the *Summarized
 # Building the BenchDesign
 
 ```{r}
-devtools::load_all()
-##library("SummarizedBenchmark")
+library("SummarizedBenchmark")
 library("magrittr")
 ```
 
