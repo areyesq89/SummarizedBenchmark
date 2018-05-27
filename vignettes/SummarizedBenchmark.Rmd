@@ -336,7 +336,7 @@ Notice, however, unlike the original *BenchDesign* above, the data is stored as 
 compareBDData(BDData(tdat), BenchDesign(sb))
 ```
 
-Finally, information about the R session where the methods were executed is stored in the metadata of the *SummarizedBenchmark* as an entry in a list called `sessions`. The package supports rerunning benchmark experiments, and for this purpose, each new session is stored as a new entry in the `sessions` list. Since this experiment has only been executed once, the list only has a single entry in the `sessions` list. In addition to storing the session info and list of methods evaluated during the session, the list also keeps track of the non-default parameters specified to the `buildBench()` call, i.e. `truthCols = "H"`.
+Finally, information about the R session where the methods were executed is stored in the metadata of the *SummarizedBenchmark* as an entry in a list called `sessions`. The package supports rerunning benchmark experiments, and for this purpose, each new session is stored as a new entry in the `sessions` list. Since this experiment has only been executed once, the list only has a single entry in the `sessions` list. In addition to storing the session info and list of methods evaluated during the session, the list also keeps track of all parameters in the `buildBench()` call, i.e. `truthCols = "H"`.
 
 ```{r}
 mp <- getOption("max.print")
@@ -645,10 +645,13 @@ head(assay(sb, "lfc"))
 
 ## Parallelizing with BiocParallel
 
-### Across methods
-The simple examples considered in this vignette were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Since constructing a *BenchDesign* object requires no computation, the bottleneck only appears at the `buildBench()` step of the process. Parallelization of this step is enabled using the `r BiocStyle::Biocpkg("BiocParallel")` package.  
+The simple examples considered in this vignette were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Similarly, when replicating benchmark experiments across multiple data sets, running each experiment in serial may be inefficent. In this section, we describe how to use the `BiocStyle::Biocpkg("BiocParallel")` package to parallelize benchmarking across methods and data sets. More details on how to specify the parallelization back-end can be found in the _Introduction to BiocParallel_ vignette for the `r BiocStyle::Biocpkg("BiocParallel")` package. 
 
-By default, parallel evaluation is disabled, but can easily be enabled by setting `parallel = TRUE` and optionally specifying the `BPPARAM =` parameter. If `BPPARAM =` is not specified, the default back-end will be used. The default back-end can be checked with `bpparam()`.
+### Across methods
+
+Since constructing a *BenchDesign* object requires no computation, the bottleneck only appears at the `buildBench()` step of the process. Parallelization of this step is enabled using the `r BiocStyle::Biocpkg("BiocParallel")` package. By default, parallel evaluation is disabled, but can easily be enabled by setting `parallel = TRUE` and optionally specifying the `BPPARAM =` parameter. If `BPPARAM =` is not specified, the default back-end will be used. The default back-end can be checked with `bpparam()`.
+
+Parallelization of `buildBench()` is carried out across the set of methods specified with `addMethod()`. Thus, there is no benefit to specifying more cores than the number of methods.
 
 ```{r}
 bpparam()
@@ -664,12 +667,13 @@ all(assay(sbp) == assay(sb), na.rm = TRUE)
 ```
 
 ### Across datasets
+
 Typically, benchmark studies have more than a single dataset. For this cases, users can create a  *BenchDesign* object and execute this design on many datasets. Again, running the step of executing the benchmark design on every dataset using a single core might take to long. However, parallelization across datasets is possible using the `r BiocStyle::Biocpkg("BiocParallel")` package. 
 
 To demonstrate this, we split the count data and ground truths of the [@Soneson_2016] dataset, as if they were three different datasets. 
 
 ```{r}
-mydat <- as.list( bd@data@data )
+#mydat <- as.list( bd@data@data )
 ndat <- length(mydat$status)
 spIndexes <- split( seq_len( ndat ), rep( 1:3, length.out=ndat ) )
 
@@ -692,24 +696,45 @@ sbL <- bplapply( datasetList, function( x ){
 sbL
 ```
 
-### BiocParallel instances
-
-Details on how to specify the parallelization back-end can be found in the _Introduction to BiocParallel_ vignette for the `r BiocStyle::Biocpkg("BiocParallel")` package. Parallelization of `buildBench()` is carried out across the set of methods specified with `addMethod()`. There is no benefit to specifying more cores than the number of methods.
-
 ## Updating Analyses
 
-Often, benchmarking analyses are performed in multiple steps, iteratively, with new methods added. Additionally, package versions may be updated. We continue with the example of comparing methods for differential expression. Suppose we have ran the analysis a few weeks or months ago, and are interested in checking if any methods need to be rerun, e.g. due to an update in a package. The package currently provides the `updateBench()` function. We can check to see if any methods need to be rerun by simply calling on `updateBench()` with `dryrun = TRUE`. 
+Often, benchmarking analyses are performed in multiple steps, iteratively, with methods added or updated based on previous results. Additionally, over the course of a benchmarking study, developers may update methods to improve the implementation or add new features. Ideally, whenever a methods are updated or added, the benchmark results should also be updated. Naively, all methods in the benchmark could be re-computed by calling `buildBench()` on the original _BenchDesign_ whenever the benchmarker notices that a method has been changed. However, not only is this computational inefficient, but requires the benchmarker to manually check if any methods have been verified.
+
+To make this process easier, the package includes the `updateBench()` function which can be used to both check if any results in a _SummarizedBenchmark_ object need to be updated, and to update these results with a call to `buildBench()`.
+
+To demonstrate the use of `updateBench()`, we continue with the example of comparing methods for differential expression. First, the function can be called with just a single _SummarizedBenchmark_ object to see if any of the methods have become outdated. By default, the function will not actually run any methods.
 
 ```{r}
-updateBench(sb = sb, dryrun = TRUE)
+updateBench(sb = sb)
 ```
 
-Notice that none of the methods need to be rerun. Suppose we decide to 
+The output is a table showing whether any methods need to be re-evaluated, as well as which components of the methods are now outdated. Here, the headings correspond to:
+
+- `Func`: the main method function,
+- `Param`: the method parameters,
+- `Meta`: the manually specified method metadata,
+- `Post`: the post-processing functions,
+- `Vers`: the corresponding package version for the main method.
+
+As can be seen by the `N`s under `Need to (Re)Run`, all results in the _SummarizedBenchmark_ are still valid, and no method needs to be re-run. Also note that the benchmark data is listed as `full data missing`. This is because the _SummarizedBenchmark_ object only contains the data set as a MD5 hash. If any of the methods needed to be updated, the original data would have to be specified to `updateBench()` using the `data =` parameter.
 
 ```{r}
-bd2 <- modifyMethod(bd, "deseq2", rlang::quos(bd.meta = list(note = "modified post hoc")))
-updateBench(sb = sb, bd = bd2, dryrun = TRUE)
+BDData(BenchDesign(sb))
 ```
+
+The second way to call `updateBench()` is to specify both a _SummarizedBenchmark_ object and a _BenchDesign_ object. Intuitively, this will result in updating the results of the _SummarizedBenchmark_ object to include any new or modified methods in the _BenchDesign_. Methods between the two objects are matched by the method label, e.g. `deseq2`. As an example, suppose we modify one of the methods in the _BenchDesign_ object and want to rerun the benchmarking experiment. We first create a modified _BenchDesign_ object, where we modify a single method's manually specified meta data. Note that this is just a trivial update and normally would not warrant updating the results.
+
+```{r}
+bd2 <- modifyMethod(bd, "deseq2", rlang::quos(bd.meta = list(note = "minor update")))
+```
+
+Next, we pass the object to `updateBench()` along with the original _SummarizedBenchmark_ object.
+
+```{r}
+updateBench(sb = sb, bd = bd2)
+```
+
+Notice that now the `Need to (Re)Run` and `Meta` columns are now set to `Y` for the `deseq2` method, indicating that the metadata of the method has been updated, and the method now needs to be rerun. Next, suppose we also decide to add a new method to our comparison. Here, we add an alternate version of DESeq2 to the comparison based on adaptive shrinkage (ASH) [@Stephens_2017].  
 
 ```{r}
 deseq2_ashr <- function(countData, colData, design, contrast) {
@@ -722,46 +747,52 @@ deseq2_ashr <- function(countData, colData, design, contrast) {
 
 bd2 <- addMethod(bd2, "deseq2_ashr", 
                  deseq2_ashr,
-                 post = list(lfc = deseq2_lfc),
+                 post = list(pv = deseq2_pv,
+                             lfc = deseq2_lfc),
                  params = rlang::quos(countData = cntdat,
                                       colData = coldat, 
                                       design = ~condition,
                                       contrast = c("condition", "2", "1")))
-
-updateBench(sb, bd2, dryrun = TRUE)
 ```
 
-We run the update by specifying `dryrun = FALSE`.
+Now we see that bo the modified `deseq2` and `deseq2_ashr` methods are listed as needing to be rerun.
 
 ```{r}
-sb2 <- updateBench(sb, bd2, dryrun = FALSE)
+updateBench(sb = sb, bd = bd2)
+```
+
+To run the update, we simply modify the call to `updateBench()` with `dryrun = FALSE`. When we do this, only the two methods needing to be rerun are evaluated.
+
+```{r}
+sb2 <- updateBench(sb = sb, bd = bd2, dryrun = FALSE)
 sb2
 ```
 
-We can check the output.
+We can check the output to see that the results of the `deseq2_ashr` method have been added along with the updated `deseq2` results.
 
 ```{r}
 head(assay(sb2, "lfc"))
 ```
 
-Additionally, we check the session metadata.
-
-```{r}
-lapply(metadata(sb2)$sessions, `[[`, "methods")
-```
-
-Also, notice that a session index is also stored in the column data of each method. This can be used to map methods quickly to the corresponding entry of the `sessions` list stored in the object metadata.
+Additionally, notice that a session index is also stored in the column data of each method. This can be used to map methods quickly to the corresponding entry of the `sessions` list stored in the object metadata.
 
 ```{r}
 colData(sb2)[, "session.idx", drop = FALSE]
 ```
 
-We can also compare the new *SummarizedBenchmark* object against the previous *BenchDesign*.
+Recall, `sessions` is a list of session information stored in the metadata of the _SummarizedBenchmark_ object. Each entry of the `sessions` list includes the names of methods for which the results were generated during that session, the corresponding method results, the run parameters, and the session info. We can check the list of methods for each session and see that it matches the `session.idx` values above.
+
+```{r}
+lapply(metadata(sb2)$sessions, `[[`, "methods")
+```
+
+As another example, we can also compare the new _SummarizedBenchmark_ object against the original _BenchDesign_. By default, `updateBench()` will keep all methods in the _SummarizedBenchmark_ object even if a corresponding method is not found in the new _BenchDesign_ object. To avoid this behavior, we can specify `keepAll = FALSE`.
 
 ```{r}
 updateBench(sb2, bd, keepAll = FALSE)
 ```
 
+As expected, the `deseq2` method must again be updated to return to match the original method definition, and the newer `deseq2_ashr` method must be dropped.
 
 ## Error Handling
 
@@ -820,7 +851,6 @@ assays(sbep)
 metadata(sbep)$sessions[[1]]$results
 simplify2array(metadata(sbep)$sessions[[1]]$results)
 ```
-
 
 ## Specifying Method Metadata
 
