@@ -64,7 +64,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     newrun_set <- dplyr::filter(res$methods$res, overlap == "yOnly")$label
 
     ## need to run updated/changed methods (or if data is new)
-    rerun_set <- dplyr::filter(res$methods$res, overlap == "both")
+    rerun_set <- dplyr::filter(res$methods$res, overlap == "Both")
     if (!isTRUE(res$data$data)) {
         rerun_set <- rerun_set$label
     } else if (version) {
@@ -72,7 +72,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     } else {
         rerun_set <- dplyr::filter(rerun_set, !f | !meta | !params | !post)$label
     }
-
+    
     ## construct method list and pick data set
     bdm <- BDMethodList(bd)[c(newrun_set, rerun_set)]
     bdd <- .select.bddata(sb, bd)
@@ -127,12 +127,13 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
 
 
 
-## helper to handle specific parts of merging SummarizedBenchmark objects
+## helper to handle merging of SummarizedBenchmark objects
 ##
 ## NOTE: This is not meant to be for general use. Here, sb2 is assumed to
 ##       be a newer SummarizedBenchmark object created from running
 ##       updateBench with sb1 and a newer BenchDesign object. Therefore,
 ##       if the same method is run in both, the results from
+##
 ## @author Patrick Kimes
 .combineSummarizedBenchmarks <- function(sb1, sb2) {
     stopifnot(is(sb1, "SummarizedBenchmark"), is(sb2, "SummarizedBenchmark"))
@@ -140,7 +141,7 @@ updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll =
     ## combine BenchDesign objects
     bd1 <- BDMethodList(sb1)
     bd2 <- BDMethodList(sb2)
-    keep_set <- setdiff(names(bd1), names(bd2))
+    keep_set <- setdiff(colnames(sb1), colnames(sb2))
     bd1 <- bd1[keep_set]
     bdd <- BDData(sb2)
     bd <- BenchDesign(methods = c(bd1, bd2), data = bdd)
