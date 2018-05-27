@@ -160,7 +160,7 @@ test_that("errors thrown with inappropriate inputs", {
                     func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
                     post = function(x) { x * 1 })
     expect_silent(sb <- buildBench(bd))
-    expect_equal(assayNames(sb), "a1")
+    expect_equal(sort(assayNames(sb)), c("a1", "default"))
 
     ## check proper handling if inconsistent length across methods
     bd <- addMethod(BenchDesign(data = tdat), label = "bonf",
@@ -222,7 +222,6 @@ test_that("buildBench can handle sortIDs", {
     expect_equal(rownames(assay(sb1b)), newdat$myids)
     expect_true(is.na(assay(sb1b)["a", "bcef"]))
 
-
     ## basic BenchDesign w/ 2 assays, different length output
     bd2 <- BenchDesign(data = newdat)
     bd2 <- addMethod(bd2, label = "abc",
@@ -243,7 +242,8 @@ test_that("buildBench can handle sortIDs", {
     expect_length(assays(sb2a), 2)
     expect_equal(rownames(sb2a), c("a", "b", "c", "e", "f"))
     expect_true(is.na(assay(sb2a, "o2")["a", "bcef"]))
-    expect_error(buildBench(bd2, truthCols = "mytru", sortIDs = TRUE))
+    expect_error(buildBench(bd2, truthCols = list(o1 = "mytru"),
+                            sortIDs = TRUE))
 
     ## check behavior when sorting with ID column
     sb2b <- buildBench(bd2, sortIDs = "myids")
