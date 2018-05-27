@@ -148,6 +148,8 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     if (!is.null(truthCols)) {
         if (is.null(names(truthCols)) && length(truthCols) == 1L && nassays == 1L) {
             names(truthCols) <- uassays
+        } else if (is.null(names(truthCols)) && length(truthCols) == 1L && nassays > 1L) {
+            warning("\tDropping 'truthCols' since it cannot be matched with an assay.\n")
         }
 
         if (!all(names(truthCols) %in% uassays))
