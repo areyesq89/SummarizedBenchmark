@@ -183,9 +183,9 @@ setGeneric("compareBenchDesigns",
 
     ## add in rows for xonly, yonly methods
     mxy <- dplyr::bind_rows(Both = mxy,
-                             xOnly = if (length(mxo)) { dplyr::tibble(label = mxo) },
-                             yOnly = if (length(myo)) { dplyr::tibble(label = myo) },
-                             .id = "overlap")
+                            xOnly = if (length(mxo)) { dplyr::tibble(label = mxo) },
+                            yOnly = if (length(myo)) { dplyr::tibble(label = myo) },
+                            .id = "overlap")
     
     return(list(res = mxy, x, y))
 }
