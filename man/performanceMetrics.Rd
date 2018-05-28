@@ -4,10 +4,10 @@
 \docType{methods}
 \name{performanceMetrics}
 \alias{performanceMetrics}
-\alias{performanceMetrics<-}
-\alias{performanceMetrics}
 \alias{performanceMetrics,SummarizedBenchmark-method}
 \alias{performanceMetrics<-,SummarizedBenchmark,SimpleList-method}
+\alias{performanceMetrics}
+\alias{performanceMetrics<-}
 \alias{performanceMetrics,SummarizedBenchmark-method}
 \alias{performanceMetrics}
 \title{Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.}

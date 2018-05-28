@@ -1,28 +1,3 @@
-#' Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.
-#'
-#' @docType methods
-#' @name performanceMetrics
-#' @rdname performanceMetrics
-#' @aliases performanceMetrics performanceMetrics,SummarizedBenchmark-method performanceMetrics<-,SummarizedBenchmark,SimpleList-method
-#'
-#' @param object a \code{SummarizedBenchmark} object.
-#' @param assay A character string indicating an assay name
-#' @param value A SimpleList of the same length as the number of assays
-#' @param ... Futher arguments, perhaps used by methods
-#' @seealso \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}
-#'
-#' @examples
-#'
-#' data( sb )
-#' performanceMetrics( sb )
-#' performanceMetrics( sb, assay="qvalue" )
-#' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
-#'
-#' @author Alejandro Reyes
-#'
-#' @return A SimpleList with one element for each assay. Each element of the list contains a list of performance functions.
-NULL
-
 performanceMetricsSB <- function( object, assay=NULL ){
   validObject( object )
   if( is.null( assay ) ){
@@ -54,27 +29,8 @@ setReplaceMethod( "performanceMetrics",
                  } )
 
 
-
-#' Accessor and replacement functions for the slots of a SummarizedBenchmark object.
-#' @docType methods
-#' @name SummarizedBenchmark-accessors
 #' @rdname SummarizedBenchmark-accessors
 #' @aliases assayNames assayNames,SummarizedBenchmark-method assayNames<-,SummarizedBenchmark,character-method
-#'
-#' @param x a \code{SummarizedBenchmark} object.
-#' @param value A character vector
-#' @param ... Futher arguments, perhaps used by methods
-#' @seealso \code{\link{performanceMetrics}}
-#'
-#' @return Either a \code{SummarizedBenchmark} object or a slot of the \code{SummarizedBenchmark} object.
-#'
-#' @examples
-#'
-#' data( sb )
-#' assayNames( sb )[2] <- "log2FC"
-#'
-#' @author Alejandro Reyes
-#' @importMethodsFrom SummarizedExperiment assayNames
 #' @export
 setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
                   function(x, ..., value)

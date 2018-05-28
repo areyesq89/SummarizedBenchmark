@@ -2,13 +2,13 @@
 % Please edit documentation in R/AllGenerics.R,
 %   R/SummarizedBenckmark-accessors.R
 \docType{methods}
-\name{groundTruths}
+\name{SummarizedBenchmark-accessors}
+\alias{SummarizedBenchmark-accessors}
 \alias{groundTruths}
 \alias{groundTruths<-}
-\alias{SummarizedBenchmark-accessors}
+\alias{assayNames<-,SummarizedBenchmark,character-method}
 \alias{assayNames}
 \alias{assayNames,SummarizedBenchmark-method}
-\alias{assayNames<-,SummarizedBenchmark,character-method}
 \alias{mcols<-,SummarizedBenchmark-method}
 \alias{groundTruths,SummarizedBenchmark-method}
 \alias{groundTruths}
