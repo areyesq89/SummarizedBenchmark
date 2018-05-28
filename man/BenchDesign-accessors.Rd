@@ -30,7 +30,7 @@ BDMethodList(x) <- value
 
 \S4method{BDMethod}{BenchDesign}(x, i = 1)
 
-\S4method{BDMethodList}{BenchDesign}(..., x = NULL)
+\S4method{BDMethodList}{BenchDesign}(x)
 }
 \arguments{
 \item{x}{BenchDesign object.}

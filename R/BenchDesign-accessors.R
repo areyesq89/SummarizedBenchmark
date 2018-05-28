@@ -68,6 +68,6 @@ setMethod("BDMethod",
 #' @exportMethod "BDMethodList"
 setMethod("BDMethodList",
           signature(x = "BenchDesign"),
-          function(..., x) {
+          function(x) {
               x@methods
           })
