@@ -22,13 +22,10 @@
 #' df <- data.frame(x1 = rnorm(20), y1 = rnorm(20))
 #' bd <- BenchDesign(data = df)
 #'
-#' @rdname BenchDesign-class
+#' @name BenchDesign
 #' @export
 #' @author Patrick Kimes
-setGeneric("BenchDesign",
-           valueClass = "BenchDesign",
-           function(..., methods = NULL, data = NULL) standardGeneric("BenchDesign"))
-
+NULL
 
 .BenchDesign <- function(..., methods, data) {
     ## add shortcut for just a single SummarizedBenchmark object (want to return w/ data)
@@ -36,7 +33,7 @@ setGeneric("BenchDesign",
     if (length(ml) == 1 && is.null(methods) && is.null(data) && is(ml[[1]], "SummarizedBenchmark"))
         return(BenchDesign(methods = ml[[1]]))
     
-    bdml <- BDMethodList(..., object = methods)
+    bdml <- BDMethodList(..., x = methods)
     if (!is.null(data) && !is(data, "BDData")) {
         data <- new("BDData", data = data,
                     type = ifelse(is(data, "character"), "md5hash", "data"))
@@ -54,8 +51,8 @@ setGeneric("BenchDesign",
     bd
 }
 
-#' @rdname BenchDesign-class
+#' @rdname BenchDesign
 setMethod("BenchDesign", signature(methods = "ANY", data = "ANY"), .BenchDesign)
+
+#' @rdname BenchDesign
 setMethod("BenchDesign", signature(methods = "SummarizedBenchmark", data = "ANY"), .BenchDesign.sb)
-
-

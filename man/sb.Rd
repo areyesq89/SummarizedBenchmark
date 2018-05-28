@@ -15,7 +15,7 @@ This object contains the example data from the \code{iCOBRA} package reformatted
 \code{edgeR} and \code{limma}-voom.
 }
 \examples{
-data( sb )
+data(sb)
 }
 \keyword{SummarizedBenchmark}
 \keyword{data}

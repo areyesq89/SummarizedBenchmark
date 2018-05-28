@@ -40,6 +40,8 @@
     }
 }
 
+#' @param object BDMethod object to show
+#' 
 #' @importFrom stringr str_pad str_trunc
 #' @importFrom rlang quo_text
 #' @rdname BDMethod-class
@@ -80,6 +82,8 @@ setMethod("show", signature(object = "BDMethod"), .show.BDMethod)
     }
 }
 
+#' @param object BenchDesign object to show
+#' 
 #' @importFrom stringr str_pad str_trunc
 #' @importFrom rlang quo_text
 #' @rdname BenchDesign-class

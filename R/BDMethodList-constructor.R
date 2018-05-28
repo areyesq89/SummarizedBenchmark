@@ -3,33 +3,34 @@
 #' Initialized a new SimpleList of BenchDesign method (BDMethod) objects.
 #'
 #' @param ... a named list of BDMethod objects
+#' @param x a BenchDesign or SummarizedBenchmark object to extract
+#'        the BDMethodList from. (default = NULL)
 #' 
 #' @return
 #' BDMethodList object
 #'
 #' @examples
 #' BDMethodList()
-#' 
+#'
+#' @name BDMethodList
 #' @importFrom rlang flatten
-#' @rdname BDMethodList-class
 #' @export
-setGeneric("BDMethodList", valueClass = "BDMethodList",
-           function(..., object = NULL) standardGeneric("BDMethodList"))
+#' @author Patrick Kimes
+NULL
 
-
-.BDMethodList <- function(..., object) {
+.BDMethodList <- function(..., x) {
     ml <- list(...)
-    if (!is.null(object))
-        ml <- c(ml, object)
+    if (!is.null(x))
+        ml <- c(ml, x)
     if (length(ml) == 0)
         ml <- list()
 
-    ## allow shortcut for calling on list, SB, BD w/out specifying object=
+    ## allow shortcut for calling on list, SB, BD w/out specifying x=
     if (length(ml) == 1) {
         if (is.list(ml[[1]]) || is(ml[[1]], "List"))
             ml <- ml[[1]]
         else if (is(ml[[1]], "BenchDesign") || is(ml[[1]], "SummarizedBenchmark"))
-            return(BDMethodList(object = ml[[1]]))
+            return(BDMethodList(x = ml[[1]]))
     }
 
     ## extract any BD objects and flatten any BDML objects
@@ -58,21 +59,10 @@ setGeneric("BDMethodList", valueClass = "BDMethodList",
         return(new("BDMethodList", S4Vectors::SimpleList(ml)))
 }
 
-.BDMethodList.bd <- function(..., object) {
-    object@methods
-}
+#' @rdname BDMethodList
+setMethod("BDMethodList", signature(x = "ANY"), .BDMethodList)
 
-.BDMethodList.sb <- function(..., object) {
-    BDMethodList(object = BenchDesign(methods = object))
-}
-
-#' @rdname BDMethodList-class
-setMethod("BDMethodList", signature(object = "ANY"), .BDMethodList)
-setMethod("BDMethodList", signature(object = "BenchDesign"), .BDMethodList.bd)
-setMethod("BDMethodList", signature(object = "SummarizedBenchmark"), .BDMethodList.sb)
-
-
-#' @rdname BDMethodList-class
+#' @rdname BDMethodList
 #' @name coerce
 setAs("list", "BDMethodList", function(from) {
     new("BDMethodList", as(from, "SimpleList"))
@@ -80,20 +70,4 @@ setAs("list", "BDMethodList", function(from) {
 setAs("List", "BDMethodList", function(from) {
     new("BDMethodList", as(from, "SimpleList"))
 })
-
-
-#' @rdname BenchDesign-class
-#' @export
-setGeneric("BDMethodList<-", 
-           function(x, ..., value) standardGeneric("BDMethodList<-"))
-
-#' @rdname BenchDesign-class
-#' @exportMethod "BDMethodList<-"
-setReplaceMethod("BDMethodList",
-                 signature(x = "BenchDesign", value = "BDMethodList"),
-                 function (x, value) {
-                     x@methods <- value
-                     x
-                 })
-
 

@@ -7,10 +7,10 @@
 #' @return
 #' BDData object
 #'
-#' @rdname BDData-class
+#' @name BDData
 #' @export
-setGeneric("BDData", valueClass = "BDDataOrNULL",
-           function(data) standardGeneric("BDData"))
+#' @author Patrick Kimes
+NULL
 
 .BDData.default <- function(data) {
     if (is(data, "character")) {
@@ -28,10 +28,16 @@ setGeneric("BDData", valueClass = "BDDataOrNULL",
     BDData(BenchDesign(data))
 }
 
-#' @rdname BDData-class
+#' @rdname BDData
 setMethod("BDData", signature(data = "ANY"), .BDData.default)
+
+#' @rdname BDData
 setMethod("BDData", signature(data = "BenchDesign"), .BDData.bd)
+
+#' @rdname BDData
 setMethod("BDData", signature(data = "SummarizedBenchmark"), .BDData.sb)
+
+#' @rdname BDData
 setMethod("BDData", signature(data = "BDData"), function(data) { data })
 
 
@@ -45,12 +51,12 @@ setMethod("BDData", signature(data = "BDData"), function(data) { data })
 #' @return
 #' an object of the same class as \code{object} with data
 #' converted to a MD5 hash.
-#' 
+#'
+#' @name hashBDData
 #' @importFrom digest digest
 #' @export
 #' @author Patrick Kimes
-setGeneric("hashBDData", 
-           function(object) standardGeneric("hashBDData"))
+NULL
 
 .hashBDData <- function(object) {
     if (object@type == "md5hash")
@@ -65,19 +71,8 @@ setGeneric("hashBDData",
 
 #' @rdname hashBDData
 setMethod("hashBDData", signature(object = "BDData"), .hashBDData)
+
+#' @rdname hashBDData
 setMethod("hashBDData", signature(object = "BenchDesign"), .hashBDData.bd)
 
 
-#' @rdname BenchDesign-class
-#' @export
-setGeneric("BDData<-", 
-           function(x, ..., value) standardGeneric("BDData<-"))
-
-#' @rdname BenchDesign-class
-#' @exportMethod "BDData<-"
-setReplaceMethod("BDData",
-                 signature(x = "BenchDesign", value = "BDDataOrNULL"),
-                 function (x, value) {
-                     x@data <- value
-                     x
-                 })

@@ -5,18 +5,17 @@
 #' to the results of applying each method on the data, the returned
 #' \code{SummarizedBenchmark} also includes metadata for the methods
 #' in the \code{colData} of the returned object, metadata for the
-#' data in the \code{rowData}, and the session information generated
-#' by \code{sessionInfo()} in the \code{metadata}.
+#' data in the \code{rowData}, and session information in the
+#' \code{metadata}.
 #'
 #' @param bd \code{BenchDesign} object.
 #' @param data Data set to be used for benchmarking, will take priority over
-#'        data set originally specified to BenchDesign object.
-#'        Ignored if NULL. (default = NULL)
+#'        data set specified to BenchDesign object. Ignored if NULL. (default = NULL)
 #' @param truthCols Character vector of column names in data set corresponding to
 #'        ground truth values for each assay. If specified, column will be added to
-#'        the \code{groundTruth} DataFrame for the returned SummarizedBenchmark object.
-#'        If the \code{BenchDesign} includes only a single assay, the same name
-#'        will be used for the assay. If the \code{BenchDesign} includes multiple assays,
+#'        the \code{groundTruth} DataFrame of the returned SummarizedBenchmark object.
+#'        If the BenchDesign includes only a single assay, the same name
+#'        will be used for the assay. If the BenchDesign includes multiple assays,
 #'        to map data set columns with assays, the vector must have names corresponding
 #'        to the assay names specified to the \code{post} parameter at each
 #'        \code{addMethod} call. (default = NULL)

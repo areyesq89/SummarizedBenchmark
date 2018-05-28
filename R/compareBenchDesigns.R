@@ -95,20 +95,10 @@ compareBDData <- function(x, y) {
 #' @return
 #' list of comparison results
 #'
-#' @examples
-#' data(quantSB)
-#'
-#' compareBenchDesigns(allSB)
-#'
-#' ## same as above
-#' compareBenchDesigns(allSB, BenchDesign(allSB))
-#'
-#' @rdname compareBenchDesigns
+#' @name compareBenchDesigns
 #' @importFrom rlang enquo
-#' @export
 #' @author Patrick Kimes
-setGeneric("compareBenchDesigns",
-           function(x, y = NULL, ...) standardGeneric("compareBenchDesigns"))
+NULL
 
 .compare.sb <- function(x, y, ...) {
     .compare.base(x, x@BenchDesign, functions = functions)
@@ -215,8 +205,21 @@ setGeneric("compareBenchDesigns",
 }
 
 #' @rdname compareBenchDesigns
+#' @export
 setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "missing"), .compare.sb)
+
+#' @rdname compareBenchDesigns
+#' @export
 setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "SummarizedBenchmark"), .compare.base)
+
+#' @rdname compareBenchDesigns
+#' @export
 setMethod("compareBenchDesigns", signature(x = "SummarizedBenchmark", y = "BenchDesign"), .compare.base)
+
+#' @rdname compareBenchDesigns
+#' @export
 setMethod("compareBenchDesigns", signature(x = "BenchDesign", y = "SummarizedBenchmark"), .compare.base)
+
+#' @rdname compareBenchDesigns
+#' @export
 setMethod("compareBenchDesigns", signature(x = "BenchDesign", y = "BenchDesign"), .compare.base)
