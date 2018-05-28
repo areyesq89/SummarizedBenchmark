@@ -32,14 +32,9 @@ test_that("BDMethod constructor accepts all valid input", {
     expect_identical(bdm@f, base::identity)
     expect_equal(rlang::expr_text(bdm@fc), "base::identity")
 
-    ## call with SummarizedBenchmark
-    expect_silent(bdm <- BDMethod(allSB))
-    expect_is(bdm, "BDMethod")
-
     ## call with BenchDesign
     expect_silent(bdm <- BDMethod(BenchDesign(allSB), i = 2))
     expect_is(bdm, "BDMethod")
-    expect_identical(BDMethod(BenchDesign(allSB)), BDMethod(allSB))
 })
 
 test_that("BDMethodList constructor accepts all valid input", {
