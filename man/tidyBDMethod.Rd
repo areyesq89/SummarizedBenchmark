@@ -40,6 +40,10 @@ a tibble of meta data for the specified list of methods.
 A helper function to extract information for a single
 or multiple BDMethod object or a list of BDMethod objects.
 }
+\details{
+If any quosures are specified to the "meta" slot of a BDMethod object,
+the quosure is converted to a text string using \code{rlang::quo_text}.
+}
 \author{
 Patrick Kimes
 }

@@ -14,15 +14,22 @@
 #'
 #' @return
 #' A named vector of meta data if only a single BDMethod object specified, else
-#' a tibble of meta data for the specified list of methods. 
+#' a tibble of meta data for the specified list of methods.
+#'
+#' @details
+#' If any quosures are specified to the "meta" slot of a BDMethod object,
+#' the quosure is converted to a text string using \code{rlang::quo_text}.
 #'
 #' @name tidyBDMethod
-#' @importFrom rlang eval_tidy
+#' @importFrom dplyr bind_rows
+#' @importFrom rlang is_quosure quo_text
 #' @author Patrick Kimes
 NULL
 
 .tidyBDMethod.bdm <- function(obj, dat) {
-    obj@meta <- lapply(obj@meta, rlang::eval_tidy, data = dat)
+    quo_meta <- unlist(lapply(obj@meta, rlang::is_quosure))
+    if (any(quo_meta))
+        obj@meta[quo_meta] <- lapply(obj@meta[quo_meta], rlang::quo_text)
     
     tidyp <- tidyBDMethodParams(obj@params)
     tidymf <- tidyBDMethodMeta(obj@meta)

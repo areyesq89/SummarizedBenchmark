@@ -14,7 +14,7 @@
 #' BDMethod object
 #'
 #' @name BDMethod
-#' @importFrom rlang enquo
+#' @importFrom rlang get_expr eval_tidy
 #' @export
 NULL
 

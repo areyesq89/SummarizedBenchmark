@@ -14,6 +14,7 @@
 #'
 #' @name BDMethodList
 #' @importFrom rlang flatten
+#' @importFrom S4Vectors SimpleList
 #' @export
 #' @author Patrick Kimes
 NULL

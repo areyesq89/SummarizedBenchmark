@@ -85,7 +85,9 @@
 #'
 #' @import BiocParallel
 #' @importFrom sessioninfo session_info
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr tibble select
+#' @importFrom tidyr spread unnest
+#' @importFrom rlang quo eval_tidy
 #' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes

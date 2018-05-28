@@ -20,9 +20,8 @@
     }
     cat("meta:\n")
     if (!is.null(object@meta)) {
-        meta <- lapply(object@meta, rlang::eval_tidy)
-        meta_n <- names(meta)
-        meta_q <- sapply(meta, quo_text)
+        meta_n <- names(object@meta)
+        meta_q <- sapply(object@meta, quo_text)
         for (i in seq(meta_n))
             cat(stringr::str_trunc(paste(" ", meta_n[i], ":", meta_q[i]), 60), "\n")
     } else {

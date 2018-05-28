@@ -75,7 +75,8 @@ setValidity("BDMethod",
 #' Extension of the SimpleList class to contain a list of BDMethod
 #' objects.
 #'
-#' @exportClass BDMethod
+#' @importClassesFrom S4Vectors SimpleList
+#' @exportClass BDMethodList
 #' @name BDMethodList-class
 #' @author Patrick Kimes
 setClass("BDMethodList", contains = "SimpleList")

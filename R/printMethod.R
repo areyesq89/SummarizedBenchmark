@@ -28,8 +28,7 @@
 #' printMethods(bench)
 #' 
 #' @md
-#' @import rlang
-#' @importFrom stringr str_trunc str_pad
+#' @importFrom stringr str_pad
 #' @export
 #' @author Patrick Kimes
 printMethod <- function(bd, n = NULL) {

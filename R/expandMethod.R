@@ -68,7 +68,7 @@ expandMethod.BenchDesign <- function(bd, label, params, onlyone = NULL,
     if (rlang::is_quosures(params)) {
         if (is.null(onlyone)) {
             stop("If onlyone = NULL, a named list of parameter lists must be supplied to ",
-                 "'params =' as a list of quosure lists created using rland::quos.\n",
+                 "'params =' as a list of quosure lists created using rlang::quos.\n",
                  "e.g. params = list(new_method1 = quos(..), new_method2 = quos(..))")
         }
         qd <- lapply(1:length(params), function(zi) {
@@ -78,18 +78,18 @@ expandMethod.BenchDesign <- function(bd, label, params, onlyone = NULL,
     } else if (is.list(params) & all(sapply(params, rlang::is_quosures))) {
         if (!is.null(onlyone)) {
             stop("If onlyone is non-NULL, a list of parameter values must be supplied to ",
-                 "'params =' as a list of quosures created using rland::quos.\n",
+                 "'params =' as a list of quosures created using rlang::quos.\n",
                  "e.g. params = quos(new_method1 = new_value1, new_method2 = new_value2)")
         }
         qd <- params
     } else {
         if (is.null(onlyone)) {
             stop("If 'onlyone = NULL', a named list of parameter lists must be supplied to ",
-                 "'params =' as a list of quosure lists created using rland::quos.\n",
+                 "'params =' as a list of quosure lists created using rlang::quos.\n",
                  "e.g. params = list(new_method1 = quos(..), new_method2 = quos(..))")
         } else {
             stop("If 'onlyone' is non-NULL, a list of parameter values must be supplied to ",
-                 "'params =' as a list of quosures created using rland::quos.\n",
+                 "'params =' as a list of quosures created using rlang::quos.\n",
                  "e.g. params = quos(new_method1 = new_value1, new_method2 = new_value2)")
         }
     }

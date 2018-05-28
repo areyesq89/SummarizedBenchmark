@@ -18,7 +18,10 @@
 #' @return
 #' SumamrizedBenchmark object.
 #'
+#' @importFrom dplyr filter mutate as_tibble bind_rows distinct select mutate_if funs
+#' @importFrom SummarizedExperiment cbind
 #' @importFrom crayon red yellow green bold
+#' @importFrom stringr str_pad str_trunc
 #' @export
 #' @author Patrick Kimes
 updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll = TRUE,
