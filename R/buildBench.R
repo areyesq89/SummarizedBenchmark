@@ -244,7 +244,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     }
     
     ## colData: method information
-    df <- tidyBDMethod(bd, dat = bd@data@data)
+    df <- tidyBDMethod(bd, dat = bd@data@data, eval = TRUE)
     
     ## add session info to df
     df$session.idx <- 1

@@ -10,15 +10,18 @@
 \alias{tidyBDMethod,BenchDesign-method}
 \title{Tidy BDMethod Data}
 \usage{
-tidyBDMethod(obj, dat = NULL, label = FALSE)
+tidyBDMethod(obj, dat = NULL, eval = FALSE, label = FALSE)
 
-\S4method{tidyBDMethod}{BDMethod}(obj, dat)
+\S4method{tidyBDMethod}{BDMethod}(obj, dat, eval)
 
-\S4method{tidyBDMethod}{list}(obj, dat = NULL, label = FALSE)
+\S4method{tidyBDMethod}{list}(obj, dat = NULL, eval = FALSE,
+  label = FALSE)
 
-\S4method{tidyBDMethod}{SimpleList}(obj, dat = NULL, label = FALSE)
+\S4method{tidyBDMethod}{SimpleList}(obj, dat = NULL, eval = FALSE,
+  label = FALSE)
 
-\S4method{tidyBDMethod}{BenchDesign}(obj, dat = NULL, label = FALSE)
+\S4method{tidyBDMethod}{BenchDesign}(obj, dat = NULL, eval = FALSE,
+  label = FALSE)
 }
 \arguments{
 \item{obj}{BDMethod object, list/List of BDMethod objects (e.g. a
@@ -27,6 +30,9 @@ BDMethodList), or a BenchDesign object}
 \item{dat}{optional data object to use when evaluating any
 unevaluated expressionsin \code{bdm} meta data.
 (default = NULL)}
+
+\item{eval}{logical whether to evaluate any quosures in the meta slot
+of the BDMethod objects. (default = FALSE)}
 
 \item{label}{logical whether to add a "label" column to the resulting
 table containing the names of the methods if \code{obj} was

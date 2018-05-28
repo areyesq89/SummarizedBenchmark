@@ -42,7 +42,7 @@ setGeneric("BenchDesign",
 #' @rdname tidyBDMethod
 #' @export
 setGeneric("tidyBDMethod",
-           function(obj, dat = NULL, label = FALSE) standardGeneric("tidyBDMethod"))
+           function(obj, dat = NULL, eval = FALSE, label = FALSE) standardGeneric("tidyBDMethod"))
 
 #' @rdname compareBenchDesigns
 #' @export

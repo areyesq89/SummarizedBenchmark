@@ -8,10 +8,12 @@
 #' @param dat optional data object to use when evaluating any
 #'        unevaluated expressionsin \code{bdm} meta data.
 #'        (default = NULL)
+#' @param eval logical whether to evaluate any quosures in the meta slot
+#'        of the BDMethod objects. (default = FALSE)
 #' @param label logical whether to add a "label" column to the resulting
 #'        table containing the names of the methods if \code{obj} was
 #'        specified as a named list. (default = FALSE)
-#'
+#' 
 #' @return
 #' A named vector of meta data if only a single BDMethod object specified, else
 #' a tibble of meta data for the specified list of methods.
@@ -22,14 +24,26 @@
 #'
 #' @name tidyBDMethod
 #' @importFrom dplyr bind_rows
-#' @importFrom rlang is_quosure quo_text
+#' @importFrom rlang is_quosure quo_text eval_tidy
 #' @author Patrick Kimes
 NULL
 
-.tidyBDMethod.bdm <- function(obj, dat) {
-    quo_meta <- unlist(lapply(obj@meta, rlang::is_quosure))
-    if (any(quo_meta))
-        obj@meta[quo_meta] <- lapply(obj@meta[quo_meta], rlang::quo_text)
+.tidyBDMethod.bdm <- function(obj, dat, eval) {
+    if (eval) {
+        obj@meta <- lapply(obj@meta, function(x) {
+            tryCatch(rlang::eval_tidy(x, data = dat),
+                     error = function(e) {
+                         message("!! error caught while trying to evaluate BDMethod meta slot !!\n",
+                                 "!!  original message: \n",
+                                 "!!  ", conditionMessage(e))
+                         return(rlang::quo_text(x))
+                     })
+        })
+    } else {
+        quo_meta <- unlist(lapply(obj@meta, rlang::is_quosure))
+        if (any(quo_meta))
+            obj@meta[quo_meta] <- lapply(obj@meta[quo_meta], rlang::quo_text)
+    }
     
     tidyp <- tidyBDMethodParams(obj@params)
     tidymf <- tidyBDMethodMeta(obj@meta)
@@ -46,18 +60,18 @@ NULL
     c(tidyf, tidyp, tidym)
 }
 
-.tidyBDMethod.list <- function(obj, dat, label) {
-    df <- lapply(obj, tidyBDMethod, dat = dat)
+.tidyBDMethod.list <- function(obj, dat, eval, label) {
+    df <- lapply(obj, tidyBDMethod, dat = dat, eval = eval)
     dplyr::bind_rows(df, .id = if(label) { "label" } else { NULL })
 }
 
-.tidyBDMethod.bd <- function(obj, dat, label) {
+.tidyBDMethod.bd <- function(obj, dat, eval, label) {
     if (!is.null(dat))
-        tidyBDMethod(obj@methods, dat, label)
+        tidyBDMethod(obj@methods, dat, eval, label)
     else if (!is.null(obj@data) && obj@data@type == "data")
-        tidyBDMethod(obj@methods, obj@data@data, label)
+        tidyBDMethod(obj@methods, obj@data@data, eval, label)
     else
-        tidyBDMethod(obj@methods, NULL, label)
+        tidyBDMethod(obj@methods, NULL, eval, label)
 }
 
 #' @rdname tidyBDMethod
