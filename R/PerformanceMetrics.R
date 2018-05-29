@@ -228,7 +228,8 @@ estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ..
     allRes <-
       lapply( allRes,
               function(x){
-                x[,elementMetadata( x )$colType == "performanceMetric",drop=FALSE]
+                x[,elementMetadata( x )$colType == "performanceMetric" &
+                    !is.na( elementMetadata( x )$colType ),drop=FALSE]
               } )
     allRes <- Reduce( cbind, allRes )
   }else{
@@ -248,7 +249,8 @@ estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ..
 }
 
 cleanPerformanceMetrics <- function( object ){
-  prevMetrics <- elementMetadata( colData( object ) )$colType == "performanceMetric"
+  prevMetrics <- elementMetadata( colData( object ) )$colType == "performanceMetric" &
+    !is.na( elementMetadata( colData( object ) )$colType )
   if( any( prevMetrics ) ){
     message("Found already estimated performance metrics, replacing these")
     colData( object ) <- colData( object )[,!prevMetrics,drop=FALSE]
@@ -282,7 +284,8 @@ tidyUpMetrics <- function( object ){
   stopifnot(is( object, "SummarizedBenchmark" ) )
   validObject( object )
   res <- colData( object )
-  isPerformanceMetric <- elementMetadata( res )$colType == "performanceMetric"
+  isPerformanceMetric <- elementMetadata( res )$colType == "performanceMetric" &
+    !is.na( elementMetadata( colData( object ) )$colType )
   if( !sum(isPerformanceMetric) > 0 ){
     stop("No performance metrics were found. Check ?estimatePerformanceMetrics for further information")
   }
