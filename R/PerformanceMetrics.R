@@ -114,6 +114,7 @@ is.scalar <- function(x){
 #'
 #' @return Either a \code{\link{SummarizedBenchmark}} object, a \code{\link{DataFrame}} or
 #' a \code{\link{data.frame}}.
+#' @importFrom S4Vectors elementMetadata
 #' @export
 #'
 estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=FALSE,

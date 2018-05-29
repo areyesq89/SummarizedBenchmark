@@ -128,9 +128,8 @@ setClassUnion("BenchDesignOrNULL", c("BenchDesign", "NULL"))
 #' @author Alejandro Reyes
 #'
 #' @aliases SummarizedBenchmark-class
-#' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
+#' @import SummarizedExperiment
 #' @importFrom methods as formalArgs is new validObject
-#' @import S4Vectors SummarizedExperiment
 #' @export
 #' 
 #' @examples

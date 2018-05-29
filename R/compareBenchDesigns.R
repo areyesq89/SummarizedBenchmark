@@ -12,7 +12,7 @@
 #'
 #' @export
 #' @importFrom tibble is_tibble
-#' @importFrom dplyr all_equal select as_tibble filter select_if bind_rows tibble mutate left_join
+#' @import dplyr
 #' @importFrom tidyr gather spread
 #' @author Patrick Kimes
 compareBDMethod <- function(x, y) {

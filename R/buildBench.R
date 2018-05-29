@@ -85,7 +85,7 @@
 #'
 #' @import BiocParallel
 #' @importFrom sessioninfo session_info
-#' @importFrom dplyr tibble select
+#' @import dplyr
 #' @importFrom tidyr spread unnest
 #' @import rlang
 #' @importFrom utils packageName packageVersion

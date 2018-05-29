@@ -23,7 +23,7 @@
 #' the quosure is converted to a text string using \code{rlang::quo_text}.
 #'
 #' @name tidyBDMethod
-#' @importFrom dplyr bind_rows
+#' @import dplyr
 #' @import rlang
 #' @author Patrick Kimes
 NULL

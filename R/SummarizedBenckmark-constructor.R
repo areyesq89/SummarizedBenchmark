@@ -55,7 +55,7 @@
 #' 
 #' @return A \code{\link{SummarizedBenchmark}} object.
 #' @importFrom tidyr gather
-#' @importFrom S4Vectors DataFrame
+#' @importFrom S4Vectors DataFrame elementMetadata
 #' @export
 #'
 SummarizedBenchmark <- function(assays, colData, ftData = NULL,

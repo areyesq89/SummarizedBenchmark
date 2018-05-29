@@ -76,7 +76,7 @@ NULL
 #' assayNames( sb )[2] <- "log2FC"
 #'
 #' @author Alejandro Reyes
-#' @importMethodsFrom SummarizedExperiment assayNames
+#' @importMethodsFrom SummarizedExperiment assayNames `assayNames<-`
 NULL
 
 
