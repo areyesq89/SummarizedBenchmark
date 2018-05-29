@@ -42,7 +42,7 @@
 #' @param object BDMethod object to show
 #' 
 #' @importFrom stringr str_pad str_trunc
-#' @importFrom rlang quo_text
+#' @import rlang
 #' @rdname BDMethod-class
 setMethod("show", signature(object = "BDMethod"), .show.BDMethod)
 
@@ -84,6 +84,6 @@ setMethod("show", signature(object = "BDMethod"), .show.BDMethod)
 #' @param object BenchDesign object to show
 #' 
 #' @importFrom stringr str_pad str_trunc
-#' @importFrom rlang quo_text
+#' @import rlang
 #' @rdname BenchDesign-class
 setMethod("show", signature(object = "BenchDesign"), .show.BenchDesign)

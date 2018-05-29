@@ -87,7 +87,7 @@
 #' @importFrom sessioninfo session_info
 #' @importFrom dplyr tibble select
 #' @importFrom tidyr spread unnest
-#' @importFrom rlang quo eval_tidy
+#' @import rlang
 #' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes

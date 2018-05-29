@@ -53,7 +53,7 @@
 #' printMethods(bench_exp)
 #'
 #' @md
-#' @importFrom rlang is_quosures quos !! :=
+#' @import rlang
 #' @export
 #' @author Patrick Kimes
 expandMethod <- function(bd, label, params, onlyone = NULL,

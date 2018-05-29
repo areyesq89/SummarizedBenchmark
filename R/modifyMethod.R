@@ -43,7 +43,7 @@
 #' Modified BenchDesign object.
 #' 
 #' @md
-#' @importFrom rlang eval_tidy is_quosures
+#' @import rlang
 #' @export
 #' @author Patrick Kimes
 modifyMethod <- function(bd, label, params, .overwrite = FALSE) {

@@ -75,7 +75,7 @@
 #'                     params = rlang::quos(p = pval))
 #'
 #' @md
-#' @importFrom rlang enquo quo quos is_quosures
+#' @import rlang
 #' @export
 #' @author Patrick Kimes
 addMethod <- function(bd, label, func, params = rlang::quos(),

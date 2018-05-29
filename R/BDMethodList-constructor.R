@@ -13,7 +13,7 @@
 #' BDMethodList()
 #'
 #' @name BDMethodList
-#' @importFrom rlang flatten
+#' @import rlang
 #' @importFrom S4Vectors SimpleList
 #' @export
 #' @author Patrick Kimes

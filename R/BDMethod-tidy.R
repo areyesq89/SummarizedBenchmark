@@ -24,7 +24,7 @@
 #'
 #' @name tidyBDMethod
 #' @importFrom dplyr bind_rows
-#' @importFrom rlang is_quosure quo_text eval_tidy
+#' @import rlang
 #' @author Patrick Kimes
 NULL
 

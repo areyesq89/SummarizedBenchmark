@@ -97,7 +97,7 @@ compareBDData <- function(x, y) {
 #' list of comparison results
 #'
 #' @name compareBenchDesigns
-#' @importFrom rlang enquo
+#' @import rlang
 #' @author Patrick Kimes
 NULL
 
