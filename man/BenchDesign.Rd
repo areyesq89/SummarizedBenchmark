@@ -5,14 +5,11 @@
 \alias{BenchDesign}
 \alias{BenchDesign}
 \alias{BenchDesign,ANY-method}
-\alias{BenchDesign,SummarizedBenchmark-method}
 \title{Create a new BenchDesign}
 \usage{
 BenchDesign(..., methods = NULL, data = NULL)
 
 \S4method{BenchDesign}{ANY}(..., methods = NULL, data = NULL)
-
-\S4method{BenchDesign}{SummarizedBenchmark}(methods, data)
 }
 \arguments{
 \item{...}{named set of \code{BDMethod} objects and/or unnamed

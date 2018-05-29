@@ -12,7 +12,7 @@ performanceMetricsSB <- function( object, assay=NULL ){
 }
 
 #' @rdname performanceMetrics
-#' @export
+#' @exportMethod "performanceMetrics"
 setMethod( "performanceMetrics",
   signature( object = "SummarizedBenchmark" ), performanceMetricsSB )
 
@@ -31,7 +31,7 @@ setReplaceMethod( "performanceMetrics",
 
 #' @rdname SummarizedBenchmark-accessors
 #' @aliases assayNames assayNames,SummarizedBenchmark-method assayNames<-,SummarizedBenchmark,character-method
-#' @export
+#' @exportMethod "assayNames<-"
 setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
                   function(x, ..., value)
 {
@@ -52,7 +52,7 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
 #' @rdname SummarizedBenchmark-accessors
 #' @aliases mcols<-,SummarizedBenchmark-method
 #' @import BiocGenerics
-#' @export
+#' @exportMethod "mcols<-"
 setReplaceMethod("mcols", "SummarizedBenchmark",
     function(x, ..., value)
 {
@@ -73,7 +73,7 @@ setReplaceMethod("mcols", "SummarizedBenchmark",
 #' @rdname SummarizedBenchmark-accessors
 #' @aliases groundTruths groundTruths,SummarizedBenchmark-method groundTruths<-,SummarizedBenchmark-method
 #' @param object a \code{SummarizedBenchmark} object.
-#' @export
+#' @exportMethod "groundTruths"
 setMethod(
   "groundTruths",
   "SummarizedBenchmark",
@@ -96,11 +96,22 @@ setReplaceMethod(
 )
 
 #' @rdname SummarizedBenchmark-accessors
-#' @export
+#' @exportMethod "BDMethodList"
 setMethod("BDMethodList",
           signature(x = "SummarizedBenchmark"),
           function(..., x) {
-              BDMethodList(x = BenchDesign(methods = x))
+              BenchDesign(x)@methods
           })
 
 
+#' @rdname SummarizedBenchmark-accessors
+#' @exportMethod "BenchDesign"
+setMethod("BenchDesign", signature(methods = "SummarizedBenchmark", data = "ANY"),
+          function(methods, data) {
+              if (!is.null(data))
+                  message("Note: Ignoring specified data and using SummarizedBenchmark object.")
+              bd <- methods@BenchDesign
+              if (is.null(bd))
+                  bd <- BenchDesign()
+              bd
+          })

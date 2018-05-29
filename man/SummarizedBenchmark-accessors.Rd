@@ -15,6 +15,7 @@
 \alias{groundTruths<-,SummarizedBenchmark-method}
 \alias{groundTruths<-,SummarizedBenchmark-method}
 \alias{BDMethodList,SummarizedBenchmark-method}
+\alias{BenchDesign,SummarizedBenchmark-method}
 \title{Accessor and replacement functions for the slots of a SummarizedBenchmark object.}
 \usage{
 groundTruths(object, ...)
@@ -30,6 +31,8 @@ groundTruths(object, ...) <- value
 \S4method{groundTruths}{SummarizedBenchmark}(object, ...) <- value
 
 \S4method{BDMethodList}{SummarizedBenchmark}(..., x = NULL)
+
+\S4method{BenchDesign}{SummarizedBenchmark}(methods, data)
 }
 \arguments{
 \item{object}{a \code{SummarizedBenchmark} object.}

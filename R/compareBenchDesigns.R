@@ -102,7 +102,7 @@ compareBDData <- function(x, y) {
 NULL
 
 .compare.sb <- function(x, y, ...) {
-    .compare.base(x, x@BenchDesign, functions = functions)
+    .compare.base(x = x, y = BenchDesign(x))
 }
 
 .compare.base <- function(x, y, ...) {
@@ -124,10 +124,12 @@ NULL
 .compare.meta <- function(x, y, ...) {
     stopifnot(tibble::is_tibble(x), tibble::is_tibble(y))
 
-    ## determine unique
-    mxo <- setdiff(x$label, y$label)
-    myo <- setdiff(y$label, x$label)
-    mxy <- intersect(x$label, y$label)
+    ## determine unique - careful of case when BD is empty
+    x_label <- if (nrow(x)) x$label else c()
+    y_label <- if (nrow(y)) y$label else c()
+    mxo <- setdiff(x_label, y_label)
+    myo <- setdiff(y_label, x_label)
+    mxy <- intersect(x_label, y_label)
 
     xj <- dplyr::filter(x, label %in% mxy)
     yj <- dplyr::filter(y, label %in% mxy)
@@ -170,9 +172,13 @@ NULL
     ## combine all contrasts
     mxy <- dplyr::bind_rows(list(f = xyfn, version = xyv, params = xyp, meta = xym, post = xyfp),
                             .id = "comparison")
-    mxy <- tidyr::gather(mxy, label, value, -comparison)
-    mxy <- tidyr::spread(mxy, comparison, value)
-
+    if (nrow(mxy)) {
+        mxy <- tidyr::gather(mxy, label, value, -comparison)
+        mxy <- tidyr::spread(mxy, comparison, value)
+    } else {
+        mxy <- NULL
+    }
+    
     ## add in rows for xonly, yonly methods
     mxy <- dplyr::bind_rows(Both = mxy,
                             xOnly = if (length(mxo)) { dplyr::tibble(label = mxo) },
@@ -185,7 +191,9 @@ NULL
 ## helper function to extract metadata from SummarizedBenchmark coldata
 .tidyForComparison <- function(x) {
     if (is(x, "SummarizedBenchmark")) {
-        xt <- colData(x)[, elementMetadata(colData(x))$colType == "methodInformation", drop = FALSE]
+        infocols <- elementMetadata(colData(x))$colType == "methodInformation"
+        infocols <- unlist(lapply(infocols, isTRUE))
+        xt <- colData(x)[, infocols, drop = FALSE]
         xt <- dplyr::as_tibble(as.data.frame(xt, optional = TRUE))
         xt <- dplyr::mutate(xt, label = colnames(x))
     } else if (is(x, "BenchDesign")) {
@@ -193,15 +201,17 @@ NULL
         x <- makePostLists(x)
         xt <- tidyBDMethod(x, label = TRUE)
     }
+
+    if (length(BDMethodList(x)) > 0) {
+        xf <- lapply(BDMethodList(x), slot, "f")
+        xf <- dplyr::tibble(label = names(xf), f = xf)
+        xp <- lapply(BDMethodList(x), slot, "post")
+        xp <- dplyr::tibble(label = names(xp), post = xp)
+        
+        xt <- dplyr::left_join(xt, xf, by = "label")
+        xt <- dplyr::left_join(xt, xp, by = "label")
+    }
     
-    xf <- lapply(BDMethodList(x), slot, "f")
-    xf <- dplyr::tibble(label = names(xf), f = xf)
-    xp <- lapply(BDMethodList(x), slot, "post")
-    xp <- dplyr::tibble(label = names(xp), post = xp)
-
-    xt <- dplyr::left_join(xt, xf, by = "label")
-    xt <- dplyr::left_join(xt, xp, by = "label")
-
     xt
 }
 

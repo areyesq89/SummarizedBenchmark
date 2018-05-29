@@ -25,13 +25,14 @@ NULL
         ml <- c(ml, x)
     if (length(ml) == 0)
         ml <- list()
-
+    
     ## allow shortcut for calling on list, SB, BD w/out specifying x=
     if (length(ml) == 1) {
-        if (is.list(ml[[1]]) || is(ml[[1]], "List"))
+        if (is.list(ml[[1]]) || is(ml[[1]], "List")) {
             ml <- ml[[1]]
-        else if (is(ml[[1]], "BenchDesign") || is(ml[[1]], "SummarizedBenchmark"))
+        } else if (is(ml[[1]], "BenchDesign") || is(ml[[1]], "SummarizedBenchmark")) {
             return(BDMethodList(x = ml[[1]]))
+        }
     }
 
     ## extract any BD objects and flatten any BDML objects
