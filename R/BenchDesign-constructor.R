@@ -41,18 +41,7 @@ NULL
     new("BenchDesign", methods = bdml, data = data)
 }
 
-
-.BenchDesign.sb <- function(methods, data) {
-    if (!is.null(data))
-        message("Note: Ignoring specified data and using SummarizedBenchmark object.")
-    bd <- methods@BenchDesign
-    if (is.null(bd))
-        bd <- BenchDesign()
-    bd
-}
-
 #' @rdname BenchDesign
+#' @exportMethod "BenchDesign"
 setMethod("BenchDesign", signature(methods = "ANY", data = "ANY"), .BenchDesign)
 
-#' @rdname BenchDesign
-setMethod("BenchDesign", signature(methods = "SummarizedBenchmark", data = "ANY"), .BenchDesign.sb)
