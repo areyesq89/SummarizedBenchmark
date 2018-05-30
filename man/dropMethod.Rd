@@ -20,9 +20,8 @@ already defined in the object, and returns a reduced BenchDesign
 object with the specified method removed.
 }
 \examples{
-## with toy data.frame
-df <- data.frame(pval = rnorm(100))
-bench <- BenchDesign(df)
+## empty BenchDesign
+bench <- BenchDesign()
 
 ## add methods
 bench <- addMethod(bench, label = "bonf", func = p.adjust,

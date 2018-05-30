@@ -28,42 +28,16 @@
 #' printMethods(bench)
 #' 
 #' @md
-#' @import rlang
-#' @importFrom stringr str_trunc str_pad
+#' @importFrom stringr str_pad
 #' @export
 #' @author Patrick Kimes
-printMethod <- function(bd, n) {
-    stopifnot(n %in% names(bd$methods))
-
-    cat(stringr::str_pad(paste0(n, " "), 60, "right", pad = "-"), "\n")
-
-    m <- bd$methods[[n]]
-    cat("func:\n")
-    cat("    ", quo_text(m$func), "\n")
-
-    cat("post:\n")
-    cat("    ", quo_text(m$post), "\n")
-
-    cat("meta:\n")
-    if (!is.null(m$meta)) {
-        mmeta <- eval_tidy(m$meta)
-        meta_n <- names(mmeta)
-        meta_q <- sapply(mmeta, quo_text)
-        for (i in seq(meta_n))
-            cat(stringr::str_trunc(paste("    ", meta_n[i], ":", meta_q[i]), 60), "\n")
-    } else {
-        cat("     none\n")
-    }
+printMethod <- function(bd, n = NULL) {
+    if (is.null(n))
+        n <- names(bd@methods)[1]
+    stopifnot(n %in% names(bd@methods))
     
-    cat("parameters:\n")
-    if (length(m$params) > 0) {
-        param_n <- names(m$params)
-        param_q <- sapply(m$params, quo_text)
-        for (i in seq(param_n))
-            cat(stringr::str_trunc(paste("    ", param_n[i], ":", param_q[i]), 60), "\n")
-    } else {
-        cat("     none\n")
-    }
+    cat(stringr::str_pad(paste0(n, " "), 60, "right", pad = "-"), "\n")
+    show(bd@methods[[n]])
 }
 
 
@@ -71,7 +45,7 @@ printMethod <- function(bd, n) {
 #' @export
 #' @author Patrick Kimes
 printMethods <- function(bd) {
-    for (n in names(bd$methods)) {
+    for (n in names(bd@methods)) {
         printMethod(bd, n)
     }
 }

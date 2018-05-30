@@ -67,15 +67,15 @@
 #' qv <- qv$qvalue
 #'
 #' ## adding same method to BenchDesign
-#' bench <- BenchDesign(df)
+#' bench <- BenchDesign(data = df)
 #' bench <- addMethod(bench,
 #'                    label = "qv",
-#'                    func = qvalue::qvalue,
-#'                    post = function(x) { x$qvalue },
-#'                    params = rlang::quos(p = pval))
+#'                     func = qvalue::qvalue,
+#'                     post = function(x) { x$qvalue },
+#'                     params = rlang::quos(p = pval))
 #'
 #' @md
-#' @importFrom rlang enquo quo quos is_quosures
+#' @import rlang
 #' @export
 #' @author Patrick Kimes
 addMethod <- function(bd, label, func, params = rlang::quos(),
@@ -93,11 +93,8 @@ addMethod.BenchDesign <- function(bd, label, func, params = rlang::quos(),
     }
     ## capture input
     qf <- rlang::enquo(func)
-    qp <- rlang::enquo(post)
-    qm <- rlang::enquo(meta)
     
     ## add to bench
-    bd$methods[[label]] <- list(func = qf, params = params, 
-                                post = qp, meta = qm)
+    bd@methods[[label]] <- BDMethod(x = qf, params = params, post = post, meta = meta)
     bd
 }

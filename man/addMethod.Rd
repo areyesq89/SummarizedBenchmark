@@ -81,12 +81,12 @@ qv <- qvalue::qvalue(p = df$pval)
 qv <- qv$qvalue
 
 ## adding same method to BenchDesign
-bench <- BenchDesign(df)
+bench <- BenchDesign(data = df)
 bench <- addMethod(bench,
                    label = "qv",
-                   func = qvalue::qvalue,
-                   post = function(x) { x$qvalue },
-                   params = rlang::quos(p = pval))
+                    func = qvalue::qvalue,
+                    post = function(x) { x$qvalue },
+                    params = rlang::quos(p = pval))
 
 }
 \author{

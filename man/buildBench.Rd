@@ -5,21 +5,20 @@
 \title{Make SummarizedBenchmark from BenchDesign}
 \usage{
 buildBench(bd, data = NULL, truthCols = NULL, ftCols = NULL,
-  ptabular = TRUE, sortIDs = FALSE, catchErrors = TRUE,
+  sortIDs = FALSE, keepData = FALSE, catchErrors = TRUE,
   parallel = FALSE, BPPARAM = bpparam())
 }
 \arguments{
 \item{bd}{\code{BenchDesign} object.}
 
 \item{data}{Data set to be used for benchmarking, will take priority over
-data set originally specified to BenchDesign object. 
-Ignored if NULL. (default = NULL)}
+data set specified to BenchDesign object. Ignored if NULL. (default = NULL)}
 
 \item{truthCols}{Character vector of column names in data set corresponding to
 ground truth values for each assay. If specified, column will be added to
-the \code{groundTruth} DataFrame for the returned SummarizedBenchmark object.
-If the \code{BenchDesign} includes only a single assay, the same name
-will be used for the assay. If the \code{BenchDesign} includes multiple assays,
+the \code{groundTruth} DataFrame of the returned SummarizedBenchmark object.
+If the BenchDesign includes only a single assay, the same name
+will be used for the assay. If the BenchDesign includes multiple assays,
 to map data set columns with assays, the vector must have names corresponding
 to the assay names specified to the \code{post} parameter at each
 \code{addMethod} call. (default = NULL)}
@@ -28,19 +27,12 @@ to the assay names specified to the \code{post} parameter at each
 included as feature data (row data) in the returned SummarizedBenchmark
 object. (default = NULL)}
 
-\item{ptabular}{Whether to return method parameters with each parameter in a
-separate column of the \code{colData} for the returned SummarizedBenchmark
-object, i.e. in tabular form. If FALSE, method parameters are returned
-as a single column with comma-delimited "key=value" pairs. (default = TRUE)}
+\item{sortIDs}{Whether the output of each method should be merged and sorted using IDs.
+See Details for more information. (default = FALSE)}
 
-\item{sortIDs}{Whether the output of each method should be merged using IDs.
-If TRUE, each method must return a named vector or list. The names will be
-used to align the output of each method in the returned SummarizedBenchmark.
-Missing values will be set to NA. This can be useful if the different methods
-return overlapping, but not identical, results. If \code{truthCols} is also
-specified, and sorting by IDs is necessary, rather than specifying 'TRUE',
-specify the string name of a column in the \code{data} to use to sort the
-method output to match the order of \code{truthCols}. (default = FALSE)}
+\item{keepData}{Whether to store the data as part of the BenchDesign slot of the
+returned SummarizedBenchmark object. If FALSE, a MD5 hash of the data will be
+stored with the BenchDesign slot. (default = FALSE)}
 
 \item{catchErrors}{logical whether errors produced by methods during evaluation
 should be caught and printed as a message without stopping the entire
@@ -56,7 +48,7 @@ through the \code{BPPARAM} parameter. (default = FALSE)}
 parameter registry is used.}
 }
 \value{
-\code{SummarizedBenchmark} object with single assay
+\code{SummarizedBenchmark} object.
 }
 \description{
 Function to evaluate \code{BenchDesign} methods on supplied
@@ -64,13 +56,14 @@ data set to generate a \code{SummarizedBenchmark}. In addition
 to the results of applying each method on the data, the returned
 \code{SummarizedBenchmark} also includes metadata for the methods
 in the \code{colData} of the returned object, metadata for the
-data in the \code{rowData}, and the session information generated
-by \code{sessionInfo()} in the \code{metadata}.
+data in the \code{rowData}, and session information in the
+\code{metadata}.
 }
 \details{
-Parallelization is performed across methods. Therefore, there is no benefit to
+Parallelization is performed across methods. Therefore, there is currently no benefit to
 specifying more cores than the total number of methods in the \code{BenchDesign}
 object.
+
 By default, errors thrown by individual methods in the \code{BenchDesign} are caught
 during evaluation and handled in a way that allows \code{buildBench} to continue
 running with the other methods. The error is printed as a message, and the corresponding
@@ -79,11 +72,22 @@ many benchmarking experiments can be time and computationally intensive, having 
 the entire analysis due to a single failed method can be frustrating. Default error catching
 was included to alleviate these frustrations. However, if this behavior is not desired,
 setting \code{catchErrors = FALSE} will turn off error handling.
+
+If \code{sortIDs} is TRUE, each method must return a named vector or list. The names will be
+used to align the output of each method in the returned SummarizedBenchmark. Missing values
+from each method will be set to NA. This can be useful if the different methods return
+overlapping, but not identical, results. If \code{truthCols} is also specified, and sorting
+by IDs is necessary, rather than specifying 'TRUE', specify the string name of a column in
+the \code{data} to use to sort the method output to match the order of \code{truthCols}.
+
+When a method specified in the BenchDesign does not have a postprocessing function specified
+to 'post', the trivial \code{base::identity} function is used as the default postprocessing
+function.
 }
 \examples{
 ## with toy data.frame
 df <- data.frame(pval = rnorm(100))
-bench <- BenchDesign(df)
+bench <- BenchDesign(data = df)
 
 ## add methods
 bench <- addMethod(bench, label = "bonf", func = p.adjust,

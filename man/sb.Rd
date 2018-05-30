@@ -14,5 +14,8 @@ This object contains the example data from the \code{iCOBRA} package reformatted
 \code{SummarizedBenchmark} object. It consists of differential expression results from \code{DESeq2}
 \code{edgeR} and \code{limma}-voom.
 }
+\examples{
+data(sb)
+}
 \keyword{SummarizedBenchmark}
 \keyword{data}

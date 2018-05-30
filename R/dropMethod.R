@@ -11,9 +11,8 @@
 #' Modified BenchDesign object.
 #'
 #' @examples
-#' ## with toy data.frame
-#' df <- data.frame(pval = rnorm(100))
-#' bench <- BenchDesign(df)
+#' ## empty BenchDesign
+#' bench <- BenchDesign()
 #'
 #' ## add methods
 #' bench <- addMethod(bench, label = "bonf", func = p.adjust,
@@ -34,11 +33,11 @@ dropMethod <- function(bd, label) {
 #' @export
 dropMethod.BenchDesign <- function(bd, label) {
     ## verify that method definition already exists
-    if(!(label %in% names(bd$methods))) {
+    if(!(label %in% names(bd@methods))) {
         stop("Specified method is not defined in BenchDesign.")
     }
 
-    bd$methods[label] <- NULL
+    bd@methods[[label]] <- NULL
     return(bd)
 }
 

@@ -8,7 +8,7 @@ data(tdat)
 
 test_that("basic buildBench call works", {
     ## basic BenchDesign
-    bd <- BenchDesign(tdat)
+    bd <- BenchDesign(data = tdat)
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
@@ -26,9 +26,9 @@ test_that("basic buildBench call works", {
     expect_equal(colnames(sb), c("bonf", "bh"))
     expect_length(assays(sb), 1)
     ## check values against direct call of p.adjust
-    expect_equal(assays(sb)[["bench"]][, "bonf"],
+    expect_equal(assays(sb)[["default"]][, "bonf"],
                  p.adjust(tdat$pval, "bonferroni"))
-    expect_equal(assays(sb)[["bench"]][, "bh"],
+    expect_equal(assays(sb)[["default"]][, "bh"],
                  p.adjust(tdat$pval, "BH"))
     
     ## check truthCols, ftCols specification
@@ -60,7 +60,7 @@ test_that("basic buildBench call works", {
     expect_equal(sb, sb_empty)
 
     ## BenchDesign with keyword metadata
-    bd_kw <- BenchDesign(tdat)
+    bd_kw <- BenchDesign(data = tdat)
     bd_kw <- addMethod(bd_kw,
                        label = "bonf",
                        func = p.adjust,
@@ -74,15 +74,15 @@ test_that("basic buildBench call works", {
                                    pkg_vers = "100", pkg_name = "nothing"))
 
     expect_silent(sb_kw <- buildBench(bd_kw))
-    expect_equal(colData(sb_kw)$pkg_name, c("testthat", "nothing"))
-    expect_equal(colData(sb_kw)$pkg_vers, c(as.character(packageVersion("testthat")),
-                                            "100"))
+    expect_equal(colData(sb_kw)$func.pkg, c("testthat", "nothing"))
+    expect_equal(colData(sb_kw)$func.pkg.vers, c(as.character(packageVersion("testthat")),
+                                                 "100"))
 })
 
 
 test_that("multi-assay BenchDesigns are handled", {
     ## multi-assay BenchDesign
-    bd <- BenchDesign(tdat)
+    bd <- BenchDesign(data = tdat)
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
@@ -115,7 +115,7 @@ test_that("multi-assay BenchDesigns are handled", {
 
 test_that("parallelization is accepted", {
     ## multi-assay BenchDesign
-    bd <- BenchDesign(tdat)
+    bd <- BenchDesign(data = tdat)
     bd <- addMethod(bd,
                     label = "bonf",
                     func = p.adjust,
@@ -134,6 +134,11 @@ test_that("parallelization is accepted", {
     ## compare output run with and without parallelization
     sb <- buildBench(bd, parallel = FALSE)
     expect_silent(sb_par <- buildBench(bd, parallel = TRUE, BPPARAM = SerialParam()))
+    ## check that everything except session metadata is the same
+    expect_false(isTRUE(all.equal(metadata(sb)$sessions[[1]]$parameters,
+                                  metadata(sb_par)$sessions[[1]]$parameters)))
+    metadata(sb)$sessions[[1]]$parameters <- NULL
+    metadata(sb_par)$sessions[[1]]$parameters <- NULL
     expect_equal(sb, sb_par)
 })
 
@@ -144,52 +149,47 @@ test_that("errors thrown with inappropriate inputs", {
                  "data in BenchDesign is NULL")
 
     ## check error if BenchDesign has no data, but methods
-    expect_error(sb <- buildBench(BenchDesign(tdat)),
+    expect_error(sb <- buildBench(BenchDesign(data = tdat)),
                  "list of methods in BenchDesign is empty")
 
-    ## check error if post only list for one method
-    bd <- addMethod(BenchDesign(tdat), label = "bonf",
+    ## check proper handling if post only list for one method
+    bd <- addMethod(BenchDesign(data = tdat), label = "bonf",
                     func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 }))
     bd <- addMethod(bd, label = "bh",
                     func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
                     post = function(x) { x * 1 })
-    expect_error(buildBench(bd), "Inconsistent post specification style across methods.")
+    expect_silent(sb <- buildBench(bd))
+    expect_equal(sort(assayNames(sb)), c("a1", "default"))
 
-    ## check error in post specification if inconsistent length across methods
-    bd <- addMethod(BenchDesign(tdat), label = "bonf",
+    ## check proper handling if inconsistent length across methods
+    bd <- addMethod(BenchDesign(data = tdat), label = "bonf",
                     func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 }, a2 = function(x) { x * 2 }))
-    bd <- addMethod(bd, label = "bh",
-                    func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
+    bd <- addMethod(bd, label = "bonf2",
+                    func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x }))
-    expect_error(buildBench(bd), "Inconsistent post length across methods.")
+    expect_silent(sb <- buildBench(bd))
+    expect_true(all(is.na(assay(sb, "a2")[, "bonf2"])))
+    expect_equal(assay(sb, "a1")[, "bonf"] * 2, assay(sb, "a2")[, "bonf"])
+    expect_equal(assay(sb, "a1")[, "bonf"], assay(sb, "a1")[, "bonf2"])
 
-    ## check error in post specification if inconsistent naming across methods
-    bd <- addMethod(BenchDesign(tdat), label = "bonf",
-                    func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
-                    post = list(a1 = function(x) { x * 1 }, a2 = function(x) { x * 2 }))
-    bd <- addMethod(bd, label = "bh",
-                    func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
-                    post = list(a100 = function(x) { x }, a200 = function(x) { x * 2 }))
-    expect_error(buildBench(bd), "Inconsistent post naming across methods.")
-
-    ## check error if truthCols not column in original data
-    bd <- addMethod(BenchDesign(tdat), label = "bonf", func = p.adjust,
-                    params = rlang::quos(p = pval, method = "bonferroni"))
-    bd <- addMethod(bd, label = "bh", func = p.adjust,
-                    params = rlang::quos(p = pval, method = "BH"))
-    expect_error(buildBench(bd, truthCols = "apple"))
-    
-    ## check error if truthCols names don't match assay names when post specified as list 
-    bd <- addMethod(BenchDesign(tdat), label = "bonf",
+    ## check proper handling if truthCols unnamed when post specified as list 
+    bd <- addMethod(BenchDesign(data = tdat), label = "bonf",
                     func = p.adjust, params = rlang::quos(p = pval, method = "bonferroni"),
                     post = list(a1 = function(x) { x * 1 }))
     bd <- addMethod(bd, label = "bh",
                     func = p.adjust, params = rlang::quos(p = pval, method = "BH"),
                     post = list(a1 = function(x) { x }))
-    expect_error(buildBench(bd, truthCols = "H"))
+    expect_silent(buildBench(bd, truthCols = "H"))
 
+    ## check error if truthCols not column in original data
+    bd <- addMethod(BenchDesign(data = tdat), label = "bonf", func = p.adjust,
+                    params = rlang::quos(p = pval, method = "bonferroni"))
+    bd <- addMethod(bd, label = "bh", func = p.adjust,
+                    params = rlang::quos(p = pval, method = "BH"))
+    expect_error(buildBench(bd, truthCols = "apple"))
+    
     ## check error if invalid ftCols is specified
     expect_error(buildBench(bd, ftCols = "apple"), "Invalid ftCols specification")
 })
@@ -201,14 +201,13 @@ test_that("buildBench can handle sortIDs", {
                    mytru = 1:5)
     
     ## basic BenchDesign w/ 1 assay, different length output
-    bd1 <- BenchDesign(newdat)
+    bd1 <- BenchDesign(data = newdat)
     bd1 <- addMethod(bd1, label = "abc",
                      func = function() { c(a = 1, b = 2, c = 3) })
     bd1 <- addMethod(bd1, label = "bcef",
                      func = function() { c(b = 11, c = 12, e = 13, f = 15) })
-    
     ## check behavior when output has unequal lengths
-    expect_error(buildBench(bd1))
+    expect_warning(buildBench(bd1), "could not be reduced")
 
     ## check behavior when sorting without ID column
     sb1a <- buildBench(bd1, sortIDs = TRUE)
@@ -223,9 +222,8 @@ test_that("buildBench can handle sortIDs", {
     expect_equal(rownames(assay(sb1b)), newdat$myids)
     expect_true(is.na(assay(sb1b)["a", "bcef"]))
 
-
     ## basic BenchDesign w/ 2 assays, different length output
-    bd2 <- BenchDesign(newdat)
+    bd2 <- BenchDesign(data = newdat)
     bd2 <- addMethod(bd2, label = "abc",
                      func = function() { c(a = 1, b = 2, c = 3) },
                      post = list(o1 = function(x) { x },
@@ -233,10 +231,10 @@ test_that("buildBench can handle sortIDs", {
     bd2 <- addMethod(bd2, label = "bcef",
                      func = function() { c(b = 11, c = 12, e = 13, f = 15) },
                      post = list(o1 = function(x) { x },
-                                 o2 = function(x) { x*2 }))
+                                 o2 = function(x) { x*2[1:2] }))
 
     ## check behavior when output has unequal lengths
-    expect_error(buildBench(bd2))
+    expect_warning(buildBench(bd2))
 
     ## check behavior when sorting without ID column
     sb2a <- buildBench(bd2, sortIDs = TRUE)
@@ -244,7 +242,8 @@ test_that("buildBench can handle sortIDs", {
     expect_length(assays(sb2a), 2)
     expect_equal(rownames(sb2a), c("a", "b", "c", "e", "f"))
     expect_true(is.na(assay(sb2a, "o2")["a", "bcef"]))
-    expect_error(buildBench(bd2, truthCols = "mytru", sortIDs = TRUE))
+    expect_error(buildBench(bd2, truthCols = list(o1 = "mytru"),
+                            sortIDs = TRUE))
 
     ## check behavior when sorting with ID column
     sb2b <- buildBench(bd2, sortIDs = "myids")
