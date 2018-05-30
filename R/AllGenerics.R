@@ -63,8 +63,10 @@ NULL
 #' @name SummarizedBenchmark-accessors
 #' @rdname SummarizedBenchmark-accessors
 #'
-#' @param x a \code{SummarizedBenchmark} object.
-#' @param value A character vector
+#' @param x A \code{SummarizedBenchmark} object.
+#' @param methods A \code{SummarizedBenchmark} object.
+#' @param value A character vector.
+#' @param data A data set to be used.
 #' @param ... Futher arguments, perhaps used by methods
 #' @seealso \code{\link{performanceMetrics}}
 #'
@@ -76,7 +78,7 @@ NULL
 #' assayNames( sb )[2] <- "log2FC"
 #'
 #' @author Alejandro Reyes
-#' @importMethodsFrom SummarizedExperiment assayNames `assayNames<-`
+#' @importMethodsFrom SummarizedExperiment assayNames "assayNames<-"
 NULL
 
 

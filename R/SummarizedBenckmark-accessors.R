@@ -51,7 +51,7 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
 
 #' @rdname SummarizedBenchmark-accessors
 #' @aliases mcols<-,SummarizedBenchmark-method
-#' @importMethodsFrom S4Vectors mcols elementMetadata `mcols<-` `elementMetadata<-`
+#' @importMethodsFrom S4Vectors mcols elementMetadata "mcols<-" "elementMetadata<-"
 #' @exportMethod "mcols<-"
 setReplaceMethod("mcols", "SummarizedBenchmark",
     function(x, ..., value)

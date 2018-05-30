@@ -39,9 +39,13 @@ groundTruths(object, ...) <- value
 
 \item{...}{Futher arguments, perhaps used by methods}
 
-\item{value}{A character vector}
+\item{value}{A character vector.}
 
-\item{x}{a \code{SummarizedBenchmark} object.}
+\item{x}{A \code{SummarizedBenchmark} object.}
+
+\item{methods}{A \code{SummarizedBenchmark} object.}
+
+\item{data}{A data set to be used.}
 }
 \value{
 Either a \code{SummarizedBenchmark} object or a slot of the \code{SummarizedBenchmark} object.
