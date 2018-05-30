@@ -33,7 +33,7 @@ test_that("BDMethod constructor accepts all valid input", {
     expect_equal(rlang::expr_text(bdm@fc), "base::identity")
 
     ## call with BenchDesign
-    expect_silent(bdm <- BDMethod(BenchDesign(allSB), i = 2))
+    expect_silent(bdm <- BDMethod(BenchDesign(allSB[[1]]), i = 2))
     expect_is(bdm, "BDMethod")
 })
 
@@ -60,7 +60,7 @@ test_that("BDMethodList constructor accepts all valid input", {
     expect_identical(bd2_bdml, bdml2)
 
     ## call with SummarizedBenchmark)
-    expect_silent(sb_bdml <- BDMethodList(allSB))
+    expect_silent(sb_bdml <- BDMethodList(allSB[[1]]))
     expect_is(sb_bdml, "BDMethodList")
 
     ## combine bdm and bdml
@@ -85,7 +85,7 @@ test_that("BDMethodList constructor accepts all valid input", {
 })
 
 test_that("BDMethod/List setters work", {
-    bd <- BenchDesign(allSB)
+    bd <- BenchDesign(allSB[[1]])
     bdm1 <- BDMethod(x = base::identity)
     bdml <- BDMethodList(m1 = bdm1)
 

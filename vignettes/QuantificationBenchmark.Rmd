@@ -218,27 +218,38 @@ allSB <- lapply(samples, function(sample) {
     dat[["sample"]] <- sample
     sb <- buildBench( b, data=dat, sortIDs="txIDs",
                      catchErrors=FALSE, parallel=TRUE,
-                     BPPARAM=MulticoreParam(2) )
+                     BPPARAM=SerialParam() )
     colData( sb )$sample <- sample
+    colData( sb )$tissue <-
+                    as.character( annotation$tissue[annotation$sample == sample] )
     sb
 } )
 
-allSB <- do.call( cbind, allSB )
-
-colData( allSB )$tissue <- 
-  annotation$tissue[match( colData( allSB )$sample, 
-                          annotation$sample )]
 
 ```
 
 To keep the pre-computed object small, we will save the quantifications for only 50,000 randomly sampled transcripts.
 
 ```{r subsample, eval=FALSE}
-   
-allSB <- allSB[rowSums( is.na( assay( allSB ) ) ) == 0,]
-set.seed(12)
 
-allSB <- allSB[sample( seq_len(nrow(allSB)), 50000 ),]
+keepRows <- rowSums(
+    sapply( allSB,
+           function(x){
+               rowSums( is.na( assay( x ) ) )
+           }) ) == 0
+allSB <- lapply( allSB,
+                function(x){
+                    x[keepRows,]
+                } )
+
+set.seed(12)
+keepRows <- sample(
+    seq_len(nrow(allSB[[1]])), 50000 )
+
+allSB <- lapply( allSB,
+                function(x){
+                    x[keepRows,]
+                } )
 
 #save(allSB, file="../data/quantSB.rda",
 #     compress="xz", compression_level=9 )
@@ -251,10 +262,10 @@ library(SummarizedBenchmark)
 data("quantSB")
 ```
 
-Notice that this object contains both the software versions and used parameters.
+Notice that each element of the list contains a *SummarizedBenchmark* object in which the `colData()` contains both software versions and used parameters.
 
 ```{r metadata}
-colData(allSB)
+colData(allSB[[1]])[,c("param.args", "meta.version", "sample", "tissue")]
 ```
 
 # Exploring the output of the isoform quantifications
@@ -263,17 +274,17 @@ The code above returns a *SummarizedBenchmark* object containing the transcript 
 
 ```{r pcaPlot}
 
-sampleIndexes <- which( colData( allSB )$sample %in% "SRR5273689" )
-keep <- !rowSums( is.na( assays( allSB )[["default"]] ) ) > 0
+keep <- !rowSums( is.na( assays( allSB[[1]] )[["default"]] ) ) > 0
+
 pcaRes <- 
-  prcomp(  log10( t( assays( allSB )[["default"]][keep,sampleIndexes] ) + 1 ) )
+  prcomp(  log10( t( assays( allSB[[1]] )[["default"]][keep,] ) + 1 ) )
 varExp <- round( 100*(pcaRes$sdev/sum( pcaRes$sdev )), 2)
 
 tidyData <- data.frame( 
   PC1=pcaRes$x[,"PC1"], 
   PC2=pcaRes$x[,"PC2"], 
-  sample=colData( allSB )$sample[sampleIndexes], 
-  label=gsub("\\d+$", "", rownames( colData(allSB) ))[sampleIndexes] )
+  sample=colData( allSB[[1]] )$sample, 
+  label=gsub("\\d+$", "", rownames( colData(allSB[[1]]) ) ) )
 
 tidyData <- tidyData %>%
   dplyr::mutate( 
@@ -313,15 +324,18 @@ houseMouse <-
   geneMap$ensembl_transcript_id[geneMap$hsapiens_homolog_ensembl_gene %in% 
                                   houseHuman]
 
+allSB <- do.call( cbind, allSB )
 colData( allSB )$label <- gsub("\\d+$", "", rownames( colData( allSB ) ) )
 
 condInfo <- 
     colData( allSB )[colData( allSB )$label == "kallisto-default","tissue"]
 
+
 replicateInfo <- condInfo
 evaluationFeature <- rep( TRUE, length.out = nrow( allSB ) )
-calibrationFeature <- 
-  gsub( "\\.\\d+", "", rownames(allSB) ) %in% houseMouse
+
+calibrationFeature <- rownames(allSB) %in% houseMouse
+
 unitReference <- 1
 quantificationList <- lapply( 
   split( seq_along( colnames( allSB ) ), colData( allSB )$label ), 
@@ -331,7 +345,7 @@ quantificationList <- lapply(
 
 compObject <- signalCalibrate( 
   quantificationList, 
-  condInfo, replicateInfo, 
+  factor(condInfo), factor(replicateInfo), 
   evaluationFeature, calibrationFeature, unitReference, 
   calibrationFeature2 = calibrationFeature)
 
