@@ -8,7 +8,7 @@
 #'        (Note: must be a character name for replacement operations.)
 #' @param value replacement object, either BDData, BDMethod, BDMethodList
 #'        or NULL object.
-#'
+#' @param ... Futher arguments, perhaps used by methods
 #' @return
 #' modified BenchDesign object
 #'

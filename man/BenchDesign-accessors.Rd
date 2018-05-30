@@ -40,6 +40,8 @@ or NULL object.}
 
 \item{i}{character name or integer index of a BDMethod object.
 (Note: must be a character name for replacement operations.)}
+
+\item{...}{Futher arguments, perhaps used by methods}
 }
 \value{
 modified BenchDesign object
