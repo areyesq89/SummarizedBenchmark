@@ -236,7 +236,7 @@ tidyUpMetrics(sb) %>%
 
 # Class Details
 
-Before moving to the second case study, we describe the anatomy of the *BenchDesign* and *SummarizedBenchmark* classes in a little bit more detail. 
+Before moving to the second case study, we describe the anatomy of the *BenchDesign* and *SummarizedBenchmark* classes in a little more detail. 
 
 ## BenchDesign
 
@@ -244,7 +244,7 @@ As noted in the previous section, *BenchDesign* objects are composed of a data s
 
 ![BenchDesign class structure](summarizedbenchmark-figure2.png)
 
-Continuing with the *BenchDesign* constructed in the example above, we can access the list of methods and data set using the `BDMethodList()` and `BDData()` functions.
+Continuing with the *BenchDesign* constructed in the example above, we can access the list of methods and the data set stored in the object using the `BDMethodList()` and `BDData()` functions.
 
 ```{r}
 BDMethodList(b)
@@ -271,7 +271,7 @@ BDMethodList(b)[["bonf"]] <- NULL
 b
 ```
 
-New *BDMethod* objects can be constructed with the `BDMethod()` constructor. The constructor takes the same input parameters as the `addMethod()` convenience function. 
+Each *BDMethod* object in a *BDMethodList* encapsulates a method to be benchmarked. The contents of the object are all of the arguments passed through the `addMethod()` convenience function used in the example above. New *BDMethod* objects can be constructed with the `BDMethod()` constructor, which takes the same input parameters as `addMethod()`. 
 
 ```{r}
 bdm_bonf <- BDMethod(x = p.adjust, 
@@ -280,14 +280,16 @@ bdm_bonf <- BDMethod(x = p.adjust,
 bdm_bonf
 ```
 
-Directly modifying the *BDMethodList* object provides an alternative and more modular approach to adding methods to a *BenchDesign* object than `addMethod()`.
+Directly modifying the *BDMethodList* object provides an alternative approach (aside form using `addMethod()`) to adding methods to a *BenchDesign* object.
 
 ```{r}
 BDMethodList(b)[["bonf"]] <- bdm_bonf
 b
 ```
 
-The *BDData* object of a *BenchDesign* can also be similarly extracted and modified. As with methods, the data set may be removed by setting the value to NULL.
+The *BDData* object is a simple object which only contains two slots, `@type` and `@data`. The `@type` of a *BDData* object can be either `data` or `hash`. If the `@type` is `data`, the `@data` slot is a standard list or data.frame object of raw data. However, if the `@type` is `hash`, then the `@data` slot is just a MD5 hash of some raw data object computed using `digest::digest()`. As described next in Section \@ref(summarizedbenchmark), *SummarizedBenchmark* objects also contain the *BenchDesign* object used to generate the benchmark results. Often, the original raw data can be large, and saving the full data set as part of the *SummarizedBenchmark* object can be undesirable and unnecessary. While the raw data set is needed during the benchmark experiment, by default, the *BDData* is converted to a MD5 hash beforing stored the *BenchDesign* as part of a *SummarizedBenchmark* object. Using this approach, it is still possible to confirm whether a certain data set was used for a benchmarking experiment without having to store copies of the raw data with every *SummarizedBenchmark*.  
+
+Returning to the *BenchDesign* example from above, the *BDData* object of a *BenchDesign* can also be similarly extracted and modified. As with *BDMethod* objects, the data set may be removed by setting the value to NULL.
 
 ```{r}
 BDData(b) <- NULL
@@ -302,7 +304,7 @@ BDData(b) <- bdd
 b
 ```
 
-The helper function `hashBDData()` can be called on either *BDData* or *BenchDesign* objects to convert the data to a MD5 hash.
+The helper function `hashBDData()` can be called on either *BDData* or *BenchDesign* objects to convert the data to a MD5 hash. By default, this function is called on the *BenchDesign* object during `buildBench()` before storing the object in the resulting *SummarizedBenchmark*.
 
 ```{r}
 b <- hashBDData(b)
@@ -339,11 +341,57 @@ compareBDData(BDData(tdat), BenchDesign(sb))
 Finally, information about the R session where the methods were executed is stored in the metadata of the *SummarizedBenchmark* as an entry in a list called `sessions`. The package supports rerunning benchmark experiments, and for this purpose, each new session is stored as a new entry in the `sessions` list. Since this experiment has only been executed once, the list only has a single entry in the `sessions` list. In addition to storing the session info and list of methods evaluated during the session, the list also keeps track of all parameters in the `buildBench()` call, i.e. `truthCols = "H"`.
 
 ```{r}
-mp <- getOption("max.print")
-options(max.print = 10)
 metadata(sb)$sessions[[1]]
-options(max.print = mp)
 ```
+
+## Reproducibility and Replicability
+
+While the *BenchDesign* and *SummarizedBenchmark* classes are designed to enable easier reproduction and replication of benchmark experiments, they are not meant to completely replace properly written and documented analyses. If any functions or packages are needed for the methods defined in the *BenchDesign*, they must be available and sourced or loaded when running (or re-running) the analyses. As an example, suppose we have the following locally defined method, `mymethod()`, which depends on another locally defined, but unavailable, function, `mysubmethod()`. 
+
+```{r}
+mymethod <- function(x) {
+    mysubmethod(x)
+}
+mybd <- BenchDesign(data = list(vals = 1:5))
+mybd <- addMethod(mybd, "method1", mymethod,
+                  params = rlang::quos(x = vals))
+```
+
+The top level `mymethod()` is captured in the corresponding *BDMethod* and *BenchDesign*. No errors are thrown since including `mymethod()` in a *BenchDesign* object does not require evaluating the function. 
+
+```{r}
+BDMethod(mybd, "method1")@f
+```
+
+However, when `buildBench()` is called, the method naturally fails because the necessary `mysubmethod()` is not available in the current session.
+
+```{r}
+tryCatch({ buildBench(mybd) }, error = function(e) print(e))
+```
+
+Therefore, if any locally defined functions are necessary for a method, they should be available along with the *BenchDesign* object or defined at the top level. Additionally, for reproducibility and clarity, we generally recommend keeping functions as "self-contained" as possible, and *never* relying on variables defined externally, e.g. in the global enviroment. Scoping with functions can be confusing, and it may not always be clear where constants are being evaluated. As an example, consider the following simple multiplying function.
+
+```{r}
+m <- 5
+mymult <- function(x) {
+    m * x
+}
+m <- 2
+
+mybd <- BenchDesign(data = list(vals = 1:5, m = 10))
+mybd <- addMethod(mybd, "methodr", mymult,
+                  params = rlang::quos(x = vals))
+```
+
+While experienced R programmers may know which value of `m` (5, 2 or 10) will be used when `buildBench()` is called, for many users, this is less obvious.
+
+```{r}
+assay(buildBench(mybd))
+```
+
+The answer is the value assigned most recently in the environment where `mymult()` was defined, `R_GlobalEnv`, the global environment (`m = 2`). Note, however, that if the *BenchDesign* is saved and reloaded in a new session, whatever value of `m` is defined in the global environment of the new session will be used. If `m` is not defined in the new session, an error will be thrown. In this case, `m` should either be explicitly defined within the function or passed as a second input variable of `mymult()` and defined with `params =` in the *BDMethod*.
+
+While it may be possible to aggressively capture all code and environment variables defined with each method in a *BenchDesign*, it is not within the scope of this package, and furthermore, may not be the best appraoch to constructing a reproducible benchmark. While redundant, for emphasis, we reiterate that the *SummarizedBenchmark* framework is a solution for structuring and organizing benchmark experiments and should not be viewed as an solution for structuring and organizing all analysis code.
 
 # Differential Expression Case Study
 
