@@ -391,7 +391,7 @@ assay(buildBench(mybd))
 
 The answer is the value assigned most recently in the environment where `mymult()` was defined, `R_GlobalEnv`, the global environment (`m = 2`). Note, however, that if the *BenchDesign* is saved and reloaded in a new session, whatever value of `m` is defined in the global environment of the new session will be used. If `m` is not defined in the new session, an error will be thrown. In this case, `m` should either be explicitly defined within the function or passed as a second input variable of `mymult()` and defined with `params =` in the *BDMethod*.
 
-While it may be possible to aggressively capture all code and environment variables defined with each method in a *BenchDesign*, it is not within the scope of this package, and furthermore, may not be the best appraoch to constructing a reproducible benchmark. While redundant, for emphasis, we reiterate that the *SummarizedBenchmark* framework is a solution for structuring and organizing benchmark experiments and should not be viewed as an solution for structuring and organizing all analysis code.
+While it may be possible to aggressively capture all code and environment variables defined with each method in a *BenchDesign*, it is not within the scope of this package, and furthermore, may not be the best appraoch to constructing a reproducible benchmark. While redundant, for emphasis, we reiterate that the *SummarizedBenchmark* framework is a solution for structuring benchmark experiments which complements, but does not replace, well documented and organized code.
 
 # Differential Expression Case Study
 
