@@ -365,7 +365,7 @@ BDMethod(mybd, "method1")@f
 
 However, when `buildBench()` is called, the method naturally fails because the necessary `mysubmethod()` is not available in the current session.
 
-```{r}
+```{r, message = TRUE}
 tryCatch({ buildBench(mybd) }, error = function(e) print(e))
 ```
 
@@ -860,7 +860,7 @@ bdslow <- BenchDesign(data = tdat) %>%
 
 We run these methods in parallel using `parallel = TRUE` and specify a timeout limit of 1 second for the `BPPARAM`. Naturally, `slowMethod` will fail, and `fastMethod` will fail during the `makeSlower` post-processing function.
 
-```{r}
+```{r, message = TRUE}
 bpp <- SerialParam()
 bptimeout(bpp) <- 1
 
