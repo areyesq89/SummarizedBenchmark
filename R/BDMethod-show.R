@@ -8,6 +8,15 @@
     }
     func_q <- gsub("\\s*\n\\s*", " ", func_q)
     cat("\n   ", stringr::str_trunc(func_q, 56), "\n")
+    cat("  parameters:\n")
+    if (length(object@params) > 0) {
+        param_n <- names(object@params)
+        param_q <- sapply(object@params, quo_text)
+        for (i in seq(param_n))
+            cat(stringr::str_trunc(paste("   ", param_n[i], ":", param_q[i]), 60), "\n")
+    } else {
+        cat("  none\n")
+    }
     cat("  post:\n")
     if (!is.null(object@post)) {
         post_n <- names(object@post)
@@ -26,16 +35,6 @@
             cat(stringr::str_trunc(paste("   ", meta_n[i], ":", meta_q[i]), 60), "\n")
     } else {
         cat("    none\n")
-    }
-    
-    cat("  parameters:\n")
-    if (length(object@params) > 0) {
-        param_n <- names(object@params)
-        param_q <- sapply(object@params, quo_text)
-        for (i in seq(param_n))
-            cat(stringr::str_trunc(paste("   ", param_n[i], ":", param_q[i]), 60), "\n")
-    } else {
-        cat("  none\n")
     }
 }
 
