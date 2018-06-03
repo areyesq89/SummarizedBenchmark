@@ -695,7 +695,7 @@ head(assay(sb, "lfc"))
 
 The simple examples considered in this vignette were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Similarly, when replicating benchmark experiments across multiple data sets, running each experiment in serial may be inefficent. In this section, we describe how to use the `BiocStyle::Biocpkg("BiocParallel")` package to parallelize benchmarking across methods and data sets. More details on how to specify the parallelization back-end can be found in the _Introduction to BiocParallel_ vignette for the `r BiocStyle::Biocpkg("BiocParallel")` package. 
 
-### Across methods
+### Across Methods
 
 Since constructing a *BenchDesign* object requires no computation, the bottleneck only appears at the `buildBench()` step of the process. Parallelization of this step is enabled using the `r BiocStyle::Biocpkg("BiocParallel")` package. By default, parallel evaluation is disabled, but can easily be enabled by setting `parallel = TRUE` and optionally specifying the `BPPARAM =` parameter. If `BPPARAM =` is not specified, the default back-end will be used. The default back-end can be checked with `bpparam()`.
 
@@ -714,7 +714,7 @@ The results, as expected, are the same as when `buildBench()` was called without
 all(assay(sbp) == assay(sb), na.rm = TRUE)
 ```
 
-### Across datasets
+### Across Datasets
 
 Typically, benchmark studies have more than a single dataset. For this cases, users can create a  *BenchDesign* object and execute this design on many datasets. Again, running the step of executing the benchmark design on every dataset using a single core might take to long. However, parallelization across datasets is possible using the `r BiocStyle::Biocpkg("BiocParallel")` package. 
 
