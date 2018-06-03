@@ -46,7 +46,7 @@ In this vignette, we first illustrate the basic use of both the *BenchDesign* an
 
 ## Related Work
 
-Other frameworks for benchmarking methods in R, include `r BiocStyle::Biocpkg("iCOBRA")` (a package for comparing results of _"binary classification and ranking methods"_ with a Shiny web application for interactive analyses) and `r BiocStyle::Githubpkg("stephenslab/dsc")` (a framework for _"managing computational benchmarking experiments that compare several competing methods"_ written in Python but capable of running methods implemented in both Python and R).
+Other frameworks for benchmarking methods include `r BiocStyle::Biocpkg("iCOBRA")` (a package for comparing results of _"binary classification and ranking methods"_ with a Shiny web application for interactive analyses), `r BiocStyle::Biocpkg("rnaseqcomp")` (a package for comparing results of RNA-seq quantification pipelines), and `r BiocStyle::Githubpkg("stephenslab/dsc")` (a framework for _"managing computational benchmarking experiments that compare several competing methods"_ written in Python but capable of running methods implemented in both Python and R).
 
 # Quickstart Case Study
 
