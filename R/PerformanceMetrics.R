@@ -91,6 +91,9 @@ is.scalar <- function(x){
 #' is returned.
 #' @param tidy Logical (default: FALSE). If TRUE, a long formated \code{\link{data.frame}}
 #' is returned.
+#' @param rerun Logical (default: TRUE). By default, all performance metrics are recalculated
+#' everytime that \code{\link{estimatePerformanceMetrics}} is called. If FALSE, performance metrics
+#' will only be calculated for newly added methods or modified methods.
 #' @param ... Additional parameters passed to the performance functions.
 #'
 #' @author Alejandro Reyes
@@ -211,10 +214,22 @@ estimateMetricsForAssay <- function( object, assay, evalMetric=NULL, addColData=
 #' @describeIn estimateMetrics Estimate performance metrics for all assays
 #' @aliases estimatePerformanceMetrics
 #' @export
-estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ... ){
+estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, rerun=TRUE, ... ){
   stopifnot( is( object, "SummarizedBenchmark" ) )
   validObject( object )
   assayNames <- assayNames( object )
+  if( addColData & !rerun & !is.null( colData(object)$pm.session ) ){
+    rerunMeth <- colData( object )$session.idx != colData( object )$pm.session |
+      is.na( colData( object )$pm.session )
+    if( sum( rerunMeth ) < 1L ){
+      stop("All performance metrics appear to be up-to-date.")
+    }else{
+      cat( sprintf("\nOption rerun is set to `FALSE`:\nRerunning performance metrics only for the following methods: %s\n\n",
+                   paste( colnames(object)[rerunMeth], collapse=", " ) ) )
+    }
+    objectPrev <- object
+    object <- object[,rerunMeth]
+  }
   object <- cleanPerformanceMetrics( object )
   allRes <- lapply( assayNames, function(x){
     if( length( object@performanceMetrics[[x]] ) > 0 ){
@@ -241,6 +256,14 @@ estimatePerformanceMetrics <- function( object, addColData=FALSE, tidy=FALSE, ..
     if( tidy ){
       return( tidyUpMetrics( object ) )
     }else{
+      if( !rerun ){
+        newEvals <- colData(object)
+        colData(objectPrev)[rownames(newEvals),colnames(newEvals)] <- newEvals
+        object <- objectPrev
+      }
+      colData( object )$pm.session <- colData( object )$session.idx
+      idx <- colnames( colData(object) ) %in% "pm.session"
+      elementMetadata( colData(object) )[idx,"colType"] <- "performanceMetricSession"
       return( object )
     }
   }else{
