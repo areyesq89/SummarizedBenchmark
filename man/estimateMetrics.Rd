@@ -8,7 +8,8 @@
 estimateMetricsForAssay(object, assay, evalMetric = NULL,
   addColData = FALSE, evalFunction = NULL, tidy = FALSE, ...)
 
-estimatePerformanceMetrics(object, addColData = FALSE, tidy = FALSE, ...)
+estimatePerformanceMetrics(object, addColData = FALSE, tidy = FALSE,
+  rerun = TRUE, ...)
 }
 \arguments{
 \item{object}{A \code{\link{SummarizedBenchmark}} object.}
@@ -34,6 +35,10 @@ is estimated.}
 is returned.}
 
 \item{...}{Additional parameters passed to the performance functions.}
+
+\item{rerun}{Logical (default: TRUE). By default, all performance metrics are recalculated
+everytime that \code{\link{estimatePerformanceMetrics}} is called. If FALSE, performance metrics
+will only be calculated for newly added methods or modified methods.}
 }
 \value{
 Either a \code{\link{SummarizedBenchmark}} object, a \code{\link{DataFrame}} or

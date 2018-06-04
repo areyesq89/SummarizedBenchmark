@@ -842,6 +842,25 @@ updateBench(sb2, bd, keepAll = FALSE)
 
 As expected, the `deseq2` method must again be updated to return to match the original method definition, and the newer `deseq2_ashr` method must be dropped.
 
+If users update the _BenchDesign_, it is possible to calculate the performance metrics only for methods that have been added or modified. This feature is useful, for example, when performance metrics are computationally expensive to calculate. In the example below, we calculate the number of rejections at a FDR of 10%.
+
+```{r simpleMetric}
+sb <- addPerformanceMetric( sb, 
+                      assay="pv", 
+                      evalMetric="rejections", 
+                      evalFunction=function( query, truth  ){ 
+                        sum( p.adjust( query, method="BH" ) < 0.1, na.rm=TRUE) 
+                        } )
+sb <- estimatePerformanceMetrics(sb, addColData=TRUE)
+```
+
+Then, we update the _BenchDesign_ and rerun the function `estimatePerformanceMetrics()` with the parameter `rerun=FALSE`. Setting this parameter to `FALSE` will detect which performance metrics have been calculated before and will only recalculate metrics for methods that have been added or modified.
+
+```{r modifyBench}
+sb2 <- updateBench( sb, bd2, dryrun=FALSE )
+estimatePerformanceMetrics( sb2, rerun=FALSE, addColData=TRUE )
+```
+
 ## Error Handling
 
 When running a large benchmark study, not uncommonly, a single or a small subset of methods may fail during execution. This may be the result of misspecified parameters, an underlying bug in the software, or any number of other reasons. By default, errors thrown by methods which fail during `buildBench()` or `updateBench()` are caught and handled in a user-friendly way. As long as a single method executes without any errors, a _SummarizedBenchmark_ object is returned as usual, with the assay columns of failed methods set to `NA`. Additionally, the corresponding error messages are stored in the metadata of the object for reference.
