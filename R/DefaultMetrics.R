@@ -24,23 +24,23 @@ availableMetrics <- function(){
 }
 
 sb.TPR <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha & truth == 1, na.rm = TRUE ) / sum( truth == 1, na.rm = TRUE )
+  sum( query <= alpha & truth == 1, na.rm = TRUE ) / sum( truth == 1, na.rm = TRUE )
 }
 
 sb.TNR <- function( query, truth, alpha=0.1 ){
-  sum( ( !query < alpha ) & truth == 0, na.rm = TRUE ) / sum( truth == 0, na.rm = TRUE )
+  sum( ( !query <= alpha ) & truth == 0, na.rm = TRUE ) / sum( truth == 0, na.rm = TRUE )
 }
 
 sb.FDR <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha & truth == 0, na.rm = TRUE ) / sum( query < alpha, na.rm = TRUE )
+  sum( query <= alpha & truth == 0, na.rm = TRUE ) / sum( query <= alpha, na.rm = TRUE )
 }
 
 sb.FNR <- function( query, truth, alpha=0.1 ){
-  sum( !(query < alpha) & truth == 1, na.rm = TRUE ) / sum( !( query < alpha ), na.rm = TRUE )
+  sum( !(query <= alpha) & truth == 1, na.rm = TRUE ) / sum( !( query <= alpha ), na.rm = TRUE )
 }
 
 sb.rejections <- function( query, truth, alpha=0.1 ){
-  sum( query < alpha, na.rm = TRUE )
+  sum( query <= alpha, na.rm = TRUE )
 }
 
 sb.correlation <- function( query, truth, method="pearson" ){
@@ -74,3 +74,4 @@ assayHasTruths <- function( object, assay ){
     return(TRUE)
   }
 }
+
