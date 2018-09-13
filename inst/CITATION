@@ -1,0 +1,8 @@
+bibentry(bibtype = "Article",
+         title = "Reproducible and replicable comparisons using SummarizedBenchmark.",
+         author = c(person("Patrick K", "Kimes"),
+                    person("Alejandro", "Reyes")),
+         year = 2018,
+         journal = "Bioinformatics",
+         doi = "10.1093/bioinformatics/bty627",
+         pages = "bty627")
