@@ -3,7 +3,6 @@
 \docType{methods}
 \name{BenchDesign}
 \alias{BenchDesign}
-\alias{BenchDesign}
 \alias{BenchDesign,ANY-method}
 \title{Create a new BenchDesign}
 \usage{

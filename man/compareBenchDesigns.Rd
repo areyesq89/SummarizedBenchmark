@@ -3,7 +3,6 @@
 \docType{methods}
 \name{compareBenchDesigns}
 \alias{compareBenchDesigns}
-\alias{compareBenchDesigns}
 \alias{compareBenchDesigns,SummarizedBenchmark,missing-method}
 \alias{compareBenchDesigns,SummarizedBenchmark,SummarizedBenchmark-method}
 \alias{compareBenchDesigns,SummarizedBenchmark,BenchDesign-method}
@@ -13,16 +12,17 @@
 \usage{
 compareBenchDesigns(x, y = NULL, ...)
 
-\S4method{compareBenchDesigns}{SummarizedBenchmark,missing}(x, y = NULL, ...)
+\S4method{compareBenchDesigns}{SummarizedBenchmark,missing}(x, y = NULL,
+  ...)
 
 \S4method{compareBenchDesigns}{SummarizedBenchmark,SummarizedBenchmark}(x,
   y = NULL, ...)
 
-\S4method{compareBenchDesigns}{SummarizedBenchmark,BenchDesign}(x, y = NULL,
-  ...)
+\S4method{compareBenchDesigns}{SummarizedBenchmark,BenchDesign}(x,
+  y = NULL, ...)
 
-\S4method{compareBenchDesigns}{BenchDesign,SummarizedBenchmark}(x, y = NULL,
-  ...)
+\S4method{compareBenchDesigns}{BenchDesign,SummarizedBenchmark}(x,
+  y = NULL, ...)
 
 \S4method{compareBenchDesigns}{BenchDesign,BenchDesign}(x, y = NULL, ...)
 }

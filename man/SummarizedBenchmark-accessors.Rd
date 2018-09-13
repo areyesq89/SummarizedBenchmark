@@ -11,8 +11,6 @@
 \alias{assayNames,SummarizedBenchmark-method}
 \alias{mcols<-,SummarizedBenchmark-method}
 \alias{groundTruths,SummarizedBenchmark-method}
-\alias{groundTruths}
-\alias{groundTruths<-,SummarizedBenchmark-method}
 \alias{groundTruths<-,SummarizedBenchmark-method}
 \alias{BDMethodList,SummarizedBenchmark-method}
 \alias{BenchDesign,SummarizedBenchmark-method}
