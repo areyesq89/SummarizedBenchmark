@@ -2,8 +2,14 @@ Package: SummarizedBenchmark
 Type: Package
 Title: Classes and methods for performing benchmark comparisons
 Version: 1.99.2
-Author: Alejandro Reyes <alejandro.reyes.ds@gmail.com>, Patrick Kimes <patrick.kimes@gmail.com>
-Maintainer: Alejandro Reyes <alejandro.reyes.ds@gmail.com>, Patrick Kimes <patrick.kimes@gmail.com>
+Authors@R: c(person("Alejandro", "Reyes", role = c("aut", "cre"),
+                    email = "alejandro.reyes.ds@gmail.com",
+                    comment = c(ORCID = "0000-0001-8717-6612")),
+             person("Patrick", "Kimes", role = "aut",
+                    email = "patrick.kimes@gmail.com",
+                    comment = c(ORCID = "0000-0001-6819-9077")))
+BugReports: https://github.com/areyesq89/SummarizedBenchmark/issues
+URL: https://github.com/areyesq89/SummarizedBenchmark, http://bioconductor.org/packages/SummarizedBenchmark/
 Description: This package defines the BenchDesign and SummarizedBenchmark classes for building,
     executing, and evaluating benchmark experiments of computational methods. The SummarizedBenchmark
     class extends the RangedSummarizedExperiment object, and is designed to provide infrastructure
@@ -50,4 +56,4 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
