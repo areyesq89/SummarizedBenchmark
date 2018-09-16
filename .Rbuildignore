@@ -1,4 +1,7 @@
+^docs$
+^_pkgdown\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .Rhistory
 .DS_Store
+vignettes/site-*
