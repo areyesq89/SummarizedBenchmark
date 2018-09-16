@@ -1,5 +1,5 @@
 ---
-title: "SummarizedBenchmark"
+title: "Appendix"
 author: "Patrick K. Kimes, Alejandro Reyes"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"

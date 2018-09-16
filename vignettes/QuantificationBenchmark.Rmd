@@ -1,5 +1,5 @@
 ---
-title: "Benchmarking Methods Not Written in R"
+title: "Case Study: Benchmarking Methods Not Written in R"
 author: "Alejandro Reyes, Patrick K. Kimes"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
