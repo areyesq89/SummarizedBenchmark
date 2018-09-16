@@ -1,0 +1,102 @@
+authors:
+  Alejandro Reyes:
+    href: http://alejandroreyes.org
+  Patrick Kimes:
+    href: https://www.pkimes.com
+
+development:
+  version_label: "info"
+  version_tooltip: "Bioc Devel"
+
+navbar:
+  structure:
+    left:
+    - home
+    - reference
+    - vignettes
+    - news
+    right:
+    - github
+  components:
+    intro: ~
+    articles: ~
+    vignettes:
+      text: Articles
+      menu:
+      - text: General
+      - text: Introduction
+        href: articles/SummarizedBenchmark.html
+      - text: Appendix
+        href: articles/Appendix.html
+      - text: --------
+      - text: Case Studies
+      - text: scRNA-seq Simulation
+        href: articles/SingleCellBenchmark.html
+      - text: RNA-seq Quantification
+        href: articles/QuantificationBenchmark.html
+
+reference:
+- title: BenchDesign Constructors
+  desc: >
+    Functions useful for putting together a new BenchDesign
+  contents:
+  - '`BenchDesign`'
+  - '`BDMethod`'
+  - '`BDMethodList`'
+  - '`BDData`'
+- title: BenchDesign modifiers
+  desc: ~
+  contents:
+  - '`addMethod`'
+  - '`dropMethod`'
+  - '`expandMethod`'
+  - '`printMethod`'
+  - '`modifyMethod`'
+- title: BenchDesign modifiers
+  desc: ~
+  contents:
+  - '`buildBench`'
+  - '`updateBench`'
+- title: BenchDesign Helpers
+  desc: ~
+  contents:
+  - '`hashBDData`'
+  - '`tidyBDMethod`'
+  - '`compareBDData`'
+  - '`compareBDMethod`'
+  - '`compareBenchDesigns`'
+- title: BenchDesign Classes
+  desc: >
+    BenchDesign class objects
+  contents:
+  - '`BDData-class`'
+  - '`BDMethod-class`'
+  - '`BDMethodList-accessors`'
+  - '`BDMethodList-class`'
+  - '`BenchDesign-accessors`'
+  - '`BenchDesign-class`'
+- title: SummarizedBenchmark Functions
+  desc: >
+    SummarizedBenchmark class objects
+  contents:
+  - '`SummarizedBenchmark`'
+  - '`addPerformanceMetric`'
+  - '`availableMetrics`'
+  - '`estimateMetricsForAssay`'
+  - '`performanceMetrics`'
+  - '`plotMethodsOverlap`'
+  - '`plotROC`'
+  - '`tidyUpMetrics`'
+- title: SummarizedBenchmark Classes
+  desc: >
+    SummarizedBenchmark class objects
+  contents:
+  - '`SummarizedBenchmark-accessors`'
+  - '`SummarizedBenchmark-class`'
+- title: Data Sets
+  desc: >
+    Example data sets to work with
+  contents:
+  - '`allSB`'
+  - '`sb`'
+  - '`tdat`'
