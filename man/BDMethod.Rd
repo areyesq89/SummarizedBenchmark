@@ -3,7 +3,6 @@
 \docType{methods}
 \name{BDMethod}
 \alias{BDMethod}
-\alias{BDMethod}
 \alias{BDMethod,quosure-method}
 \alias{BDMethod,function-method}
 \title{Create a new BDMethod}

@@ -16,7 +16,7 @@ test_that("basic updateBench call works", {
     sb <- buildBench(bd)
 
     ## basic call w/ just SummarizedBenchmark
-    expect_silent(bdcomp <- compareBenchDesigns(sb))
+    bdcomp <- compareBenchDesigns(sb)
     expect_output(bdupdate <- updateBench(sb), "Update SummarizedBenchmark \\(dryrun\\)")
     expect_equal(bdcomp$methods$res, bdupdate$methods$res)
     expect_equal(dplyr::select(bdcomp$methods[[2]], -post, -f),
@@ -30,7 +30,7 @@ test_that("basic updateBench call works", {
     expect_error(sb2 <- updateBench(sb, dryrun = FALSE), "MD5 hash")
     expect_silent(sb2 <- updateBench(sb, dryrun = FALSE, data = tdat))
     expect_identical(sb, sb2)
-    
+
     ## basic call w/ new BenchDesign
     bd2 <- bd
     BDMethod(bd2, "holm") <- BDMethod(x = p.adjust, params = rlang::quos(p = pval, method = "holm"))

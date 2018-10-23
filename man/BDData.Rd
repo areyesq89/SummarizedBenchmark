@@ -3,7 +3,6 @@
 \docType{methods}
 \name{BDData}
 \alias{BDData}
-\alias{BDData}
 \alias{BDData,ANY-method}
 \alias{BDData,BenchDesign-method}
 \alias{BDData,SummarizedBenchmark-method}

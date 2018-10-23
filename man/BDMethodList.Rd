@@ -3,7 +3,6 @@
 \docType{methods}
 \name{BDMethodList}
 \alias{BDMethodList}
-\alias{BDMethodList}
 \alias{BDMethodList,ANY-method}
 \alias{coerce}
 \title{Create a new BDMethodList}

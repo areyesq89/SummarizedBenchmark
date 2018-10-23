@@ -3,7 +3,6 @@
 \docType{methods}
 \name{hashBDData}
 \alias{hashBDData}
-\alias{hashBDData}
 \alias{hashBDData,BDData-method}
 \alias{hashBDData,BenchDesign-method}
 \title{Convert BDData to BDData with MD5 Hash}

@@ -3,7 +3,6 @@
 \docType{methods}
 \name{tidyBDMethod}
 \alias{tidyBDMethod}
-\alias{tidyBDMethod}
 \alias{tidyBDMethod,BDMethod-method}
 \alias{tidyBDMethod,list-method}
 \alias{tidyBDMethod,SimpleList-method}
