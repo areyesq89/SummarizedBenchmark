@@ -12,10 +12,10 @@ navbar:
   structure:
     left:
     - home
-    - reference
-    - vignettes
     - news
     right:
+    - reference
+    - vignettes
     - github
   components:
     intro: ~
@@ -36,66 +36,79 @@ navbar:
         href: articles/QuantificationBenchmark.html
 
 reference:
-- title: BenchDesign Constructors
+- title: Creating Objects
   desc: >
-    Functions useful for putting together a new BenchDesign
+    Several classes are defined in the package, most importantly, the [BenchDesign](BenchDesign-class.html) and
+    [SummarizedBenchmark](SummarizedBenchmark-class.html) classes for encapsulating the benchmark design and
+    benchmark results, repectively. The following set of functions can be used to create new instances of
+    each class. For more details, see [class definitions](#section-class-definitions) below.
   contents:
   - '`BenchDesign`'
   - '`BDMethod`'
   - '`BDMethodList`'
   - '`BDData`'
-- title: BenchDesign modifiers
-  desc: ~
+  - '`SummarizedBenchmark`'
+- title: Executing Benchmarks
+  desc: >
+    After
+  contents:
+  - '`buildBench`'
+  - '`updateBench`'
+- title: BenchDesign Methods
+  desc: >
+    Core functions for building a benchmark experiment using the [BenchDesign](BenchDesign-class.html) class.
   contents:
   - '`addMethod`'
   - '`dropMethod`'
   - '`expandMethod`'
-  - '`printMethod`'
   - '`modifyMethod`'
-- title: BenchDesign modifiers
-  desc: ~
-  contents:
-  - '`buildBench`'
-  - '`updateBench`'
-- title: BenchDesign Helpers
-  desc: ~
-  contents:
-  - '`hashBDData`'
-  - '`tidyBDMethod`'
+  - '`printMethod`'
+  - '`compareBenchDesigns`'
   - '`compareBDData`'
   - '`compareBDMethod`'
-  - '`compareBenchDesigns`'
-- title: BenchDesign Classes
+  - '`hashBDData`'
+- title: SummarizedBenchmark Methods
   desc: >
-    BenchDesign class objects
+    Core functions for evaluating benchmark experiments using the [SummarizedBenchmark](SummarizedBenchmark-class.html) class.
   contents:
-  - '`BDData-class`'
-  - '`BDMethod-class`'
-  - '`BDMethodList-accessors`'
-  - '`BDMethodList-class`'
-  - '`BenchDesign-accessors`'
-  - '`BenchDesign-class`'
-- title: SummarizedBenchmark Functions
-  desc: >
-    SummarizedBenchmark class objects
-  contents:
-  - '`SummarizedBenchmark`'
+  - '`performanceMetrics`'
+  - '`groundTruths`'
   - '`addPerformanceMetric`'
   - '`availableMetrics`'
   - '`estimateMetricsForAssay`'
-  - '`performanceMetrics`'
   - '`plotMethodsOverlap`'
   - '`plotROC`'
   - '`tidyUpMetrics`'
-- title: SummarizedBenchmark Classes
+- title: Class Definitions
   desc: >
-    SummarizedBenchmark class objects
+    Two core classes, [BenchDesign](BenchDesign-class.html) and
+    [SummarizedBenchmark](SummarizedBenchmark-class.html) are
+    defined in the package, along with several smaller classes which help encapsulate data
+    used in benchmarking ([BDData](BDData-class.html)) and definitions of methods benchmarked
+    ([BDMethod](BDMethod-class.html), [BDMethodList](BDMethodList-class.html)).
   contents:
-  - '`SummarizedBenchmark-accessors`'
+  - '`BenchDesign-class`'
+  - '`BDData-class`'
+  - '`BDMethod-class`'
+  - '`BDMethodList-class`'
   - '`SummarizedBenchmark-class`'
+- title: Class Setters
+  desc: >
+    In addition to using the methods defined above for [working with BenchDesign objects](#section-benchdesign-methods)
+    and [working with SummarizedBenchmark](#section-summarizedbenchmark-methods), some slots and values of
+    the classes can be directly modified using the following functions. 
+  contents:
+  - '`BDData-setter`'
+  - '`BDMethod-setter`'
+  - '`BDMethodList-setter`'
+  - '`performanceMetrics-setter`'
+  - '`groundTruths-setter`'
+  - '`assayNames-setter`'
+  - '`mcols-setter`'
 - title: Data Sets
   desc: >
-    Example data sets to work with
+    Example data sets are included to illustrate the functionality of the package in the
+    various vignettes and case studies.
   contents:
   - '`allSB`'
   - '`sb`'
