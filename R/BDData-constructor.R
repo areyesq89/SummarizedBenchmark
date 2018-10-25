@@ -1,4 +1,4 @@
-#' Create a new BDData
+#' Create a new BDData object
 #'
 #' Initialized a new BDData object for benchmarking methods.
 #'

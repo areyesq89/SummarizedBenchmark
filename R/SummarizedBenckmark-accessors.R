@@ -13,25 +13,37 @@ performanceMetricsSB <- function( object, assay=NULL ){
 
 #' @rdname performanceMetrics
 #' @exportMethod "performanceMetrics"
-setMethod( "performanceMetrics",
-  signature( object = "SummarizedBenchmark" ), performanceMetricsSB )
+setMethod("performanceMetrics",
+          signature(object = "SummarizedBenchmark"), performanceMetricsSB)
 
-
-#' @name performanceMetrics
-#' @rdname performanceMetrics
+#' @rdname performanceMetrics-setter
 #' @exportMethod "performanceMetrics<-"
-setReplaceMethod( "performanceMetrics",
-                  signature(object="SummarizedBenchmark", value="SimpleList"),
+setReplaceMethod("performanceMetrics",
+                 signature(object="SummarizedBenchmark", value="SimpleList"),
                  function( object, value ) {
-                   object@performanceMetrics <- value
-                   validObject(object)
-                   object
-                 } )
+                     object@performanceMetrics <- value
+                     validObject(object)
+                     object
+                 })
 
-
-#' @rdname SummarizedBenchmark-accessors
-#' @aliases assayNames assayNames,SummarizedBenchmark-method assayNames<-,SummarizedBenchmark,character-method
+#' assayNames setter
+#' 
+#' @param x A \code{SummarizedBenchmark} object.
+#' @param value A character vector.
+#' @param ... Futher arguments, perhaps used by methods
+#'
+#' @return
+#' Modfied \code{SummarizedBenchmark} object.
+#'
+#' @examples
+#'
+#' data( sb )
+#' assayNames( sb )[2] <- "log2FC"
+#'
+#' @name assayNames-setter
+#' @importMethodsFrom SummarizedExperiment assayNames "assayNames<-"
 #' @exportMethod "assayNames<-"
+#' @author Alejandro Reyes
 setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
                   function(x, ..., value)
 {
@@ -49,10 +61,25 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
   x
 } )
 
-#' @rdname SummarizedBenchmark-accessors
-#' @aliases mcols<-,SummarizedBenchmark-method
+
+#' mcols setter
+#' 
+#' @param x A \code{SummarizedBenchmark} object.
+#' @param value A character vector.
+#' @param ... Futher arguments, perhaps used by methods
+#'
+#' @return
+#' Modfied \code{SummarizedBenchmark} object.
+#'
+#' @examples
+#'
+#' data( sb )
+#' assayNames( sb )[2] <- "log2FC"
+#'
+#' @name mcols-setter
 #' @importMethodsFrom S4Vectors mcols elementMetadata "mcols<-" "elementMetadata<-"
 #' @exportMethod "mcols<-"
+#' @author Alejandro Reyes
 setReplaceMethod("mcols", "SummarizedBenchmark",
     function(x, ..., value)
 {
@@ -70,9 +97,7 @@ setReplaceMethod("mcols", "SummarizedBenchmark",
     x
 })
 
-#' @rdname SummarizedBenchmark-accessors
-#' @aliases groundTruths groundTruths,SummarizedBenchmark-method groundTruths<-,SummarizedBenchmark-method
-#' @param object a \code{SummarizedBenchmark} object.
+#' @rdname groundTruths
 #' @exportMethod "groundTruths"
 setMethod(
   "groundTruths",
@@ -84,7 +109,7 @@ setMethod(
   }
 )
 
-#' @rdname SummarizedBenchmark-accessors
+#' @rdname groundTruths-setter
 #' @exportMethod "groundTruths<-"
 setReplaceMethod(
   "groundTruths",
@@ -95,7 +120,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname SummarizedBenchmark-accessors
+#' @rdname BDMethodList
 #' @exportMethod "BDMethodList"
 setMethod("BDMethodList",
           signature(x = "SummarizedBenchmark"),
@@ -104,7 +129,7 @@ setMethod("BDMethodList",
           })
 
 
-#' @rdname SummarizedBenchmark-accessors
+#' @rdname BenchDesign
 #' @exportMethod "BenchDesign"
 setMethod("BenchDesign", signature(methods = "SummarizedBenchmark", data = "ANY"),
           function(methods, data) {

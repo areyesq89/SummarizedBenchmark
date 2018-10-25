@@ -2,29 +2,30 @@
 % Please edit documentation in R/AllGenerics.R,
 %   R/SummarizedBenckmark-accessors.R
 \docType{methods}
-\name{performanceMetrics}
-\alias{performanceMetrics}
-\alias{performanceMetrics,SummarizedBenchmark-method}
-\title{performanceMetrics slot getter}
+\name{performanceMetrics-setter}
+\alias{performanceMetrics-setter}
+\alias{performanceMetrics<-,SummarizedBenchmark,SimpleList-method}
+\title{performanceMetrics slot setter}
 \usage{
-performanceMetrics(object, ...)
+performanceMetrics(object, ...) <- value
 
-\S4method{performanceMetrics}{SummarizedBenchmark}(object, assay = NULL)
+
+  \S4method{performanceMetrics}{SummarizedBenchmark,SimpleList}(object) <- value
 }
 \arguments{
 \item{object}{a \code{SummarizedBenchmark} object.}
 
 \item{...}{Futher arguments, perhaps used by methods}
 
-\item{assay}{A character string indicating an assay name}
-
 \item{value}{A SimpleList of the same length as the number of assays}
+
+\item{assay}{A character string indicating an assay name}
 }
 \value{
 A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
 }
 \description{
-performanceMetrics slot getter
+performanceMetrics slot setter
 }
 \examples{
 
@@ -35,7 +36,7 @@ performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
 
 }
 \seealso{
-\code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}
+\code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}, \code{\link{performanceMetrics}}
 }
 \author{
 Alejandro Reyes

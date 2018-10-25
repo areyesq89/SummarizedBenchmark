@@ -1,102 +1,3 @@
-#' BenchDesign Accessors
-#'
-#' These methods can be used to access, set, and remove elements of
-#' a BenchDesign object.
-#'  
-#' @param x BenchDesign object.
-#' @param i character name or integer index of a BDMethod object.
-#'        (Note: must be a character name for replacement operations.)
-#' @param value replacement object, either BDData, BDMethod, BDMethodList
-#'        or NULL object.
-#' @param ... Futher arguments, perhaps used by methods
-#' @return
-#' modified BenchDesign object
-#'
-#' @name BenchDesign-accessors
-#' @author Patrick Kimes
-NULL
-
-#' BDMethodList Accessors
-#'
-#' These methods can be used to access, set, and remove elements of
-#' a BDMethodList object.
-#' 
-#' @param x BDMethodList object.
-#' @param i character name or integer index of a BDMethod object.
-#'        (Note: must be a character name for replacement operations.)
-#' @param value replacement object, either BDMethod or NULL object.
-#'
-#' @return
-#' modified BDMethodList object
-#'
-#' @name BDMethodList-accessors
-#' @author Patrick Kimes
-NULL
-
-#' Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.
-#'
-#' @docType methods
-#' @name performanceMetrics
-#' @rdname performanceMetrics
-#' @aliases performanceMetrics performanceMetrics,SummarizedBenchmark-method performanceMetrics<-,SummarizedBenchmark,SimpleList-method
-#'
-#' @param object a \code{SummarizedBenchmark} object.
-#' @param assay A character string indicating an assay name
-#' @param value A SimpleList of the same length as the number of assays
-#' @param ... Futher arguments, perhaps used by methods
-#' @seealso \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}
-#'
-#' @examples
-#'
-#' data( sb )
-#' performanceMetrics( sb )
-#' performanceMetrics( sb, assay="qvalue" )
-#' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
-#'
-#' @author Alejandro Reyes
-#'
-#' @return A SimpleList with one element for each assay. Each element of the list contains a list of performance functions.
-NULL
-
-#' Accessor and replacement functions for the slots of a SummarizedBenchmark object.
-#' @docType methods
-#' @name SummarizedBenchmark-accessors
-#' @rdname SummarizedBenchmark-accessors
-#'
-#' @param x A \code{SummarizedBenchmark} object.
-#' @param methods A \code{SummarizedBenchmark} object.
-#' @param value A character vector.
-#' @param data A data set to be used.
-#' @param ... Futher arguments, perhaps used by methods
-#' @seealso \code{\link{performanceMetrics}}
-#'
-#' @return Either a \code{SummarizedBenchmark} object or a slot of the \code{SummarizedBenchmark} object.
-#'
-#' @examples
-#'
-#' data( sb )
-#' assayNames( sb )[2] <- "log2FC"
-#'
-#' @author Alejandro Reyes
-#' @importMethodsFrom SummarizedExperiment assayNames "assayNames<-"
-NULL
-
-
-#' @rdname BenchDesign-accessors
-#' @export
-setGeneric("BDData<-", 
-           function(x, value) standardGeneric("BDData<-"))
-
-#' @rdname BenchDesign-accessors
-#' @export
-setGeneric("BDMethod<-", 
-           function(x, i, value) standardGeneric("BDMethod<-"))
-
-#' @rdname BenchDesign-accessors
-#' @export
-setGeneric("BDMethodList<-", 
-           function(x, value) standardGeneric("BDMethodList<-"))
-
 #' @rdname BDData
 #' @export
 setGeneric("BDData", valueClass = "BDDataOrNULL",
@@ -133,22 +34,127 @@ setGeneric("tidyBDMethod",
 setGeneric("compareBenchDesigns",
            function(x, y = NULL, ...) standardGeneric("compareBenchDesigns"))
 
-#' @rdname performanceMetrics
+#' BDData slot setter
+#'
+#' Method to set BDData slot in objects.
+#'  
+#' @param x BenchDesign object.
+#'
+#' @return
+#' modified BenchDesign object
+#'
+#' @name BDData-setter
+#' @author Patrick Kimes
 #' @export
-setGeneric("performanceMetrics", function( object, ... ) standardGeneric("performanceMetrics"))
+setGeneric("BDData<-", 
+           function(x, value) standardGeneric("BDData<-"))
 
-#' @rdname performanceMetrics
+#' BDMethod slot setter
+#'
+#' Method to set BDMethod slot in objects.
+#'  
+#' @param x BenchDesign object.
+#'
+#' @return
+#' modified BenchDesign object
+#'
+#' @name BDMethod-setter
+#' @author Patrick Kimes
 #' @export
-setGeneric( "performanceMetrics<-",
-  function( object, ..., value ) standardGeneric( "performanceMetrics<-" ) )
+setGeneric("BDMethod<-", 
+           function(x, i, value) standardGeneric("BDMethod<-"))
 
-#' @rdname SummarizedBenchmark-accessors
+#' BDMethodList slot setter
+#'
+#' Method to set BDMethodList slot in objects.
+#'  
+#' @param x BenchDesign object.
+#'
+#' @return
+#' modified BenchDesign object
+#'
+#' @name BDMethodList-setter
+#' @author Patrick Kimes
+#' @export
+setGeneric("BDMethodList<-", 
+           function(x, value) standardGeneric("BDMethodList<-"))
+
+#' groundTruths setter
+#'
+#' Method to set groundTruths in SummarizedBenchmark object.
+#'  
+#' @param object a \code{SummarizedBenchmark} object.
+#'
+#' @return
+#' modified BenchDesign object
+#'
+#' @name groundTruths-setter
+#' @author Patrick Kimes
+#' @export
+setGeneric("groundTruths<-",
+            function( object, ..., value ) standardGeneric( "groundTruths<-" ) )
+
+#' groundTruths getter
+#'
+#' Method to get groundTruths in SummarizedBenchmark object.
+#'  
+#' @param object a \code{SummarizedBenchmark} object.
+#'
+#' @return
+#' modified BenchDesign object
+#'
+#' @name groundTruths
+#' @author Patrick Kimes
 #' @export
 setGeneric("groundTruths",
            function( object, ... )
              standardGeneric("groundTruths"))
 
-#' @rdname SummarizedBenchmark-accessors
+#' performanceMetrics slot getter
+#'
+#' @param object a \code{SummarizedBenchmark} object.
+#' @param assay A character string indicating an assay name
+#' @param value A SimpleList of the same length as the number of assays
+#' @param ... Futher arguments, perhaps used by methods
+#'
+#' @return
+#' A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
+#'
+#' @examples
+#'
+#' data( sb )
+#' performanceMetrics( sb )
+#' performanceMetrics( sb, assay="qvalue" )
+#' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+#'
+#' @seealso \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}
+#' @name performanceMetrics
 #' @export
-setGeneric( "groundTruths<-",
-            function( object, ..., value ) standardGeneric( "groundTruths<-" ) )
+#' @author Alejandro Reyes
+setGeneric("performanceMetrics", function( object, ... ) standardGeneric("performanceMetrics"))
+
+#' performanceMetrics slot setter
+#'
+#' @param object a \code{SummarizedBenchmark} object.
+#' @param assay A character string indicating an assay name
+#' @param value A SimpleList of the same length as the number of assays
+#' @param ... Futher arguments, perhaps used by methods
+#'
+#' @return
+#' A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
+#'
+#' @examples
+#'
+#' data( sb )
+#' performanceMetrics( sb )
+#' performanceMetrics( sb, assay="qvalue" )
+#' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+#'
+#' @seealso \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}, \code{\link{performanceMetrics}}
+#' @name performanceMetrics-setter
+#' @export
+#' @author Alejandro Reyes
+setGeneric("performanceMetrics<-",
+  function( object, ..., value ) standardGeneric( "performanceMetrics<-" ) )
+
+

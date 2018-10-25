@@ -2,10 +2,9 @@ setOldClass(c("quosure", "quosures"))
 setClassUnion("listOrNULL", c("list", "NULL"))
 setClassUnion("listOrCharacter", c("list", "character"))
 
-#' BDMethod class
+#' BDData class
 #'
-#' Container for individual methods to be compared as part of
-#' a BenchDesign object.
+#' Container for data in a BenchDesign object.
 #'
 #' @slot data a list or MD5 hash of the data.
 #' @slot type a character string indicating whether the data slot
@@ -111,7 +110,7 @@ setClass("BenchDesign", representation(data = "BDDataOrNULL", methods = "BDMetho
 setClassUnion("BenchDesignOrNULL", c("BenchDesign", "NULL"))
 
 #' @name SummarizedBenchmark-class
-#' @title SummarizedBenchmark class documentation
+#' @title SummarizedBenchmark class
 #' @description
 #' Extension of the \code{\link{RangedSummarizedExperiment}} to
 #' store the output of different methods intended for the same purpose

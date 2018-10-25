@@ -1,4 +1,4 @@
-#' @rdname BenchDesign-accessors
+#' @rdname BDData-setter
 #' @exportMethod "BDData<-"
 setReplaceMethod("BDData",
                  signature(x = "BenchDesign", value = "BDDataOrNULL"),
@@ -8,7 +8,7 @@ setReplaceMethod("BDData",
                  })
 
 
-#' @rdname BenchDesign-accessors
+#' @rdname BDMethod-setter
 #' @exportMethod "BDMethod<-"
 setReplaceMethod("BDMethod",
                  signature(x = "BenchDesign", i = "character", value = "BDMethod"),
@@ -17,7 +17,7 @@ setReplaceMethod("BDMethod",
                      x
                  })
 
-#' @rdname BenchDesign-accessors
+#' @rdname BDMethod-setter
 #' @exportMethod "BDMethod<-"
 setReplaceMethod("BDMethod",
                  signature(x = "BenchDesign", i = "character", value = "NULL"),
@@ -27,7 +27,7 @@ setReplaceMethod("BDMethod",
                  })
 
 
-#' @rdname BenchDesign-accessors
+#' @rdname BDMethodList-setter
 #' @exportMethod "BDMethodList<-"
 setReplaceMethod("BDMethodList",
                  signature(x = "BenchDesign", value = "BDMethodList"),
@@ -37,7 +37,7 @@ setReplaceMethod("BDMethodList",
                  })
 
 
-#' @rdname BenchDesign-accessors
+#' @rdname BDMethod
 #' @exportMethod "BDMethod"
 setMethod("BDMethod",
           signature(x = "BenchDesign"),
@@ -45,8 +45,7 @@ setMethod("BDMethod",
               BDMethod(x@methods, i = i)
           })
 
-
-#' @rdname BenchDesign-accessors
+#' @rdname BDMethodList
 #' @exportMethod "BDMethodList"
 setMethod("BDMethodList",
           signature(x = "BenchDesign"),

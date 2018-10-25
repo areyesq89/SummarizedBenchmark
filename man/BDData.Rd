@@ -7,7 +7,7 @@
 \alias{BDData,BenchDesign-method}
 \alias{BDData,SummarizedBenchmark-method}
 \alias{BDData,BDData-method}
-\title{Create a new BDData}
+\title{Create a new BDData object}
 \usage{
 BDData(data)
 

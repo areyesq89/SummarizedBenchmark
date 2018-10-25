@@ -32,9 +32,11 @@
     }
 }
 
+#' Show BenchDesign object
+#' 
 #' @param object BenchDesign object to show
 #' 
 #' @importFrom stringr str_pad str_trunc
 #' @import rlang
-#' @rdname BenchDesign-class
+#' @name BenchDesign-show
 setMethod("show", signature(object = "BenchDesign"), .show.BenchDesign)

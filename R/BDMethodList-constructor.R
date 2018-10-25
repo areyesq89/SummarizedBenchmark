@@ -1,4 +1,4 @@
-#' Create a new BDMethodList
+#' Create a new BDMethodList object
 #'
 #' Initialized a new SimpleList of BenchDesign method (BDMethod) objects.
 #'

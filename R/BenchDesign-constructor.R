@@ -1,4 +1,4 @@
-#' Create a new BenchDesign
+#' Create a new BenchDesign object
 #'
 #' Initializes a new BenchDesign object for benchmarking methods.
 #'
@@ -44,4 +44,3 @@ NULL
 #' @rdname BenchDesign
 #' @exportMethod "BenchDesign"
 setMethod("BenchDesign", signature(methods = "ANY", data = "ANY"), .BenchDesign)
-

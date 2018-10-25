@@ -1,4 +1,4 @@
-#' @rdname BDMethodList-accessors
+#' @rdname BDMethod-setter
 #' @exportMethod "BDMethod<-"
 setReplaceMethod("BDMethod",
                  signature(x = "BDMethodList", i = "character", value = "BDMethod"),
@@ -7,7 +7,7 @@ setReplaceMethod("BDMethod",
                      x
                  })
 
-#' @rdname BDMethodList-accessors
+#' @rdname BDMethod-setter
 #' @exportMethod "BDMethod<-"
 setReplaceMethod("BDMethod",
                  signature(x = "BDMethodList", i = "character", value = "NULL"),
@@ -16,7 +16,7 @@ setReplaceMethod("BDMethod",
                      x
                  })
 
-#' @rdname BDMethodList-accessors
+#' @rdname BDMethod
 #' @exportMethod "BDMethod"
 setMethod("BDMethod",
           signature(x = "BDMethodList"),
