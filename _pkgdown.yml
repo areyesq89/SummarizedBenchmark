@@ -67,13 +67,16 @@ reference:
   - '`SummarizedBenchmark`'
 - title: Executing Benchmarks
   desc: >
-    After
+    Benchmark experiments can be executed from either BenchDesign or SummarizedBenchmark objects using the following
+    set of functions.
   contents:
   - '`buildBench`'
   - '`updateBench`'
 - title: BenchDesign Methods
   desc: >
-    Core functions for building a benchmark experiment using the [BenchDesign](BenchDesign-class.html) class.
+    Methods and data for benchmark experiments are stored in [BenchDesign](BenchDesign-class.html) objects.
+    The following functions are available for working with these objects to add, remove, or modify methods
+    in the design, as well as to compare the methods and data contained in these objects.
   contents:
   - '`addMethod`'
   - '`dropMethod`'
@@ -86,7 +89,9 @@ reference:
   - '`hashBDData`'
 - title: SummarizedBenchmark Methods
   desc: >
-    Core functions for evaluating benchmark experiments using the [SummarizedBenchmark](SummarizedBenchmark-class.html) class.
+    Results from benchmark experiments are stored in [SummarizedBenchmark](SummarizedBenchmark-class.html) objects.
+    The following functions are available for working with these objects to define benchmark metrics and
+    evaluate or plot the results of a benchmark experiment.
   contents:
   - '`performanceMetrics`'
   - '`groundTruths`'
