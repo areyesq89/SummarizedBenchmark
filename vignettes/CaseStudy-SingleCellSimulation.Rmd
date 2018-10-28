@@ -1,5 +1,5 @@
 ---
-title: "Case Study: Single-Cell RNA-Seq Simulation"
+title: "Case Study: scRNA-Seq Simulation"
 author: "Patrick K. Kimes, Alejandro Reyes"
 date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"

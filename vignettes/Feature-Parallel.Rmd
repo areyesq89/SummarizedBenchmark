@@ -1,0 +1,156 @@
+---
+title: "Features: Parallelization"
+author: "Patrick K. Kimes, Alejandro Reyes"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
+abstract: >
+  "Running a large number of methods on several data sets, as in a benchmark comparisons can be computationaly expensive, possibly requiring hours to days to complete if each method is run in serial. Parallelization in the `SummarizedBenchmark`, both across methods and data sets can be accomplished using the `BiocParallel` package. Both forms of parallelization are demonstrated with an example case study. `SummarizedBenchmark package version: `r packageVersion("SummarizedBenchmark")`"
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    toc: true
+    fig_width: 5
+bibliography: library.bib
+vignette: >
+  %\VignetteIndexEntry{Feature: Parallelization}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE, cache = TRUE, dev = "png",
+                      message = FALSE, error = FALSE, warning = TRUE)
+```
+
+# Introduction
+
+The simple examples considered in most of these vignettes were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Similarly, when replicating benchmark experiments across multiple data sets, running each experiment in serial may be inefficent. In this section, we describe how to use the `BiocStyle::Biocpkg("BiocParallel")` package to parallelize benchmarking across methods and data sets. More details on how to specify the parallelization back-end can be found in the _Introduction to BiocParallel_ vignette for the `r BiocStyle::Biocpkg("BiocParallel")` package. 
+
+## Example Case Study
+
+```{r load-packages}
+library("SummarizedBenchmark")
+library("magrittr")
+```
+
+To demonstrate the use of `updateBench()`, we use the sample example of comparing methods for differential expression using the **SummarizedBenchmark: Full Case Study** vignette. The *BenchDesign* is initialized using RNA-seq counts and truth included with the package as an example data set. The data is described in more detail in the **Case Study** vignette.
+
+```{r case-study-data}
+library("limma")
+library("edgeR")
+library("DESeq2")
+library("tximport")
+
+data(soneson2016)
+
+mycounts <- round(txi$counts)
+mycoldat <- data.frame(condition = factor(rep(c(1, 2), each = 3)))
+rownames(mycoldat) <- colnames(mycounts)
+mydat <- list(coldat = mycoldat, cntdat = mycounts,
+              status = truthdat$status, lfc = truthdat$logFC)
+
+bd <- BenchDesign(data = mydat)
+```
+
+Three methods for differential expression testing implemented in the `r BiocStyle::Biocpkg("DESeq2")`, `r BiocStyle::Biocpkg("edgeR")`, and `r BiocStyle::Biocpkg("limma")` packages are added to the benchmark. Only the p-values are stored for each method, as before.
+
+```{r case-study-methods}
+deseq2_run <- function(countData, colData, design, contrast) {
+    dds <- DESeqDataSetFromMatrix(countData, colData = colData, design = design)
+    dds <- DESeq(dds)
+    results(dds, contrast = contrast)
+}
+deseq2_pv <- function(x) { x$pvalue }
+
+edgeR_run <- function(countData, group, design) {
+    y <- DGEList(countData, group = group)
+    y <- calcNormFactors(y)
+    des <- model.matrix(design)
+    y <- estimateDisp(y, des)
+    fit <- glmFit(y, des)
+    glmLRT(fit, coef=2)
+}
+edgeR_pv <- function(x) { x$table$PValue }
+
+voom_run <- function(countData, group, design) {
+    y <- DGEList(countData, group = group)
+    y <- calcNormFactors(y)
+    des <- model.matrix(design)
+    y <- voom(y, des)
+    eBayes(lmFit(y, des))
+}
+voom_pv <- function(x) { x$p.value[, 2] }
+
+bd <- bd %>%
+    addMethod(label = "deseq2", func = deseq2_run, post = deseq2_pv,
+              params = rlang::quos(countData = cntdat,
+                                   colData = coldat, 
+                                   design = ~condition,
+                                   contrast = c("condition", "2", "1"))) %>%
+    addMethod(label = "edgeR", func = edgeR_run, post = edgeR_pv,
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)) %>%
+    addMethod(label = "voom", func = voom_run, post = voom_pv, 
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition))
+```
+
+# Across Methods
+
+Since constructing a *BenchDesign* object requires no computation, the bottleneck only appears at the `buildBench()` step of the process. Parallelization of this step is enabled using the `r BiocStyle::Biocpkg("BiocParallel")` package. By default, parallel evaluation is disabled, but can easily be enabled by setting `parallel = TRUE` and optionally specifying the `BPPARAM =` parameter. If `BPPARAM =` is not specified, the default back-end will be used. The default back-end can be checked with `bpparam()`.
+
+Parallelization of `buildBench()` is carried out across the set of methods specified with `addMethod()`. Thus, there is no benefit to specifying more cores than the number of methods.
+
+```{r}
+bpparam()
+sbp <- buildBench(bd, parallel = TRUE,
+                  BPPARAM = BiocParallel::SerialParam())
+sbp
+```
+
+We also run `buildBench()` without parallelization for comparison.
+
+```{r}
+sb <- buildBench(bd, truthCols = "status")
+```
+
+The results, as expected, are the same as when `buildBench()` was called without parallelization.
+
+```{r}
+all(assay(sbp) == assay(sb), na.rm = TRUE)
+```
+
+# Across Datasets
+
+Typically, benchmark studies have more than a single dataset. For this cases, users can create a  *BenchDesign* object and execute this design on many datasets. Again, running the step of executing the benchmark design on every dataset using a single core might take to long. However, parallelization across datasets is possible using the `r BiocStyle::Biocpkg("BiocParallel")` package. 
+
+To demonstrate this, we split the count data and ground truths of the [@Soneson_2016] dataset, as if they were three different datasets. 
+
+```{r}
+ndat <- length(mydat$status)
+spIndexes <- split(seq_len(ndat), rep( 1:3, length.out = ndat))
+
+datasetList <- lapply(spIndexes, function(x) {
+    list(coldat = mydat$coldat, 
+        cntdat = mydat$cntdat[x, ], 
+        status = mydat$status[x], 
+        lfc = mydat$lfc[x])
+})
+
+names(datasetList) <- c("dataset1", "dataset2", "dataset3")
+```
+
+Then, using a call to `bplapply()` function, we can execute the *BenchDesign* object for each dataset. Note that with the `BPPARAM =` parameter, the execution of the *BenchDesign* is done across many computing instances. In the example below, we use 3 cores.
+
+```{r}
+sbL <- bplapply(datasetList, function(x) { buildBench(bd, data = x) },
+                BPPARAM = MulticoreParam(3))
+sbL
+```
+
+# References
+

@@ -1,0 +1,228 @@
+---
+title: "Feature: Iterative Benchmarking"
+author: "Patrick K. Kimes, Alejandro Reyes"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('SummarizedBenchmark')`"
+abstract: >
+  "Benchmark comparisons are often performed iteratively, with new methods added to the comparison or existing methods updated with new versions or features. Here, we describe the features currently available in the `SummarizedBenchmark` package for handling iterative benchmarking using an example case study. SummarizedBenchmark package version: `r packageVersion("SummarizedBenchmark")`"
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    toc: true
+    fig_width: 5
+bibliography: library.bib
+vignette: >
+  %\VignetteIndexEntry{Feature: Iterative Benchmarking}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r echo = FALSE, include = FALSE}
+knitr::opts_chunk$set(tidy = FALSE, cache = TRUE, dev = "png",
+                      message = FALSE, error = FALSE, warning = TRUE)
+```
+
+# Introduction
+
+Often, benchmarking analyses are performed in multiple steps, iteratively, with methods added or updated based on previous results. Additionally, over the course of a benchmarking study, developers may update methods to improve the implementation or add new features. Ideally, whenever a method is updated or added, the benchmark results should also be updated. Naively, all methods in the benchmark could be re-computed by calling `buildBench()` on the original _BenchDesign_ whenever the benchmarker notices that a method has been changed. However, not only is this computational inefficient, but requires the benchmarker to manually check if any methods have become outdated.
+
+To make this process easier, the package includes the `updateBench()` function which can be used to both check if any results in a _SummarizedBenchmark_ object need to be updated, and to update these results if necessary.
+
+## Example Case Study
+
+```{r load-packages}
+library("SummarizedBenchmark")
+library("magrittr")
+```
+
+To demonstrate the use of `updateBench()`, we use the same example of comparing methods for differential expression used in the **SummarizedBenchmark: Full Case Study** vignette. The *BenchDesign* is initialized using RNA-seq count data and ground truth information included with the package. The data is described in more detail in the **Full Case Study** vignette.
+
+```{r case-study-data}
+library("limma")
+library("edgeR")
+library("DESeq2")
+library("tximport")
+
+data(soneson2016)
+
+mycounts <- round(txi$counts)
+mycoldat <- data.frame(condition = factor(rep(c(1, 2), each = 3)))
+rownames(mycoldat) <- colnames(mycounts)
+mydat <- list(coldat = mycoldat, cntdat = mycounts,
+              status = truthdat$status, lfc = truthdat$logFC)
+
+bd <- BenchDesign(data = mydat)
+```
+
+Three methods for differential expression testing implemented in the `r BiocStyle::Biocpkg("DESeq2")`, `r BiocStyle::Biocpkg("edgeR")`, and `r BiocStyle::Biocpkg("limma")` packages are added to the benchmark. The p-values and log-fold change (LFC) values are stored for each method, as before.
+
+```{r case-study-methods}
+deseq2_run <- function(countData, colData, design, contrast) {
+    dds <- DESeqDataSetFromMatrix(countData, colData = colData, design = design)
+    dds <- DESeq(dds)
+    results(dds, contrast = contrast)
+}
+deseq2_pv <- function(x) { x$pvalue }
+deseq2_lfc <- function(x) { x$log2FoldChange }
+
+edgeR_run <- function(countData, group, design) {
+    y <- DGEList(countData, group = group)
+    y <- calcNormFactors(y)
+    des <- model.matrix(design)
+    y <- estimateDisp(y, des)
+    fit <- glmFit(y, des)
+    glmLRT(fit, coef=2)
+}
+edgeR_pv <- function(x) { x$table$PValue }
+edgeR_lfc <- function(x) { x$table$logFC }
+
+voom_run <- function(countData, group, design) {
+    y <- DGEList(countData, group = group)
+    y <- calcNormFactors(y)
+    des <- model.matrix(design)
+    y <- voom(y, des)
+    eBayes(lmFit(y, des))
+}
+voom_pv <- function(x) { x$p.value[, 2] }
+voom_lfc <- function(x) { x$coefficients[, 2] }
+
+bd <- bd %>%
+    addMethod(label = "deseq2", func = deseq2_run,
+              post = list(pv = deseq2_pv, lfc = deseq2_lfc),
+              params = rlang::quos(countData = cntdat,
+                                   colData = coldat, 
+                                   design = ~condition,
+                                   contrast = c("condition", "2", "1"))) %>%
+    addMethod(label = "edgeR", func = edgeR_run,
+              post = list(pv = edgeR_pv, lfc = edgeR_lfc),
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition)) %>%
+    addMethod(label = "voom", func = voom_run,
+              post = list(pv = voom_pv, lfc = voom_lfc), 
+              params = rlang::quos(countData = cntdat,
+                                   group = coldat$condition,
+                                   design = ~coldat$condition))
+
+sb <- buildBench(bd, truthCols = c(pv = "status", lfc = "lfc"))
+```
+
+# Using updateBench
+
+First, the `updateBench()` can be called with just a single _SummarizedBenchmark_ object to see if any of the methods have become outdated. By default, the function will not actually run any methods.
+
+```{r}
+updateBench(sb = sb)
+```
+
+The output is a table showing whether any methods need to be re-evaluated, as well as which components of the methods are now outdated. Here, the headings correspond to:
+
+- `Func`: the main method function,
+- `Param`: the method parameters,
+- `Meta`: the manually specified method metadata,
+- `Post`: the post-processing functions,
+- `Vers`: the corresponding package version for the main method.
+
+As can be seen by the `N`s under `Need to (Re)Run`, all results in the _SummarizedBenchmark_ are still valid, and no method needs to be re-run. Also note that the benchmark data is listed as `full data missing`. This is because our _SummarizedBenchmark_ object only contains a **MD5 hash** of the original data. (Optionally, the full data could have been stored with the _SummarizedBenchmark_ object by specifying `keepData = TRUE` in the original `buildBench()` call above. However, by default this is not done to prevent making duplicating large data sets.) If any of the methods needed to be updated, the original data must be specified to `updateBench()` using the `data =` parameter. 
+
+```{r}
+BDData(BenchDesign(sb))
+```
+
+The second way to call `updateBench()` is to specify both a _SummarizedBenchmark_ object and a _BenchDesign_ object. Intuitively, this will result in updating the results of the _SummarizedBenchmark_ object to include any new or modified methods in the _BenchDesign_. Methods between the two objects are matched by the method label, e.g. `deseq2`. As an example, suppose we modify one of the methods in the _BenchDesign_ object and want to rerun the benchmarking experiment. We first create a modified _BenchDesign_ object, where we modify a single method's manually specified meta data. Note that this is just a trivial update and normally would not warrant updating the results.
+
+```{r}
+bd2 <- modifyMethod(bd, "deseq2", rlang::quos(bd.meta = list(note = "minor update")))
+```
+
+Next, we pass the object to `updateBench()` along with the original _SummarizedBenchmark_ object.
+
+```{r}
+updateBench(sb = sb, bd = bd2)
+```
+
+Notice that now the `Need to (Re)Run` and `Meta` columns are now set to `Y` for the `deseq2` method, indicating that the metadata of the method has become outdated in the _SummarizedBenchmark_ object, and the method now needs to be rerun. Next, suppose we also decide to add a new method to our comparison. Here, we add an alternate version of DESeq2 to the comparison based on adaptive shrinkage (ASH) [@Stephens_2017].  
+
+```{r}
+deseq2_ashr <- function(countData, colData, design, contrast) {
+    dds <- DESeqDataSetFromMatrix(countData,
+                                  colData = colData,
+                                  design = design)
+    dds <- DESeq(dds)
+    lfcShrink(dds, contrast = contrast, type = "ashr")
+}
+
+bd2 <- addMethod(bd2, "deseq2_ashr", 
+                 deseq2_ashr,
+                 post = list(pv = deseq2_pv, lfc = deseq2_lfc),
+                 params = rlang::quos(countData = cntdat,
+                                      colData = coldat, 
+                                      design = ~condition,
+                                      contrast = c("condition", "2", "1")))
+```
+
+Now we see that bo the modified `deseq2` and `deseq2_ashr` methods are listed as needing to be rerun.
+
+```{r}
+updateBench(sb = sb, bd = bd2)
+```
+
+To run the update, we simply modify the call to `updateBench()` with `dryrun = FALSE`. When we do this, only the two methods needing to be rerun are evaluated.
+
+```{r}
+sb2 <- updateBench(sb = sb, bd = bd2, dryrun = FALSE)
+sb2
+```
+
+We can check the output to see that the results of the `deseq2_ashr` method have been added along with the updated `deseq2` results.
+
+```{r}
+head(assay(sb2, "lfc"))
+```
+
+## Benchmark Sessions
+
+Notice that a session index is also stored in the column data of each method. This can be used to map methods quickly to the corresponding entry of the `sessions` list stored in the object metadata.
+
+```{r}
+colData(sb2)[, "session.idx", drop = FALSE]
+```
+
+As described in the **SummarizedBenchmark: Class Details** vignette, `sessions` is a list of session information stored in the metadata of the _SummarizedBenchmark_ object. Each entry of the `sessions` list includes the names of methods for which the results were generated during that session, the corresponding method results, the run parameters, and the session info. We can check the list of methods for each session and see that it matches the `session.idx` values above.
+
+```{r}
+lapply(metadata(sb2)$sessions, `[[`, "methods")
+```
+
+As another example, we can also compare the new _SummarizedBenchmark_ object against the original _BenchDesign_. By default, `updateBench()` will keep all methods in the _SummarizedBenchmark_ object even if a corresponding method is not found in the new _BenchDesign_ object. To avoid this behavior, we can specify `keepAll = FALSE`.
+
+```{r}
+updateBench(sb2, bd, keepAll = FALSE)
+```
+
+As expected, the `deseq2` method must again be updated to return to match the original method definition, and the newer `deseq2_ashr` method must be dropped.
+
+# Updating Performance Metrics
+
+If users update the _BenchDesign_, it is possible to calculate the performance metrics only for methods that have been added or modified. This feature is useful, for example, when performance metrics are computationally expensive to calculate. In the example below, we calculate the number of rejections at a nominal 10% FDR threshold for the original _SummarizedBenchmark_ object. (Note that we do this rather than directly calculating the performance metrics for the newer _SummarizedBenchmark_ object for illustrative purposes only.)
+
+```{r simpleMetric}
+sb <- addPerformanceMetric(sb, assay = "pv", 
+                           evalMetric = "rejections", 
+                           evalFunction = function(query, truth) { 
+                               sum(p.adjust(query, method = "BH") < 0.1, na.rm = TRUE) 
+                           })
+sb <- estimatePerformanceMetrics(sb, addColData = TRUE)
+```
+
+Then, we update the _BenchDesign_ and rerun the function `estimatePerformanceMetrics()` with the parameter `rerun = FALSE`. Setting this parameter to `FALSE` will detect which performance metrics have been calculated before and will only recalculate metrics for methods that have been added or modified.
+
+```{r modifyBench}
+sb2 <- updateBench(sb, bd2, dryrun = FALSE)
+estimatePerformanceMetrics(sb2, rerun = FALSE, addColData = TRUE)
+```
+
+# References
+
