@@ -12,28 +12,45 @@ navbar:
   structure:
     left:
     - home
-    - news
+    - intro
     right:
+    - news
     - reference
     - vignettes
     - github
   components:
-    intro: ~
+    intro: 
+      text: Introduction
+      href: articles/SummarizedBenchmark-Introduction.html
+    home: ~
     articles: ~
     vignettes:
       text: Articles
       menu:
       - text: General
       - text: Introduction
-        href: articles/SummarizedBenchmark.html
-      - text: Appendix
-        href: articles/Appendix.html
+        href: articles/SummarizedBenchmark-Introduction.html
+      - text: Class Details
+        href: articles/SummarizedBenchmark-ClassDetails.html
+      - text: Full Case Study
+        href: articles/SummarizedBenchmark-FullCaseStudy.html
       - text: --------
-      - text: Case Studies
+      - text: Features
+      - text: Error Handling
+        href: articles/Feature-ErrorHandling.html
+      - text: Iterative Benchmarking
+        href: articles/Feature-Iterative.html
+      - text: Parallelization
+        href: articles/Feature-Parallel.html
+      - text: --------
+      - text: More Case Studies
       - text: scRNA-seq Simulation
-        href: articles/SingleCellBenchmark.html
+        href: articles/CaseStudy-SingleCellSimulation.html
       - text: RNA-seq Quantification
-        href: articles/QuantificationBenchmark.html
+        href: articles/CaseStudy-RNAseqQuantification.html
+
+toc:
+  depth: 1
 
 reference:
 - title: Creating Objects
