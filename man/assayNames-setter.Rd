@@ -26,6 +26,9 @@ data(sb)
 assayNames(sb)[2] <- "log2FC"
 
 }
+\seealso{
+\code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+}
 \author{
 Alejandro Reyes
 }

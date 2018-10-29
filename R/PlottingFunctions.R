@@ -1,4 +1,4 @@
-#' @title Calls UpSetR for qvalues of a \code{\link{SummarizedBenchmark}} object.
+#' @title Plot UpSetR for SummarizedBenchmark object
 #' @aliases plotMethodsOverlap
 #' @description
 #' This function looks for an assay, called by default 'qvalue', and given an alpha threshold,
@@ -13,16 +13,15 @@
 #' @param ... Further arguments passed to \code{\link{upset}}
 #'
 #' @examples
-#'
-#' data( sb )
+#' data(sb)
 #' \dontrun{
 #' plotMethodsOverlap(sb)
 #' }
 #'
 #' @return An upseR plot.
 #'
+#' @seealso \code{\link{plotROC}}, \code{\link{estimateMetrics}}
 #' @author Alejandro Reyes
-#'
 #' @export
 #' @importFrom UpSetR upset
 #'
@@ -41,7 +40,7 @@ plotMethodsOverlap <- function( object, assay="qvalue", alpha=0.1, ... ){
   upset(uobj , ... )
 }
 
-#' @title Plotting ROC curves
+#' @title Plot ROC curve for SummarizedBenchmark object
 #' @aliases plotROC
 #' @description
 #' This function inputs a \code{\link{SummarizedBenchmark}} object, looks
@@ -52,14 +51,14 @@ plotMethodsOverlap <- function( object, assay="qvalue", alpha=0.1, ... ){
 #' @param assay An assay name.
 #'
 #' @examples
-#' 
-#' data( sb )
+#' data(sb)
 #' \dontrun{
-#' plotROC( sb )
+#' plotROC(sb)
 #' }
 #'
 #' @return A ggplot object.
 #'
+#' @seealso \code{\link{plotMethodsOverlap}}, \code{\link{estimateMetrics}}
 #' @author Alejandro Reyes
 #' @export
 #' @importFrom ggplot2 ggplot geom_line aes geom_abline xlim ylim

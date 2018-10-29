@@ -21,6 +21,9 @@ Modfied \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 Modifies the \code{mcols} slot of a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
 object.
 }
+\seealso{
+\code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+}
 \author{
 Alejandro Reyes
 }

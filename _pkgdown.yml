@@ -93,14 +93,14 @@ reference:
     The following functions are available for working with these objects to define benchmark metrics and
     evaluate or plot the results of a benchmark experiment.
   contents:
-  - '`performanceMetrics`'
   - '`groundTruths`'
-  - '`addPerformanceMetric`'
   - '`availableMetrics`'
+  - '`performanceMetrics`'
+  - '`addPerformanceMetric`'
   - '`estimateMetricsForAssay`'
-  - '`plotMethodsOverlap`'
-  - '`plotROC`'
   - '`tidyUpMetrics`'
+  - '`plotROC`'
+  - '`plotMethodsOverlap`'
 - title: Class Definitions
   desc: >
     Two core classes, [BenchDesign](BenchDesign-class.html) and
@@ -125,8 +125,8 @@ reference:
   - '`BDMethodList-setter`'
   - '`performanceMetrics-setter`'
   - '`groundTruths-setter`'
-  - '`assayNames-setter`'
   - '`mcols-setter`'
+  - '`assayNames-setter`'
 - title: Data Sets
   desc: >
     Example data sets are included to illustrate the functionality of the package in the

@@ -2,7 +2,7 @@
 % Please edit documentation in R/PlottingFunctions.R
 \name{plotROC}
 \alias{plotROC}
-\title{Plotting ROC curves}
+\title{Plot ROC curve for SummarizedBenchmark object}
 \usage{
 plotROC(object, assay = "qvalue")
 }
@@ -20,12 +20,14 @@ for an assay called 'qvalue' and plots receiver operating characteristic curves
 for each of the methods to benchmark.
 }
 \examples{
-
-data( sb )
+data(sb)
 \dontrun{
-plotROC( sb )
+plotROC(sb)
 }
 
+}
+\seealso{
+\code{\link{plotMethodsOverlap}}, \code{\link{estimateMetrics}}
 }
 \author{
 Alejandro Reyes
