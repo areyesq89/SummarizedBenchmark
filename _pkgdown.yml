@@ -84,8 +84,8 @@ reference:
   - '`modifyMethod`'
   - '`printMethod`'
   - '`compareBenchDesigns`'
-  - '`compareBDData`'
   - '`compareBDMethod`'
+  - '`compareBDData`'
   - '`hashBDData`'
 - title: SummarizedBenchmark Methods
   desc: >
