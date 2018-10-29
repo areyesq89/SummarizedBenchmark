@@ -8,42 +8,47 @@ addMethod(bd, label, func, params = rlang::quos(), post = NULL,
   meta = NULL)
 }
 \arguments{
-\item{bd}{BenchDesign object.}
+\item{bd}{\code{\link[=BenchDesign-class]{BenchDesign}} object.}
 
 \item{label}{Character name for the method.}
 
 \item{func}{Primary function to be benchmarked.}
 
-\item{params}{Named quosure list created using \code{rlang::quos} of
+\item{params}{Named quosure list created using \code{\link[rlang]{quos}} of
 \code{parameter = value} pairs to be passed to \code{func}.}
 
 \item{post}{Optional post-processing function that takes
-results of \code{func} as input. Ignored if NULL.
+results of \code{func} as input. Ignored if \code{NULL}.
 If multiple assays (metrics) should be generated for each
 method, this can be accomplished by specifying a named
 list of post-processing functions, one for each assay.
-(default = NULL)}
+(default = \code{NULL})}
 
 \item{meta}{Optional metadata information for method to be
-included in \code{colData} of \code{SummarizedBenchmark} object
-generated using \code{buildBench}. See Details for more
-information. Ignored if NULL. (default = NULL)}
+included in \code{colData} of \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object
+generated using \code{link{buildBench}}. See Details for more
+information. Ignored if \code{NULL}. (default = \code{NULL})}
 }
 \value{
-A copy of the originally supplied BenchDesign with the
+Modified \code{\link[=BenchDesign-class]{BenchDesign}} object with
 new method added.
 }
 \description{
-Takes a BenchDesign object and returns a
-modified object with the specified method included. At a
-minimum, a string name for the method, \code{label}, and the
-workhorse function for the method, \code{func}, must be specified
-in addition to the primary BenchDesign object.
+Takes a \code{\link[=BenchDesign-class]{BenchDesign}} object
+and the definition of a new method for benchmarking and returns
+the original \code{\link[=BenchDesign-class]{BenchDesign}} with
+the new method included.
 
-The inputs for the call to \code{label} should be specified as
-\code{parameter = value} pairs, where the \code{value} can be any
-fixed value, variable, or column in the \code{bdata} of the
-BenchDesign object.
+At a minimum, a method label (\code{label =}), and the
+workhorse function for the method (\code{func =}) must be specified
+for the new method.
+
+Parameters for the method must be specified as a
+\code{\link[rlang]{quos}} named list of \code{parameter = value} pairs
+mapping entries in the benchmarking data to the function parameters.
+For users familiar with the \pkg{ggplot2} package, this can be
+viewed similar to the \code{aes =} mapping of data to geometry
+parameters.
 
 An optional secondary function, \code{post}, can be specified if
 the output of the workhorse function, \code{func}, needs to be
@@ -53,7 +58,8 @@ the large object returned by \code{func}.
 }
 \details{
 The optional \code{meta} parameter accepts a named list of metadata
-tags to be included for the method in the resulting \code{SummarizedBenchmark}
+tags to be included for the method in the resulting
+\code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
 object. This can be useful for two primary cases. First, it can help keep
 analyses better organized by allowing the specification of additional
 information that should be stored with methods, e.g. a tag for "method type"
@@ -67,7 +73,7 @@ appropriate package and version information can't be directly pulled from
 and \code{"pkg_vers"} values to \code{meta} as a list, or specify a separate function
 that should be used to determine the package name and version. If a separate
 function should be used, it should be passed to \code{meta} as a list entry
-with the name \code{pkg_func} and first quoted using \code{rlang::quo}, e.g.
+with the name \code{pkg_func} and first quoted using \code{\link[rlang]{quo}}, e.g.
 \code{list(pkg_func = quo(p.adjust))}.
 }
 \examples{

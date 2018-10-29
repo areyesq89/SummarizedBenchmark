@@ -26,20 +26,23 @@ setReplaceMethod("performanceMetrics",
                      object
                  })
 
-#' assayNames setter
+#' Set assay names in SummarizedBenchmark object
+#'
+#' Modifies the assay names of a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+#' object.
 #' 
-#' @param x A \code{SummarizedBenchmark} object.
+#' @param x A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #' @param value A character vector.
-#' @param ... Futher arguments, perhaps used by methods
+#' @param ... Futher arguments, perhaps used by methods.
 #'
 #' @return
-#' Modfied \code{SummarizedBenchmark} object.
+#' Modfied \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #'
 #' @examples
+#' data(sb)
+#' assayNames(sb)[2] <- "log2FC"
 #'
-#' data( sb )
-#' assayNames( sb )[2] <- "log2FC"
-#'
+#' @seealso \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
 #' @name assayNames-setter
 #' @importMethodsFrom SummarizedExperiment assayNames "assayNames<-"
 #' @exportMethod "assayNames<-"
@@ -62,20 +65,19 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
 } )
 
 
-#' mcols setter
+#' Set meta data columns in SummarizedBenchmark object
+#'
+#' Modifies the \code{mcols} slot of a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+#' object.
 #' 
-#' @param x A \code{SummarizedBenchmark} object.
-#' @param value A character vector.
-#' @param ... Futher arguments, perhaps used by methods
+#' @param x A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
+#' @param value A DataFrame of meta data.
+#' @param ... Futher arguments, perhaps used by methods.
 #'
 #' @return
-#' Modfied \code{SummarizedBenchmark} object.
+#' Modfied \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #'
-#' @examples
-#'
-#' data( sb )
-#' assayNames( sb )[2] <- "log2FC"
-#'
+#' @seealso \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
 #' @name mcols-setter
 #' @importMethodsFrom S4Vectors mcols elementMetadata "mcols<-" "elementMetadata<-"
 #' @exportMethod "mcols<-"

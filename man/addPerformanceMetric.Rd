@@ -2,7 +2,7 @@
 % Please edit documentation in R/PerformanceMetrics.R
 \name{addPerformanceMetric}
 \alias{addPerformanceMetric}
-\title{Add a performance metric definition to a \code{\link{SummarizedBenchmark}} object.}
+\title{Add performance metric to SummarizedBenchmark object}
 \usage{
 addPerformanceMetric(object, evalMetric, assay, evalFunction = NULL)
 }
@@ -40,6 +40,9 @@ sb <- addPerformanceMetric(
    }
 )
 
+}
+\seealso{
+\code{\link{availableMetrics}}, \code{\link{performanceMetrics}}
 }
 \author{
 Alejandro Reyes

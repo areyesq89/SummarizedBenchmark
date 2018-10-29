@@ -5,7 +5,7 @@
 \name{groundTruths-setter}
 \alias{groundTruths-setter}
 \alias{groundTruths<-,SummarizedBenchmark-method}
-\title{groundTruths setter}
+\title{Set ground truths in SummarizedBenchmark object}
 \usage{
 groundTruths(object, ...) <- value
 

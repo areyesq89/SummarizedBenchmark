@@ -1,16 +1,21 @@
 #' Add method to BenchDesign object
 #'
 #' @description
-#' Takes a BenchDesign object and returns a
-#' modified object with the specified method included. At a
-#' minimum, a string name for the method, `label`, and the
-#' workhorse function for the method, `func`, must be specified
-#' in addition to the primary BenchDesign object.
+#' Takes a \code{\link[=BenchDesign-class]{BenchDesign}} object
+#' and the definition of a new method for benchmarking and returns
+#' the original \code{\link[=BenchDesign-class]{BenchDesign}} with
+#' the new method included.
 #'
-#' The inputs for the call to `label` should be specified as
-#' `parameter = value` pairs, where the `value` can be any
-#' fixed value, variable, or column in the `bdata` of the
-#' BenchDesign object.
+#' At a minimum, a method label (`label =`), and the
+#' workhorse function for the method (`func =`) must be specified
+#' for the new method. 
+#'
+#' Parameters for the method must be specified as a 
+#' \code{\link[rlang]{quos}} named list of `parameter = value` pairs
+#' mapping entries in the benchmarking data to the function parameters.
+#' For users familiar with the \pkg{ggplot2} package, this can be
+#' viewed similar to the \code{aes =} mapping of data to geometry
+#' parameters.
 #'
 #' An optional secondary function, `post`, can be specified if
 #' the output of the workhorse function, `func`, needs to be
@@ -18,29 +23,30 @@
 #' "getter" function for accessing the column of interest from
 #' the large object returned by `func`.
 #' 
-#' @param bd BenchDesign object.
+#' @param bd \code{\link[=BenchDesign-class]{BenchDesign}} object.
 #' @param label Character name for the method.
 #' @param func Primary function to be benchmarked.
-#' @param params Named quosure list created using `rlang::quos` of
+#' @param params Named quosure list created using \code{\link[rlang]{quos}} of
 #'        `parameter = value` pairs to be passed to `func`.
 #' @param post Optional post-processing function that takes
-#'        results of `func` as input. Ignored if NULL.
+#'        results of `func` as input. Ignored if \code{NULL}.
 #'        If multiple assays (metrics) should be generated for each
 #'        method, this can be accomplished by specifying a named
 #'        list of post-processing functions, one for each assay. 
-#'        (default = NULL)
+#'        (default = \code{NULL})
 #' @param meta Optional metadata information for method to be
-#'        included in `colData` of `SummarizedBenchmark` object
-#'        generated using `buildBench`. See Details for more
-#'        information. Ignored if NULL. (default = NULL)
+#'        included in `colData` of \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object
+#'        generated using \code{link{buildBench}}. See Details for more
+#'        information. Ignored if \code{NULL}. (default = \code{NULL})
 #'
 #' @return
-#' A copy of the originally supplied BenchDesign with the
+#' Modified \code{\link[=BenchDesign-class]{BenchDesign}} object with
 #' new method added.
 #' 
 #' @details
 #' The optional `meta` parameter accepts a named list of metadata
-#' tags to be included for the method in the resulting `SummarizedBenchmark`
+#' tags to be included for the method in the resulting
+#' \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
 #' object. This can be useful for two primary cases. First, it can help keep
 #' analyses better organized by allowing the specification of additional
 #' information that should be stored with methods, e.g. a tag for "method type"
@@ -54,7 +60,7 @@
 #' and `"pkg_vers"` values to `meta` as a list, or specify a separate function
 #' that should be used to determine the package name and version. If a separate
 #' function should be used, it should be passed to `meta` as a list entry
-#' with the name `pkg_func` and first quoted using `rlang::quo`, e.g.
+#' with the name `pkg_func` and first quoted using \code{\link[rlang]{quo}}, e.g.
 #' `list(pkg_func = quo(p.adjust))`.
 #' 
 #' @examples

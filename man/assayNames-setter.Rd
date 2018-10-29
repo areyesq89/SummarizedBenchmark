@@ -3,27 +3,27 @@
 \docType{methods}
 \name{assayNames-setter}
 \alias{assayNames-setter}
-\title{assayNames setter}
+\title{Set assay names in SummarizedBenchmark object}
 \usage{
 \S4method{assayNames}{SummarizedBenchmark,character}(x, ...) <- value
 }
 \arguments{
-\item{x}{A \code{SummarizedBenchmark} object.}
+\item{x}{A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
-\item{...}{Futher arguments, perhaps used by methods}
+\item{...}{Futher arguments, perhaps used by methods.}
 
 \item{value}{A character vector.}
 }
 \value{
-Modfied \code{SummarizedBenchmark} object.
+Modfied \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 }
 \description{
-assayNames setter
+Modifies the assay names of a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+object.
 }
 \examples{
-
-data( sb )
-assayNames( sb )[2] <- "log2FC"
+data(sb)
+assayNames(sb)[2] <- "log2FC"
 
 }
 \author{

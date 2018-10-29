@@ -1,4 +1,4 @@
-#' @title availableMetrics
+#' @title List pre-defined metrics for SummarizedBenchmark objects 
 #' @aliases availableMetrics
 #' @description
 #' This function returns a data frame summarizing the default performance metrics provided in this package.
@@ -9,7 +9,7 @@
 #' availableMetrics()
 #'
 #' @return A data.frame summarizing the default performance metrics provided in this package.
-#' 
+#' @md
 #' @export
 availableMetrics <- function(){
   data.frame(

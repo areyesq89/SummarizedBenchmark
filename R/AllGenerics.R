@@ -34,52 +34,71 @@ setGeneric("tidyBDMethod",
 setGeneric("compareBenchDesigns",
            function(x, y = NULL, ...) standardGeneric("compareBenchDesigns"))
 
-#' BDData slot setter
+#' Set data in BenchDesign object
 #'
-#' Method to set BDData slot in objects.
-#'  
-#' @param x BenchDesign object.
-#'
+#' Adds, removes or replaces \code{\link[=BDData-class]{BDData}} in
+#' \code{\link[=BenchDesign-class]{BenchDesign}} object.
+#' Data can be removed by setting the value to \code{NULL}.
+#' 
+#' @param x \code{\link[=BenchDesign-class]{BenchDesign}} object.
+#' @param value \code{\link[=BDData-class]{BDData}} or \code{NULL}.
+#' 
 #' @return
 #' modified BenchDesign object
 #'
+#' @seealso \code{\link{BDData}}
 #' @name BDData-setter
 #' @author Patrick Kimes
 #' @export
 setGeneric("BDData<-", 
            function(x, value) standardGeneric("BDData<-"))
 
-#' BDMethod slot setter
+#' Set method in list or BenchDesign object
 #'
-#' Method to set BDMethod slot in objects.
+#' @description
+#' Adds, replaces or removes a named \code{\link[=BDMethod-class]{BDMethod}} method
+#' in a \code{\link[=BDMethodList-class]{BDMethodList}} or
+#' \code{\link[=BenchDesign-class]{BenchDesign}} object with a specified
+#' \code{\link[=BDMethod-class]{BDMethod}} object.
+#' 
+#' An existing method can be removed by setting the value to \code{NULL}.
 #'  
-#' @param x BenchDesign object.
+#' @param x \code{\link[=BenchDesign-class]{BenchDesign}} or
+#'        \code{\link[=BDMethodList-class]{BDMethodList}} object.
+#' @param i character name of method.
+#' @param value \code{\link[=BDMethod-class]{BDMethod}} or \code{NULL}.
 #'
 #' @return
 #' modified BenchDesign object
 #'
+#' @seealso \code{\link{BDMethod}}
 #' @name BDMethod-setter
 #' @author Patrick Kimes
 #' @export
 setGeneric("BDMethod<-", 
            function(x, i, value) standardGeneric("BDMethod<-"))
 
-#' BDMethodList slot setter
+#' Set method list in BenchDesign object
 #'
-#' Method to set BDMethodList slot in objects.
-#'  
+#' @description
+#' Replaces the \code{\link[=BDMethodList-class]{BDMethodList}} list of methods
+#' in a \code{\link[=BenchDesign-class]{BenchDesign}} object with a specified
+#' \code{\link[=BDMethodList-class]{BDMethodList}} object.
+#' 
 #' @param x BenchDesign object.
-#'
+#' @param value \code{\link[=BDMethodList-class]{BDMethodList}} list of methods.
+#' 
 #' @return
 #' modified BenchDesign object
 #'
+#' @seealso \code{\link{BDMethod}}, \code{\link{BDMethodList}}
 #' @name BDMethodList-setter
 #' @author Patrick Kimes
 #' @export
 setGeneric("BDMethodList<-", 
            function(x, value) standardGeneric("BDMethodList<-"))
 
-#' groundTruths setter
+#' Set ground truths in SummarizedBenchmark object
 #'
 #' Method to set groundTruths in SummarizedBenchmark object.
 #'  
@@ -94,7 +113,7 @@ setGeneric("BDMethodList<-",
 setGeneric("groundTruths<-",
             function( object, ..., value ) standardGeneric( "groundTruths<-" ) )
 
-#' groundTruths getter
+#' Get ground truths in SummarizedBenchmark object
 #'
 #' Method to get groundTruths in SummarizedBenchmark object.
 #'  
@@ -110,22 +129,26 @@ setGeneric("groundTruths",
            function( object, ... )
              standardGeneric("groundTruths"))
 
-#' performanceMetrics slot getter
+#' Get performance metrics in SummarizedBenchmark object
 #'
+#' @description
+#' Given a \code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object,
+#' returns a list of lists of performance metrics that have been defined for
+#' each assay. Optionally, if \code{assay =} is specified, performance metrics
+#' for only the specified subset of specified assays are returned.
+#' 
 #' @param object a \code{SummarizedBenchmark} object.
-#' @param assay A character string indicating an assay name
-#' @param value A SimpleList of the same length as the number of assays
-#' @param ... Futher arguments, perhaps used by methods
+#' @param assay A character string indicating an assay name.
+#' @param value A SimpleList of the same length as the number of assays.
+#' @param ... Futher arguments, perhaps used by methods.
 #'
 #' @return
 #' A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
 #'
 #' @examples
-#'
-#' data( sb )
-#' performanceMetrics( sb )
-#' performanceMetrics( sb, assay="qvalue" )
-#' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+#' data(sb)
+#' performanceMetrics(sb)
+#' performanceMetrics(sb, assay = "qvalue")
 #'
 #' @seealso \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}
 #' @name performanceMetrics
@@ -133,22 +156,25 @@ setGeneric("groundTruths",
 #' @author Alejandro Reyes
 setGeneric("performanceMetrics", function( object, ... ) standardGeneric("performanceMetrics"))
 
-#' performanceMetrics slot setter
+#' Set performance metrics in SummarizedBenchmark object
 #'
+#' @description
+#' Replaces the list of performance metrics in a
+#' \code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object with
+#' a new list of performance metric lists. 
+#' 
 #' @param object a \code{SummarizedBenchmark} object.
-#' @param assay A character string indicating an assay name
-#' @param value A SimpleList of the same length as the number of assays
-#' @param ... Futher arguments, perhaps used by methods
+#' @param assay A character string indicating an assay name.
+#' @param value A SimpleList of the same length as the number of assays.
+#' @param ... Futher arguments, perhaps used by methods.
 #'
 #' @return
-#' A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
+#' Silently, the newly specified SimpleList of performance metric lists.
 #'
 #' @examples
-#'
-#' data( sb )
-#' performanceMetrics( sb )
-#' performanceMetrics( sb, assay="qvalue" )
-#' performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+#' data(sb)
+#' performanceMetrics(sb)
+#' performanceMetrics(sb) <- SimpleList(qvalue = list(), logFC = list())
 #'
 #' @seealso \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}, \code{\link{performanceMetrics}}
 #' @name performanceMetrics-setter

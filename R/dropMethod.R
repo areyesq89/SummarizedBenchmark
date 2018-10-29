@@ -1,15 +1,17 @@
 #' Remove method from BenchDesign object
 #'
 #' @description
-#' Takes a BenchDesign object and the name of a method
-#' already defined in the object, and returns a reduced BenchDesign
-#' object with the specified method removed.
+#' Takes a \code{\link[=BenchDesign-class]{BenchDesign}} object and the name of an
+#' existing method
+#' and returns a reduced \code{\link[=BenchDesign-class]{BenchDesign}} object with the
+#' method removed.
 #'
-#' @param bd BenchDesign object.
-#' @param label Character name of method to be modified.
+#' @param bd \code{\link[=BenchDesign-class]{BenchDesign}} object.
+#' @param label Character name of method.
 #'
 #' @return
-#' Modified BenchDesign object.
+#' Modified \code{\link[=BenchDesign-class]{BenchDesign}} object with
+#' specified method dropped.
 #'
 #' @examples
 #' ## empty BenchDesign
@@ -20,9 +22,11 @@
 #'                    params = rlang::quos(p = pval, method = "bonferroni"))
 #' bench <- addMethod(bench, label = "BH", func = p.adjust,
 #'                    params = rlang::quos(p = pval, method = "BH"))
-#'
+#' BDMethodList(bench)
+#' 
 #' ## remove methods
 #' bench <- dropMethod(bench, label = "bonf")
+#' BDMethodList(bench)
 #' 
 #' @seealso \code{\link{modifyMethod}}, \code{\link{expandMethod}}, \code{\link{addMethod}}
 #' @md

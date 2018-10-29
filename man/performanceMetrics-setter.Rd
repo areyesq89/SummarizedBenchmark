@@ -5,7 +5,7 @@
 \name{performanceMetrics-setter}
 \alias{performanceMetrics-setter}
 \alias{performanceMetrics<-,SummarizedBenchmark,SimpleList-method}
-\title{performanceMetrics slot setter}
+\title{Set performance metrics in SummarizedBenchmark object}
 \usage{
 performanceMetrics(object, ...) <- value
 
@@ -15,24 +15,24 @@ performanceMetrics(object, ...) <- value
 \arguments{
 \item{object}{a \code{SummarizedBenchmark} object.}
 
-\item{...}{Futher arguments, perhaps used by methods}
+\item{...}{Futher arguments, perhaps used by methods.}
 
-\item{value}{A SimpleList of the same length as the number of assays}
+\item{value}{A SimpleList of the same length as the number of assays.}
 
-\item{assay}{A character string indicating an assay name}
+\item{assay}{A character string indicating an assay name.}
 }
 \value{
-A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
+Silently, the newly specified SimpleList of performance metric lists.
 }
 \description{
-performanceMetrics slot setter
+Replaces the list of performance metrics in a
+\code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object with
+a new list of performance metric lists.
 }
 \examples{
-
-data( sb )
-performanceMetrics( sb )
-performanceMetrics( sb, assay="qvalue" )
-performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+data(sb)
+performanceMetrics(sb)
+performanceMetrics(sb) <- SimpleList(qvalue = list(), logFC = list())
 
 }
 \seealso{

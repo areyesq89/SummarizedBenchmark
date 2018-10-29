@@ -39,7 +39,7 @@
 #'                   data = datadf)
 #'
 #' ## with BDMethodList and data
-#' bdml <- BDMethodList(bh = methods_bh, bonf = method_bf)
+#' bdml <- BDMethodList(bh = method_bh, bonf = method_bf)
 #' bd <- BenchDesign(methods = bdml, data = datadf)
 #' 
 #' @seealso \code{\link{BenchDesign-class}}, \code{\link{BDMethod}}, \code{\link{BDMethodList}}

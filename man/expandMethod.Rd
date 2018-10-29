@@ -8,37 +8,39 @@ expandMethod(bd, label, params, onlyone = NULL, .replace = FALSE,
   .overwrite = FALSE)
 }
 \arguments{
-\item{bd}{BenchDesign object.}
+\item{bd}{\code{\link[=BenchDesign-class]{BenchDesign}} object.}
 
 \item{label}{Character name of method to be expanded.}
 
 \item{params}{Named list of quosure lists specifying the label of the
-new methods to be added to the BenchDesign, and the set of
+new methods to be added to the \code{\link[=BenchDesign-class]{BenchDesign}},
+and the set of
 parameters to overwrite in the original method definition for
-each new method. Alternatively, if \code{onlyone} is non-NULL, a single quosure
+each new method. Alternatively, if \code{onlyone} is non-\code{NULL}, a single quosure
 list with \code{name = value} pairs specifying the label of the new methods and
 the values to use for overwriting the parameter specified in \code{onlyone}.}
 
 \item{onlyone}{Character name of a parameter to be modified. Only specify
 if just a single parameter should be replaced in the original
-method definition. Ignored if NULL. (default = NULL)}
+method definition. Ignored if \code{NULL}. (default = \code{NULL})}
 
-\item{.replace}{Logical whether original \code{label} object should be removed
-if method expansion is successful. (default = FALSE)}
+\item{.replace}{Logical whether original \code{label} method should be removed.
+(default = \code{FALSE})}
 
 \item{.overwrite}{Logical whether to overwrite the existing list of
-parameters (TRUE) or to simply add the new parameters to the existing
-list (FALSE). (default = FALSE)}
+parameters (\code{TRUE}) or to simply add the new parameters to the existing
+list (\code{FALSE}). (default = \code{FALSE})}
 }
 \value{
-Modified BenchDesign object.
+Modified \code{\link[=BenchDesign-class]{BenchDesign}} object with new methods with
+specified parameters added.
 }
 \description{
-Takes a BenchDesign object and the name of a method
-already defined in the object, and returns a modified BenchDesign
-object with multiple variants of the method differing only by the
-specified parameter sets. In other words, this function "expands"
-the set of methods using a set of parameters.
+Takes a \code{\link[=BenchDesign-class]{BenchDesign}} object, the name of an
+existing method, and new parameter specifications,
+and returns a modified \code{\link[=BenchDesign-class]{BenchDesign}}
+object with new methods added. The named method is "expanded" to mutliple methods
+according to the specified set of parameters.
 }
 \examples{
 ## empty BenchDesign
@@ -47,24 +49,18 @@ bench <- BenchDesign()
 ## add basic 'padjust' method
 bench <- addMethod(bench, label = "padjust",
                    func = p.adjust,
-                   params = rlang::quos(p = pval,
-                                        method = "none"))
+                   params = rlang::quos(p = pval, method = "none"))
 
-## modify multiple parameters, "p" and "method"
-bench_exp <- expandMethod(bench, label = "padjust",
-                          params = list(
-        bonf = rlang::quos(p = round(pval, 5),
-                           method = "bonferonni"),
-        bh = rlang::quos(p = round(pval, 3),
-                         method = "BH")))
-printMethods(bench_exp)
+## modify multiple parameters - params is a list of quosure lists
+newparams <- list(bonf = rlang::quos(p = round(pval, 5), method = "bonferonni"),
+                  bh = rlang::quos(p = round(pval, 3), method = "BH"))
+bench_exp <- expandMethod(bench, label = "padjust", params = newparams))
+BDMethodList(bench_exp)
 
-## only modify a single parameter using the 'onlyone=' parameter
-bench_exp <- expandMethod(bench, label = "padjust",
-                          onlyone = "method",
-                          params = rlang::quos(bonf = "bonferonni",
-                                               BH = "BH"))
-printMethods(bench_exp)
+## only modify a single parameter - params is a quosure list
+newparams <- rlang::quos(bonf = "bonferonni", BH = "BH")
+bench_exp <- expandMethod(bench, label = "padjust", onlyone = "method", params = newparams)
+BDMethodList(bench_exp)
 
 }
 \seealso{

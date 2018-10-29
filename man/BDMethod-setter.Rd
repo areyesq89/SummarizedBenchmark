@@ -8,7 +8,7 @@
 \alias{BDMethod<-,BDMethodList,character,NULL-method}
 \alias{BDMethod<-,BenchDesign,character,BDMethod-method}
 \alias{BDMethod<-,BenchDesign,character,NULL-method}
-\title{BDMethod slot setter}
+\title{Set method in list or BenchDesign object}
 \usage{
 BDMethod(x, i) <- value
 
@@ -21,13 +21,26 @@ BDMethod(x, i) <- value
 \S4method{BDMethod}{BenchDesign,character,`NULL`}(x, i) <- value
 }
 \arguments{
-\item{x}{BenchDesign object.}
+\item{x}{\code{\link[=BenchDesign-class]{BenchDesign}} or
+\code{\link[=BDMethodList-class]{BDMethodList}} object.}
+
+\item{i}{character name of method.}
+
+\item{value}{\code{\link[=BDMethod-class]{BDMethod}} or \code{NULL}.}
 }
 \value{
 modified BenchDesign object
 }
 \description{
-Method to set BDMethod slot in objects.
+Adds, replaces or removes a named \code{\link[=BDMethod-class]{BDMethod}} method
+in a \code{\link[=BDMethodList-class]{BDMethodList}} or
+\code{\link[=BenchDesign-class]{BenchDesign}} object with a specified
+\code{\link[=BDMethod-class]{BDMethod}} object.
+
+An existing method can be removed by setting the value to \code{NULL}.
+}
+\seealso{
+\code{\link{BDMethod}}
 }
 \author{
 Patrick Kimes

@@ -4,20 +4,27 @@
 \name{BDData-setter}
 \alias{BDData-setter}
 \alias{BDData<-,BenchDesign,BDDataOrNULL-method}
-\title{BDData slot setter}
+\title{Set data in BenchDesign object}
 \usage{
 BDData(x) <- value
 
 \S4method{BDData}{BenchDesign,BDDataOrNULL}(x) <- value
 }
 \arguments{
-\item{x}{BenchDesign object.}
+\item{x}{\code{\link[=BenchDesign-class]{BenchDesign}} object.}
+
+\item{value}{\code{\link[=BDData-class]{BDData}} or \code{NULL}.}
 }
 \value{
 modified BenchDesign object
 }
 \description{
-Method to set BDData slot in objects.
+Adds, removes or replaces \code{\link[=BDData-class]{BDData}} in
+\code{\link[=BenchDesign-class]{BenchDesign}} object.
+Data can be removed by setting the value to \code{NULL}.
+}
+\seealso{
+\code{\link{BDData}}
 }
 \author{
 Patrick Kimes

@@ -5,7 +5,7 @@
 \name{performanceMetrics}
 \alias{performanceMetrics}
 \alias{performanceMetrics,SummarizedBenchmark-method}
-\title{performanceMetrics slot getter}
+\title{Get performance metrics in SummarizedBenchmark object}
 \usage{
 performanceMetrics(object, ...)
 
@@ -14,24 +14,25 @@ performanceMetrics(object, ...)
 \arguments{
 \item{object}{a \code{SummarizedBenchmark} object.}
 
-\item{...}{Futher arguments, perhaps used by methods}
+\item{...}{Futher arguments, perhaps used by methods.}
 
-\item{assay}{A character string indicating an assay name}
+\item{assay}{A character string indicating an assay name.}
 
-\item{value}{A SimpleList of the same length as the number of assays}
+\item{value}{A SimpleList of the same length as the number of assays.}
 }
 \value{
 A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
 }
 \description{
-performanceMetrics slot getter
+Given a \code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object,
+returns a list of lists of performance metrics that have been defined for
+each assay. Optionally, if \code{assay =} is specified, performance metrics
+for only the specified subset of specified assays are returned.
 }
 \examples{
-
-data( sb )
-performanceMetrics( sb )
-performanceMetrics( sb, assay="qvalue" )
-performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+data(sb)
+performanceMetrics(sb)
+performanceMetrics(sb, assay = "qvalue")
 
 }
 \seealso{

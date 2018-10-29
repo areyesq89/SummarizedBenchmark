@@ -3,28 +3,23 @@
 \docType{methods}
 \name{mcols-setter}
 \alias{mcols-setter}
-\title{mcols setter}
+\title{Set meta data columns in SummarizedBenchmark object}
 \usage{
 \S4method{mcols}{SummarizedBenchmark}(x, ...) <- value
 }
 \arguments{
-\item{x}{A \code{SummarizedBenchmark} object.}
+\item{x}{A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
-\item{...}{Futher arguments, perhaps used by methods}
+\item{...}{Futher arguments, perhaps used by methods.}
 
-\item{value}{A character vector.}
+\item{value}{A DataFrame of meta data.}
 }
 \value{
-Modfied \code{SummarizedBenchmark} object.
+Modfied \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 }
 \description{
-mcols setter
-}
-\examples{
-
-data( sb )
-assayNames( sb )[2] <- "log2FC"
-
+Modifies the \code{mcols} slot of a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+object.
 }
 \author{
 Alejandro Reyes

@@ -2,7 +2,7 @@
 % Please edit documentation in R/DefaultMetrics.R
 \name{availableMetrics}
 \alias{availableMetrics}
-\title{availableMetrics}
+\title{List pre-defined metrics for SummarizedBenchmark objects}
 \usage{
 availableMetrics()
 }
@@ -11,8 +11,8 @@ A data.frame summarizing the default performance metrics provided in this packag
 }
 \description{
 This function returns a data frame summarizing the default performance metrics provided in this package.
-The data.frame contains three columns, `functions` is the name of the performance metric, `description`
-is longer description of the performance metric and `requiredTruth` is logical depending on whether the
+The data.frame contains three columns, \code{functions} is the name of the performance metric, \code{description}
+is longer description of the performance metric and \code{requiredTruth} is logical depending on whether the
 performance metrics require ground truths.
 }
 \examples{

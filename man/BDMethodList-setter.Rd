@@ -4,7 +4,7 @@
 \name{BDMethodList-setter}
 \alias{BDMethodList-setter}
 \alias{BDMethodList<-,BenchDesign,BDMethodList-method}
-\title{BDMethodList slot setter}
+\title{Set method list in BenchDesign object}
 \usage{
 BDMethodList(x) <- value
 
@@ -12,12 +12,19 @@ BDMethodList(x) <- value
 }
 \arguments{
 \item{x}{BenchDesign object.}
+
+\item{value}{\code{\link[=BDMethodList-class]{BDMethodList}} list of methods.}
 }
 \value{
 modified BenchDesign object
 }
 \description{
-Method to set BDMethodList slot in objects.
+Replaces the \code{\link[=BDMethodList-class]{BDMethodList}} list of methods
+in a \code{\link[=BenchDesign-class]{BenchDesign}} object with a specified
+\code{\link[=BDMethodList-class]{BDMethodList}} object.
+}
+\seealso{
+\code{\link{BDMethod}}, \code{\link{BDMethodList}}
 }
 \author{
 Patrick Kimes

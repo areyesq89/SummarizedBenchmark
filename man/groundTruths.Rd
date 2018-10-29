@@ -5,7 +5,7 @@
 \name{groundTruths}
 \alias{groundTruths}
 \alias{groundTruths,SummarizedBenchmark-method}
-\title{groundTruths getter}
+\title{Get ground truths in SummarizedBenchmark object}
 \usage{
 groundTruths(object, ...)
 
