@@ -1,23 +1,24 @@
-#' Update SummarizedBenchmark object
+#' Check/Update SummarizedBenchmark
 #'
-#' Update SummarizedBenchmark results with new methods.
+#' Update \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} results with new methods.
 #'
-#' @param sb a \code{SummarizedBenchmark} object
-#' @param bd a \code{BenchDesign} object
+#' @param sb a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object
+#' @param bd a \code{\link[=BenchDesign-class]{BenchDesign}} object
 #' @param dryrun logical whether to just print description of what would
 #'        be updated rather than actually running any methods. (default = TRUE)
 #' @param version logical whether to re-run methods with only package
 #'        version differences. (default = FALSE)
-#' @param keepAll logical whether to keep methods run in original SummarizedBenchmark
-#'        but not in new BenchDesign. Only used if \code{bd} is not NULL. (default = TRUE)
+#' @param keepAll logical whether to keep methods run in original \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+#'        but not in new \code{\link[=BenchDesign-class]{BenchDesign}}. Only used if \code{bd} is not NULL. (default = TRUE)
 #' @param reuseParams logical whether to reuse parameters from \code{buildBench} call
-#'        used to create \code{SummarizedBenchmark} object (if available). Directly
-#'        specified \code{buildBench} parameters still take precedence. (default = TRUE)
+#'        used to create \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object (if available). Directly
+#'        specified \code{\link{buildBench}} parameters still take precedence. (default = TRUE)
 #' @param ... optional parameters to pass to \code{\link{buildBench}}.
 #'
 #' @return
 #' SumamrizedBenchmark object.
 #'
+#' @seealso \code{\link{buildBench}}
 #' @import dplyr
 #' @importFrom SummarizedExperiment cbind
 #' @importFrom crayon red yellow green bold

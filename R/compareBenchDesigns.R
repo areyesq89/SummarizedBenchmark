@@ -10,6 +10,7 @@
 #' logical value indicating whether the two objects produced the same
 #' meta data.
 #'
+#' @seealso \code{\link{compareBenchDesigns}}
 #' @export
 #' @importFrom tibble is_tibble
 #' @import dplyr
@@ -53,6 +54,7 @@ compareBDMethod <- function(x, y) {
 #' @return
 #' list of two values giving agreement of "data" and "type".
 #' 
+#' @seealso \code{\link{compareBenchDesigns}}
 #' @export
 #' @author Patrick Kimes
 compareBDData <- function(x, y) {
@@ -96,6 +98,7 @@ compareBDData <- function(x, y) {
 #' @return
 #' list of comparison results
 #'
+#' @seealso \code{\link{compareBDMethod}}, \code{\link{compareBDData}}
 #' @name compareBenchDesigns
 #' @import rlang
 #' @author Patrick Kimes

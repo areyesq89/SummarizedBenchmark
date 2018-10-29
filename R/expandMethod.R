@@ -1,6 +1,7 @@
-#' Expand method in BenchDesign object across parameter settings
+#' Expand method in BenchDesign object
 #'
-#' This function takes a BenchDesign object and the name of a method
+#' @description
+#' Takes a BenchDesign object and the name of a method
 #' already defined in the object, and returns a modified BenchDesign
 #' object with multiple variants of the method differing only by the
 #' specified parameter sets. In other words, this function "expands"
@@ -52,6 +53,7 @@
 #'                                                BH = "BH"))
 #' printMethods(bench_exp)
 #'
+#' @seealso \code{\link{modifyMethod}}, \code{\link{addMethod}}, \code{\link{dropMethod}}
 #' @md
 #' @import rlang
 #' @export

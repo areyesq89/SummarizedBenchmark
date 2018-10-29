@@ -2,7 +2,7 @@
 % Please edit documentation in R/buildBench.R
 \name{buildBench}
 \alias{buildBench}
-\title{Make SummarizedBenchmark from BenchDesign}
+\title{Execute BenchDesign}
 \usage{
 buildBench(bd, data = NULL, truthCols = NULL, ftCols = NULL,
   sortIDs = FALSE, keepData = FALSE, catchErrors = TRUE,
@@ -51,10 +51,11 @@ parameter registry is used.}
 \code{SummarizedBenchmark} object.
 }
 \description{
-Function to evaluate \code{BenchDesign} methods on supplied
-data set to generate a \code{SummarizedBenchmark}. In addition
-to the results of applying each method on the data, the returned
-\code{SummarizedBenchmark} also includes metadata for the methods
+Function to evaluate methods defined in a \code{\link[=BenchDesign-class]{BenchDesign}} on a supplied
+data set to generate a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} of
+benchmarking results. In addition to the results of applying each method on the data, the returned
+\code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} also
+includes metadata for the methods
 in the \code{colData} of the returned object, metadata for the
 data in the \code{rowData}, and session information in the
 \code{metadata}.
@@ -101,6 +102,9 @@ sb <- buildBench(bench)
 ## evaluate benchmark experiment w/ data sepecified
 sb <- buildBench(bench, data = df)
 
+}
+\seealso{
+\code{\link{updateBench}}
 }
 \author{
 Patrick Kimes

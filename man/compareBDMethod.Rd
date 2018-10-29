@@ -19,6 +19,9 @@ meta data.
 Simple comparison of two BDMethod objects based on
 meta data.
 }
+\seealso{
+\code{\link{compareBenchDesigns}}
+}
 \author{
 Patrick Kimes
 }

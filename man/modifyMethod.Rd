@@ -2,7 +2,7 @@
 % Please edit documentation in R/modifyMethod.R
 \name{modifyMethod}
 \alias{modifyMethod}
-\title{Modify definition of method in BenchDesign object}
+\title{Modify method in BenchDesign object}
 \usage{
 modifyMethod(bd, label, params, .overwrite = FALSE)
 }
@@ -28,7 +28,7 @@ parameters (FALSE). (default = FALSE)}
 Modified BenchDesign object.
 }
 \description{
-This function takes a BenchDesign object and the name of a method
+Takes a BenchDesign object and the name of a method
 already defined in the object, and returns a modified BenchDesign
 object with the specified changes made only to the named method.
 At a minimum, a string name for the method, \code{label}, must be
@@ -53,6 +53,9 @@ bench <- modifyMethod(bench, label = "qv",
 ## verify that method has been updated
 printMethod(bench, "qv")
 
+}
+\seealso{
+\code{\link{addMethod}}, \code{\link{expandMethod}}, \code{\link{dropMethod}}
 }
 \author{
 Patrick Kimes

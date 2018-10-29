@@ -18,6 +18,9 @@ list of two values giving agreement of "data" and "type".
 Simple comparison of two BDData objects based on
 comparing both type and data hash.
 }
+\seealso{
+\code{\link{compareBenchDesigns}}
+}
 \author{
 Patrick Kimes
 }

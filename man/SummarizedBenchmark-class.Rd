@@ -24,7 +24,6 @@ results in the object.}
 }}
 
 \examples{
-
 ## loading the example data from iCOBRA
 library(iCOBRA)
 data(cobradata_example)

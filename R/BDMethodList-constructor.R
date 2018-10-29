@@ -1,17 +1,42 @@
 #' Create a new BDMethodList object
 #'
-#' Initialized a new SimpleList of BenchDesign method (BDMethod) objects.
+#' @description
+#' Initializes a new SimpleList of BenchDesign method (\code{\link[=BDMethod-class]{BDMethod}}) objects.
+#' 
+#' Similar to \code{\link[=BDMethod-class]{BDMethod}} objects, \code{\link[=BDMethodList-class]{BDMethodList}}
+#' typically do not need to be
+#' directly constructed. Because the list of methods is only useful as art of a
+#' \code{\link[=BenchDesign-class]{BenchDesign}} object, it is more common to simply manipulate the
+#' list of methods through calls to the corresponding \code{\link[=BenchDesign-class]{BenchDesign}}, e.g.
+#' \code{\link{addMethod}} to add a new method to the list.
 #'
-#' @param ... a named list of BDMethod objects
-#' @param x a BenchDesign or SummarizedBenchmark object to extract
-#'        the BDMethodList from. (default = NULL)
+#' The constructor can also be used to access the \code{\link[=BDMethodList-class]{BDMethodList}} list
+#' of methods in a \code{\link[=BenchDesign-class]{BenchDesign}} object.
+#' 
+#' @param ... a named list of \code{\link[=BDMethod-class]{BDMethod}} objects
+#' @param x a \code{\link[=BenchDesign-class]{BenchDesign}} or
+#'        \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object to extract
+#'        the list of methods from. (default = NULL)
 #' 
 #' @return
 #' BDMethodList object
 #'
 #' @examples
-#' BDMethodList()
+#' ## construct an empty list
+#' bdml <- BDMethodList()
+#' 
+#' ## construct a list with BDMethod objects
+#' bdml <- BDMethodList(m_method = BDMethod(base::mean),
+#'                      s_method = BDMethod(function(x) { x^2 }))
+#' bdml
 #'
+#' ## construct a BenchDesign with a BDMethodList
+#' bd <- BenchDesign(methods = bdml)
+#'
+#' ## access the BDMethodList in the BenchDesign
+#' BDMethodList(bd)
+#'
+#' @seealso \code{\link{BDMethodList-class}}, \code{\link{BenchDesign}}, \code{\link{BDMethod}}
 #' @name BDMethodList
 #' @import rlang
 #' @importFrom S4Vectors SimpleList

@@ -26,7 +26,40 @@ BDData(data)
 BDData object
 }
 \description{
-Initialized a new BDData object for benchmarking methods.
+Initializes a new BDData object of benchmarking data.
+
+Data sets are stored as BDData objects within BenchDesign
+objects as well as SummarizedBenchmark objects. However, because
+data is directly specified to the BenchDesign constructor, there
+is usually no need to call the BDData constructor to create completely
+new data objects.
+
+The BDData constructor is most useful for extracting the data sets
+contained in BenchDesign objects as well as SummarizedBenchmark objects.
+By default, the BDData object stored in SummarizedBenchmark objects will
+be MD5 hashes rather than the complete original data set. 
+\code{\link{compareBDData}} can be used to compare various forms of
+BDData, as shown in the examples below.
+}
+\examples{
+## construct from data.frame
+datadf <- data.frame(x = 1:5, y = runif(5))
+bdd_df <- BDData(datadf)
+bdd_df
+
+## construct from MD5 hash of data.frame
+bdd_md5 <- BDData(digest::digest(datadf))
+bdd_md5
+
+## compare two BDData objects 
+compareBDData(bdd_df, bdd_md5)
+
+## note that the data is the same, i.e. the MD5 hashes match, but the
+## data types ("data" vs. "md5has") are different
+
+}
+\seealso{
+\code{\link{BDData-class}}, \code{\link{BenchDesign}}
 }
 \author{
 Patrick Kimes

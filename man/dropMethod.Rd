@@ -15,7 +15,7 @@ dropMethod(bd, label)
 Modified BenchDesign object.
 }
 \description{
-This function takes a BenchDesign object and the name of a method
+Takes a BenchDesign object and the name of a method
 already defined in the object, and returns a reduced BenchDesign
 object with the specified method removed.
 }
@@ -32,6 +32,9 @@ bench <- addMethod(bench, label = "BH", func = p.adjust,
 ## remove methods
 bench <- dropMethod(bench, label = "bonf")
 
+}
+\seealso{
+\code{\link{modifyMethod}}, \code{\link{expandMethod}}, \code{\link{addMethod}}
 }
 \author{
 Patrick Kimes

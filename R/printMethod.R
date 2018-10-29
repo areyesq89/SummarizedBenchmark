@@ -1,4 +1,4 @@
-#' Pretty print methods in a BenchDesign
+#' Pretty print methods in a BenchDesign object
 #'
 #' Print out details about a method included in
 #' the BenchDesign. The `printMethods` function is just a wrapper
@@ -26,7 +26,8 @@
 #'
 #' ## show all methods
 #' printMethods(bench)
-#' 
+#'
+#' @seealso \code{\link{BDMethod-class}}, \code{\link{BenchDesign-class}}
 #' @md
 #' @importFrom stringr str_pad
 #' @export

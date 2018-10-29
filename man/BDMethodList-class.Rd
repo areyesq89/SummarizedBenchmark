@@ -6,7 +6,14 @@
 \title{BDMethodList class}
 \description{
 Extension of the SimpleList class to contain a list of BDMethod
-objects.
+objects. The class serves as the primary container for the set of
+methods in the BenchDesign class.
+
+New BDMethodList objects can be created using the
+\code{\link{BDMethodList}} constructor.
+}
+\seealso{
+\code{\link{BDMethodList}}, \code{\link{BenchDesign-class}}, \code{\link{BDMethod-class}}, \code{\link{BDData-class}}
 }
 \author{
 Patrick Kimes

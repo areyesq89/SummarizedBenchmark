@@ -24,7 +24,9 @@ BDMethod(x, params = rlang::quos(), post = NULL, meta = NULL, ...)
 }
 \arguments{
 \item{x}{main method function or function quosure. Alternative, may be a
-BDMethodList or BenchDesign object from which the BDMethod should be
+\code{\link[=BDMethodList-class]{BDMethodList}} or
+\code{\link[=BenchDesign-class]{BenchDesign}} object from which
+the \code{\link[=BDMethod-class]{BDMethod}} should be
 extracted.}
 
 \item{params}{list of quosures specifying function parameters.
@@ -37,22 +39,41 @@ extracted.}
 
 \item{...}{other parameters.}
 
-\item{i}{integer index or character name of BDMethod in BDMethodList or
-BenchDesign object.}
+\item{i}{integer index or character name of \code{\link[=BDMethod-class]{BDMethod}} in
+\code{\link[=BDMethodList-class]{BDMethodList}} or
+\code{\link[=BenchDesign-class]{BenchDesign}} object.}
 }
 \value{
 BDMethod object
 }
 \description{
-Initializes a new BenchDesign method (BDMethod) object for benchmarking methods.
+Initializes a new BenchDesign method object for benchmarking.
+
+New \code{\link[=BDMethod-class]{BDMethod}} objects are typically not directly constructed as they
+have limited use outside of \code{\link[=BenchDesign-class]{BenchDesign}} objects. Instead,
+methods in a \code{\link[=BenchDesign-class]{BenchDesign}} object are more commonly created, modified or
+removed using
+function calls on the \code{\link[=BenchDesign-class]{BenchDesign}}, e.g. using \code{\link{addMethod}} to
+add a new method object.
+
+The constructor can also be used to access \code{\link[=BDMethod-class]{BDMethod}} objects stored in
+\code{\link[=BDMethodList-class]{BDMethodList}} and \code{\link[=BenchDesign-class]{BenchDesign}} objects.
 }
 \examples{
-BDMethod(x = base::mean)
+## create a simple BDMethod
+bdm1 <- BDMethod(x = base::mean)
 
-BDMethod(x = function(x) { x^2 }, post = base::sqrt,
-         meta = list(note = "simple example"))
+## create a more complex BDMethod
+bdm2 <- BDMethod(x = function(x) { x^2 }, post = base::sqrt,
+                 meta = list(note = "simple example"))
 
-bd <- BenchDesign(method1 = BDMethod(x = base::mean))
+## construct a BenchDesign with the BDMethod objects
+bd <- BenchDesign(method1 = bdm1, method2 = bdm2)
+
+## access a BDMethod in the BenchDesign
 BDMethod(bd, "method1")
 
+}
+\seealso{
+\code{\link{BDMethod-class}}, \code{\link{BenchDesign}}, \code{\link{BDMethodList}}
 }

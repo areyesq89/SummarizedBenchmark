@@ -16,6 +16,9 @@ Container for data in a BenchDesign object.
 contains the 'data' or a 'md5hash' of the data.}
 }}
 
+\seealso{
+\code{\link{BDData}}, \code{\link{BenchDesign-class}}, \code{\link{BDMethod-class}}, \code{\link{BDMethodList-class}}
+}
 \author{
 Patrick Kimes
 }

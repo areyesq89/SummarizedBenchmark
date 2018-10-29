@@ -5,7 +5,7 @@
 \alias{hashBDData}
 \alias{hashBDData,BDData-method}
 \alias{hashBDData,BenchDesign-method}
-\title{Convert BDData to BDData with MD5 Hash}
+\title{Hash data in BDData object}
 \usage{
 hashBDData(object)
 
@@ -21,8 +21,11 @@ an object of the same class as \code{object} with data
 converted to a MD5 hash.
 }
 \description{
-Simple converting function to replace data object in
-BDData object with MD5 hash value.
+Repliaces data stored in a \code{\link[=BDData-class]{BDData}} object
+with the MD5 hash of the data. If the data was already a MD5 hash, the
+original object is returned unchanged. The method can be called directly
+on \code{\link[=BenchDesign-class]{BenchDesign}} objects to hash the
+underlying data as well.
 }
 \author{
 Patrick Kimes

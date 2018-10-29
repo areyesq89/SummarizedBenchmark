@@ -49,6 +49,9 @@ To compare the \code{BenchDesign} slots of SummarizedBenchmark objects,
 the BenchDesigns should be extracted with \code{BenchDesign(sb)} and
 passed as inputs (see Examples).
 }
+\seealso{
+\code{\link{compareBDMethod}}, \code{\link{compareBDData}}
+}
 \author{
 Patrick Kimes
 }

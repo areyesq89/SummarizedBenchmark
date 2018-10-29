@@ -1,6 +1,7 @@
 #' Remove method from BenchDesign object
 #'
-#' This function takes a BenchDesign object and the name of a method
+#' @description
+#' Takes a BenchDesign object and the name of a method
 #' already defined in the object, and returns a reduced BenchDesign
 #' object with the specified method removed.
 #'
@@ -23,6 +24,7 @@
 #' ## remove methods
 #' bench <- dropMethod(bench, label = "bonf")
 #' 
+#' @seealso \code{\link{modifyMethod}}, \code{\link{expandMethod}}, \code{\link{addMethod}}
 #' @md
 #' @export
 #' @author Patrick Kimes

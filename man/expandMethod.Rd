@@ -2,7 +2,7 @@
 % Please edit documentation in R/expandMethod.R
 \name{expandMethod}
 \alias{expandMethod}
-\title{Expand method in BenchDesign object across parameter settings}
+\title{Expand method in BenchDesign object}
 \usage{
 expandMethod(bd, label, params, onlyone = NULL, .replace = FALSE,
   .overwrite = FALSE)
@@ -34,7 +34,7 @@ list (FALSE). (default = FALSE)}
 Modified BenchDesign object.
 }
 \description{
-This function takes a BenchDesign object and the name of a method
+Takes a BenchDesign object and the name of a method
 already defined in the object, and returns a modified BenchDesign
 object with multiple variants of the method differing only by the
 specified parameter sets. In other words, this function "expands"
@@ -66,6 +66,9 @@ bench_exp <- expandMethod(bench, label = "padjust",
                                                BH = "BH"))
 printMethods(bench_exp)
 
+}
+\seealso{
+\code{\link{modifyMethod}}, \code{\link{addMethod}}, \code{\link{dropMethod}}
 }
 \author{
 Patrick Kimes

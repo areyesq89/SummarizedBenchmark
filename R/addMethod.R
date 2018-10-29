@@ -1,6 +1,7 @@
-#' Add new method to BenchDesign object
+#' Add method to BenchDesign object
 #'
-#' This function takes a BenchDesign object and returns a
+#' @description
+#' Takes a BenchDesign object and returns a
 #' modified object with the specified method included. At a
 #' minimum, a string name for the method, `label`, and the
 #' workhorse function for the method, `func`, must be specified
@@ -74,6 +75,7 @@
 #'                     post = function(x) { x$qvalue },
 #'                     params = rlang::quos(p = pval))
 #'
+#' @seealso \code{\link{modifyMethod}}, \code{\link{expandMethod}}, \code{\link{dropMethod}}
 #' @md
 #' @import rlang
 #' @export

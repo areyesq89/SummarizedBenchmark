@@ -1,6 +1,7 @@
-#' Modify definition of method in BenchDesign object
+#' Modify method in BenchDesign object
 #'
-#' This function takes a BenchDesign object and the name of a method
+#' @description
+#' Takes a BenchDesign object and the name of a method
 #' already defined in the object, and returns a modified BenchDesign
 #' object with the specified changes made only to the named method.
 #' At a minimum, a string name for the method, `label`, must be
@@ -42,6 +43,7 @@
 #' @return
 #' Modified BenchDesign object.
 #' 
+#' @seealso \code{\link{addMethod}}, \code{\link{expandMethod}}, \code{\link{dropMethod}}
 #' @md
 #' @import rlang
 #' @export

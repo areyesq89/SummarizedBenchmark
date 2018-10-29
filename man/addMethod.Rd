@@ -2,7 +2,7 @@
 % Please edit documentation in R/addMethod.R
 \name{addMethod}
 \alias{addMethod}
-\title{Add new method to BenchDesign object}
+\title{Add method to BenchDesign object}
 \usage{
 addMethod(bd, label, func, params = rlang::quos(), post = NULL,
   meta = NULL)
@@ -34,13 +34,12 @@ A copy of the originally supplied BenchDesign with the
 new method added.
 }
 \description{
-This function takes a BenchDesign object and returns a
+Takes a BenchDesign object and returns a
 modified object with the specified method included. At a
 minimum, a string name for the method, \code{label}, and the
 workhorse function for the method, \code{func}, must be specified
 in addition to the primary BenchDesign object.
-}
-\details{
+
 The inputs for the call to \code{label} should be specified as
 \code{parameter = value} pairs, where the \code{value} can be any
 fixed value, variable, or column in the \code{bdata} of the
@@ -51,7 +50,8 @@ the output of the workhorse function, \code{func}, needs to be
 further processed. As an example, \code{post} may be a simple
 "getter" function for accessing the column of interest from
 the large object returned by \code{func}.
-
+}
+\details{
 The optional \code{meta} parameter accepts a named list of metadata
 tags to be included for the method in the resulting \code{SummarizedBenchmark}
 object. This can be useful for two primary cases. First, it can help keep
@@ -88,6 +88,9 @@ bench <- addMethod(bench,
                     post = function(x) { x$qvalue },
                     params = rlang::quos(p = pval))
 
+}
+\seealso{
+\code{\link{modifyMethod}}, \code{\link{expandMethod}}, \code{\link{dropMethod}}
 }
 \author{
 Patrick Kimes

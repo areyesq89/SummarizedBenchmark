@@ -2,15 +2,15 @@
 % Please edit documentation in R/updateBench.R
 \name{updateBench}
 \alias{updateBench}
-\title{Update SummarizedBenchmark object}
+\title{Check/Update SummarizedBenchmark}
 \usage{
 updateBench(sb, bd = NULL, dryrun = TRUE, version = FALSE,
   keepAll = TRUE, reuseParams = TRUE, ...)
 }
 \arguments{
-\item{sb}{a \code{SummarizedBenchmark} object}
+\item{sb}{a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object}
 
-\item{bd}{a \code{BenchDesign} object}
+\item{bd}{a \code{\link[=BenchDesign-class]{BenchDesign}} object}
 
 \item{dryrun}{logical whether to just print description of what would
 be updated rather than actually running any methods. (default = TRUE)}
@@ -18,12 +18,12 @@ be updated rather than actually running any methods. (default = TRUE)}
 \item{version}{logical whether to re-run methods with only package
 version differences. (default = FALSE)}
 
-\item{keepAll}{logical whether to keep methods run in original SummarizedBenchmark
-but not in new BenchDesign. Only used if \code{bd} is not NULL. (default = TRUE)}
+\item{keepAll}{logical whether to keep methods run in original \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+but not in new \code{\link[=BenchDesign-class]{BenchDesign}}. Only used if \code{bd} is not NULL. (default = TRUE)}
 
 \item{reuseParams}{logical whether to reuse parameters from \code{buildBench} call
-used to create \code{SummarizedBenchmark} object (if available). Directly
-specified \code{buildBench} parameters still take precedence. (default = TRUE)}
+used to create \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object (if available). Directly
+specified \code{\link{buildBench}} parameters still take precedence. (default = TRUE)}
 
 \item{...}{optional parameters to pass to \code{\link{buildBench}}.}
 }
@@ -31,7 +31,10 @@ specified \code{buildBench} parameters still take precedence. (default = TRUE)}
 SumamrizedBenchmark object.
 }
 \description{
-Update SummarizedBenchmark results with new methods.
+Update \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} results with new methods.
+}
+\seealso{
+\code{\link{buildBench}}
 }
 \author{
 Patrick Kimes
