@@ -44,7 +44,6 @@ printMethod <- function(bd, n = NULL) {
 
 #' @rdname printMethod
 #' @export
-#' @author Patrick Kimes
 printMethods <- function(bd) {
     for (n in names(bd@methods)) {
         printMethod(bd, n)

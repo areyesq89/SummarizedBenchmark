@@ -19,3 +19,6 @@ performance metrics require ground truths.
 availableMetrics()
 
 }
+\author{
+Alejandro Reyes
+}

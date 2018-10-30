@@ -77,3 +77,6 @@ BDMethod(bd, "method1")
 \seealso{
 \code{\link{BDMethod-class}}, \code{\link{BenchDesign}}, \code{\link{BDMethodList}}
 }
+\author{
+Patrick Kimes
+}

@@ -28,7 +28,6 @@ This is a function to define performance metrics for benchmarking methods.
 The function is saved into the \code{performanceMetrics} slot.
 }
 \examples{
-
 data( sb )
 sb <- addPerformanceMetric(
    object=sb,

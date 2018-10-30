@@ -11,6 +11,7 @@
 #' @return A data.frame summarizing the default performance metrics provided in this package.
 #' @md
 #' @export
+#' @author Alejandro Reyes
 availableMetrics <- function(){
   data.frame(
     functions=c( "rejections", "TPR", "TNR", "FDR", "FNR",

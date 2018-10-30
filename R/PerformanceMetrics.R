@@ -17,7 +17,6 @@
 #' @author Alejandro Reyes
 #'
 #' @examples
-#'
 #' data( sb )
 #' sb <- addPerformanceMetric(
 #'    object=sb,

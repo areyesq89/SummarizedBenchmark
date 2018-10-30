@@ -45,6 +45,4 @@ printMethods(bench)
 }
 \author{
 Patrick Kimes
-
-Patrick Kimes
 }

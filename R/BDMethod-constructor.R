@@ -49,6 +49,7 @@
 #' @name BDMethod
 #' @import rlang
 #' @export
+#' @author Patrick Kimes
 NULL
 
 .BDMethod.quo <- function(x, params, post, meta, ...) {
