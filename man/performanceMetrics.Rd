@@ -12,19 +12,17 @@ performanceMetrics(object, ...)
 \S4method{performanceMetrics}{SummarizedBenchmark}(object, assay = NULL)
 }
 \arguments{
-\item{object}{a \code{SummarizedBenchmark} object.}
+\item{object}{a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
-\item{...}{Futher arguments, perhaps used by methods.}
+\item{...}{futher arguments, perhaps used by methods.}
 
-\item{assay}{A character string indicating an assay name.}
-
-\item{value}{A SimpleList of the same length as the number of assays.}
+\item{assay}{a character string indicating an assay name.}
 }
 \value{
 A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
 }
 \description{
-Given a \code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object,
+Given a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object,
 returns a list of lists of performance metrics that have been defined for
 each assay. Optionally, if \code{assay =} is specified, performance metrics
 for only the specified subset of specified assays are returned.

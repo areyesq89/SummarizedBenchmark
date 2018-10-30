@@ -4,7 +4,7 @@
 #' This is a function to define performance metrics for benchmarking methods.
 #' The function is saved into the \code{performanceMetrics} slot.
 #'
-#' @param object A \code{\link{SummarizedBenchmark}} object.
+#' @param object A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #' @param evalMetric A string with the name of the evaluation metric.
 #' @param assay A string with an assay name. Indicates the assay that should be
 #' given as input to this performance metric.
@@ -30,7 +30,7 @@
 #' )
 #'
 #' @seealso \code{\link{availableMetrics}}, \code{\link{performanceMetrics}}
-#' @return A \code{\link{SummarizedBenchmark}} object.
+#' @return A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #' @importFrom tidyr gather
 #' @export
 #'
@@ -76,7 +76,7 @@ is.scalar <- function(x){
 #' added previously with the \code{\link{addPerformanceMetric}} function. The function
 #' will estimate the performance metric for each method.
 #'
-#' @param object A \code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object.
+#' @param object A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #' @param assay A string with an assay name. Indicates the assay that should be
 #' given as input to this performance metric.
 #' @param evalMetric A string with the name of the evaluation metric.
@@ -302,7 +302,7 @@ cleanPerformanceMetrics <- function( object ){
 #'
 #' @author Alejandro Reyes
 #'
-#' @seealso \code{\link{estimateMetrics}}
+#' @seealso \code{\link{estimatePerformanceMetrics}}
 #' @return A tidy \code{data.frame}
 #' @importFrom tidyr gather
 #' @export

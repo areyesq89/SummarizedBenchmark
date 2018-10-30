@@ -2,8 +2,8 @@
 % Please edit documentation in R/AllGenerics.R,
 %   R/SummarizedBenckmark-accessors.R
 \docType{methods}
-\name{performanceMetrics-setter}
-\alias{performanceMetrics-setter}
+\name{performanceMetrics<-}
+\alias{performanceMetrics<-}
 \alias{performanceMetrics<-,SummarizedBenchmark,SimpleList-method}
 \title{Set performance metrics in SummarizedBenchmark object}
 \usage{
@@ -13,20 +13,18 @@ performanceMetrics(object, ...) <- value
   \S4method{performanceMetrics}{SummarizedBenchmark,SimpleList}(object) <- value
 }
 \arguments{
-\item{object}{a \code{SummarizedBenchmark} object.}
+\item{object}{a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
-\item{...}{Futher arguments, perhaps used by methods.}
+\item{...}{futher arguments, perhaps used by methods.}
 
-\item{value}{A SimpleList of the same length as the number of assays.}
-
-\item{assay}{A character string indicating an assay name.}
+\item{value}{a SimpleList of the same length as the number of assays.}
 }
 \value{
 Silently, the newly specified SimpleList of performance metric lists.
 }
 \description{
 Replaces the list of performance metrics in a
-\code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object with
+\code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object with
 a new list of performance metric lists.
 }
 \examples{

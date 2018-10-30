@@ -12,7 +12,7 @@ estimatePerformanceMetrics(object, addColData = FALSE, tidy = FALSE,
   rerun = TRUE, ...)
 }
 \arguments{
-\item{object}{A \code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
+\item{object}{A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
 \item{assay}{A string with an assay name. Indicates the assay that should be
 given as input to this performance metric.}

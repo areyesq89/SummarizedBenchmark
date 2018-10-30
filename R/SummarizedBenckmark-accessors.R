@@ -43,7 +43,7 @@ setReplaceMethod("performanceMetrics",
 #' assayNames(sb)[2] <- "log2FC"
 #'
 #' @seealso \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
-#' @name assayNames-setter
+#' @rdname assayNames-setter
 #' @importMethodsFrom SummarizedExperiment assayNames "assayNames<-"
 #' @exportMethod "assayNames<-"
 #' @author Alejandro Reyes
@@ -78,7 +78,7 @@ setReplaceMethod( "assayNames", c("SummarizedBenchmark", "character"),
 #' Modfied \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #'
 #' @seealso \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
-#' @name mcols-setter
+#' @rdname mcols-setter
 #' @importMethodsFrom S4Vectors mcols elementMetadata "mcols<-" "elementMetadata<-"
 #' @exportMethod "mcols<-"
 #' @author Alejandro Reyes

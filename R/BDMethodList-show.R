@@ -24,5 +24,5 @@
 #' 
 #' @importFrom stringr str_pad str_trunc
 #' @import rlang
-#' @name BDMethodList-show
+#' @rdname BDMethodList-show
 setMethod("show", signature(object = "BDMethodList"), .show.BDMethodList)

@@ -29,5 +29,5 @@
 #' @param object BDData object to show
 #' 
 #' @importFrom stringr str_pad
-#' @name BDData-show
+#' @rdname BDData-show
 setMethod("show", signature(object = "BDData"), .show.BDData)

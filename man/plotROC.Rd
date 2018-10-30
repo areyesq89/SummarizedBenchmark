@@ -27,7 +27,7 @@ plotROC(sb)
 
 }
 \seealso{
-\code{\link{plotMethodsOverlap}}, \code{\link{estimateMetrics}}
+\code{\link{plotMethodsOverlap}}, \code{\link{estimatePerformanceMetrics}}
 }
 \author{
 Alejandro Reyes

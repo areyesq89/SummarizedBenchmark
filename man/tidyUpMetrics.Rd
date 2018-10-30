@@ -27,7 +27,7 @@ tidyUpMetrics( sb )
 
 }
 \seealso{
-\code{\link{estimateMetrics}}
+\code{\link{estimatePerformanceMetrics}}
 }
 \author{
 Alejandro Reyes

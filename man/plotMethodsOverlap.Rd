@@ -33,7 +33,7 @@ plotMethodsOverlap(sb)
 
 }
 \seealso{
-\code{\link{plotROC}}, \code{\link{estimateMetrics}}
+\code{\link{plotROC}}, \code{\link{estimatePerformanceMetrics}}
 }
 \author{
 Alejandro Reyes

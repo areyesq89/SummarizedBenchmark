@@ -54,7 +54,7 @@ bench <- addMethod(bench, label = "padjust",
 ## modify multiple parameters - params is a list of quosure lists
 newparams <- list(bonf = rlang::quos(p = round(pval, 5), method = "bonferonni"),
                   bh = rlang::quos(p = round(pval, 3), method = "BH"))
-bench_exp <- expandMethod(bench, label = "padjust", params = newparams))
+bench_exp <- expandMethod(bench, label = "padjust", params = newparams)
 BDMethodList(bench_exp)
 
 ## only modify a single parameter - params is a quosure list

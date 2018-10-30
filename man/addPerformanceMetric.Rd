@@ -7,7 +7,7 @@
 addPerformanceMetric(object, evalMetric, assay, evalFunction = NULL)
 }
 \arguments{
-\item{object}{A \code{\link{SummarizedBenchmark}} object.}
+\item{object}{A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
 \item{evalMetric}{A string with the name of the evaluation metric.}
 
@@ -21,7 +21,7 @@ are specified, they must contain default values. If NULL, the 'evalMetric' strin
 be the name of a predefined metric available through 'availableMetrics()$function'.}
 }
 \value{
-A \code{\link{SummarizedBenchmark}} object.
+A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 }
 \description{
 This is a function to define performance metrics for benchmarking methods.

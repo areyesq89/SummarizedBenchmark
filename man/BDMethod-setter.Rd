@@ -2,8 +2,8 @@
 % Please edit documentation in R/AllGenerics.R, R/BDMethodList-accessors.R,
 %   R/BenchDesign-accessors.R
 \docType{methods}
-\name{BDMethod-setter}
-\alias{BDMethod-setter}
+\name{BDMethod<-}
+\alias{BDMethod<-}
 \alias{BDMethod<-,BDMethodList,character,BDMethod-method}
 \alias{BDMethod<-,BDMethodList,character,NULL-method}
 \alias{BDMethod<-,BenchDesign,character,BDMethod-method}

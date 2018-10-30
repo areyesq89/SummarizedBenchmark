@@ -20,7 +20,7 @@
 #'
 #' @return An upseR plot.
 #'
-#' @seealso \code{\link{plotROC}}, \code{\link{estimateMetrics}}
+#' @seealso \code{\link{plotROC}}, \code{\link{estimatePerformanceMetrics}}
 #' @author Alejandro Reyes
 #' @export
 #' @importFrom UpSetR upset
@@ -58,7 +58,7 @@ plotMethodsOverlap <- function( object, assay="qvalue", alpha=0.1, ... ){
 #'
 #' @return A ggplot object.
 #'
-#' @seealso \code{\link{plotMethodsOverlap}}, \code{\link{estimateMetrics}}
+#' @seealso \code{\link{plotMethodsOverlap}}, \code{\link{estimatePerformanceMetrics}}
 #' @author Alejandro Reyes
 #' @export
 #' @importFrom ggplot2 ggplot geom_line aes geom_abline xlim ylim

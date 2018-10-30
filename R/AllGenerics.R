@@ -47,7 +47,7 @@ setGeneric("compareBenchDesigns",
 #' modified BenchDesign object
 #'
 #' @seealso \code{\link{BDData}}
-#' @name BDData-setter
+#' @rdname BDData-setter
 #' @author Patrick Kimes
 #' @export
 setGeneric("BDData<-", 
@@ -72,7 +72,7 @@ setGeneric("BDData<-",
 #' modified BenchDesign object
 #'
 #' @seealso \code{\link{BDMethod}}
-#' @name BDMethod-setter
+#' @rdname BDMethod-setter
 #' @author Patrick Kimes
 #' @export
 setGeneric("BDMethod<-", 
@@ -92,7 +92,7 @@ setGeneric("BDMethod<-",
 #' modified BenchDesign object
 #'
 #' @seealso \code{\link{BDMethod}}, \code{\link{BDMethodList}}
-#' @name BDMethodList-setter
+#' @rdname BDMethodList-setter
 #' @author Patrick Kimes
 #' @export
 setGeneric("BDMethodList<-", 
@@ -103,12 +103,14 @@ setGeneric("BDMethodList<-",
 #' Method to set groundTruths in SummarizedBenchmark object.
 #'  
 #' @param object a \code{SummarizedBenchmark} object.
-#'
+#' @param value replacement set of ground truths.
+#' @param ... futher arguments, perhaps used by methods.
+#' 
 #' @return
 #' modified BenchDesign object
 #'
-#' @name groundTruths-setter
-#' @author Patrick Kimes
+#' @rdname groundTruths-setter
+#' @author Alejandro Reyes, Patrick Kimes
 #' @export
 setGeneric("groundTruths<-",
             function( object, ..., value ) standardGeneric( "groundTruths<-" ) )
@@ -118,12 +120,13 @@ setGeneric("groundTruths<-",
 #' Method to get groundTruths in SummarizedBenchmark object.
 #'  
 #' @param object a \code{SummarizedBenchmark} object.
+#' @param ... further arguments, perhaps used by methods.
 #'
 #' @return
 #' modified BenchDesign object
 #'
 #' @name groundTruths
-#' @author Patrick Kimes
+#' @author Alejandro Reyes
 #' @export
 setGeneric("groundTruths",
            function( object, ... )
@@ -132,15 +135,14 @@ setGeneric("groundTruths",
 #' Get performance metrics in SummarizedBenchmark object
 #'
 #' @description
-#' Given a \code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object,
+#' Given a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object,
 #' returns a list of lists of performance metrics that have been defined for
 #' each assay. Optionally, if \code{assay =} is specified, performance metrics
 #' for only the specified subset of specified assays are returned.
 #' 
-#' @param object a \code{SummarizedBenchmark} object.
-#' @param assay A character string indicating an assay name.
-#' @param value A SimpleList of the same length as the number of assays.
-#' @param ... Futher arguments, perhaps used by methods.
+#' @param object a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
+#' @param assay a character string indicating an assay name.
+#' @param ... futher arguments, perhaps used by methods.
 #'
 #' @return
 #' A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
@@ -160,13 +162,12 @@ setGeneric("performanceMetrics", function( object, ... ) standardGeneric("perfor
 #'
 #' @description
 #' Replaces the list of performance metrics in a
-#' \code{\link[SummarizedBenchmark-class]{SummarizedBenchmark}} object with
+#' \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object with
 #' a new list of performance metric lists. 
 #' 
-#' @param object a \code{SummarizedBenchmark} object.
-#' @param assay A character string indicating an assay name.
-#' @param value A SimpleList of the same length as the number of assays.
-#' @param ... Futher arguments, perhaps used by methods.
+#' @param object a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
+#' @param value a SimpleList of the same length as the number of assays.
+#' @param ... futher arguments, perhaps used by methods.
 #'
 #' @return
 #' Silently, the newly specified SimpleList of performance metric lists.
@@ -177,7 +178,7 @@ setGeneric("performanceMetrics", function( object, ... ) standardGeneric("perfor
 #' performanceMetrics(sb) <- SimpleList(qvalue = list(), logFC = list())
 #'
 #' @seealso \code{\link{addPerformanceMetric}}, \code{\link{estimatePerformanceMetrics}}, \code{\link{performanceMetrics}}
-#' @name performanceMetrics-setter
+#' @rdname performanceMetrics-setter
 #' @export
 #' @author Alejandro Reyes
 setGeneric("performanceMetrics<-",

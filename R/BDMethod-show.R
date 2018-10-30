@@ -44,5 +44,5 @@
 #' 
 #' @importFrom stringr str_pad str_trunc
 #' @import rlang
-#' @name BDMethod-show
+#' @rdname BDMethod-show
 setMethod("show", signature(object = "BDMethod"), .show.BDMethod)

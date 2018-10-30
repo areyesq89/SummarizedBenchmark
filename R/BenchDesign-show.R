@@ -38,5 +38,5 @@
 #' 
 #' @importFrom stringr str_pad str_trunc
 #' @import rlang
-#' @name BenchDesign-show
+#' @rdname BenchDesign-show
 setMethod("show", signature(object = "BenchDesign"), .show.BenchDesign)

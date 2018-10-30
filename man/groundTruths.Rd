@@ -13,6 +13,8 @@ groundTruths(object, ...)
 }
 \arguments{
 \item{object}{a \code{SummarizedBenchmark} object.}
+
+\item{...}{further arguments, perhaps used by methods.}
 }
 \value{
 modified BenchDesign object
@@ -21,5 +23,5 @@ modified BenchDesign object
 Method to get groundTruths in SummarizedBenchmark object.
 }
 \author{
-Patrick Kimes
+Alejandro Reyes
 }

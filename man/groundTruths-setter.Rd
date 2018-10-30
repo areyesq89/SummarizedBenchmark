@@ -2,8 +2,8 @@
 % Please edit documentation in R/AllGenerics.R,
 %   R/SummarizedBenckmark-accessors.R
 \docType{methods}
-\name{groundTruths-setter}
-\alias{groundTruths-setter}
+\name{groundTruths<-}
+\alias{groundTruths<-}
 \alias{groundTruths<-,SummarizedBenchmark-method}
 \title{Set ground truths in SummarizedBenchmark object}
 \usage{
@@ -13,6 +13,10 @@ groundTruths(object, ...) <- value
 }
 \arguments{
 \item{object}{a \code{SummarizedBenchmark} object.}
+
+\item{...}{futher arguments, perhaps used by methods.}
+
+\item{value}{replacement set of ground truths.}
 }
 \value{
 modified BenchDesign object
@@ -21,5 +25,5 @@ modified BenchDesign object
 Method to set groundTruths in SummarizedBenchmark object.
 }
 \author{
-Patrick Kimes
+Alejandro Reyes, Patrick Kimes
 }
