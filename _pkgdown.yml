@@ -22,7 +22,6 @@ navbar:
     intro: 
       text: Introduction
       href: articles/SummarizedBenchmark-Introduction.html
-    home: ~
     articles: ~
     vignettes:
       text: Articles
