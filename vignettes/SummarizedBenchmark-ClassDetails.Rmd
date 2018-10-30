@@ -26,7 +26,7 @@ knitr::opts_chunk$set(tidy = FALSE, cache = TRUE, dev = "png",
 
 # Introduction
 
-This vignette assumes that the user is familiar with the basics of the `SummarizedBenchmark` framework for benchmarking computational methods described in the **SummarizedBenchmark: Introduction** vignette (the "introdution"). New users should start from the package description and example presented in the introduction before moving on to more advanced topics, including the class descriptions in this vignette. Here, we describe the anatomy of the *BenchDesign* and *SummarizedBenchmark* classes in a little more detail than was presented in the introduction. 
+This vignette assumes that the user is familiar with the basics of the `SummarizedBenchmark` framework for benchmarking computational methods described in the **SummarizedBenchmark: Introduction** vignette (the "introduction"). New users should start from the package description and example presented in the introduction before moving on to more advanced topics, including the class descriptions in this vignette. Here, we describe the anatomy of the *BenchDesign* and *SummarizedBenchmark* classes in a little more detail than was presented in the introduction. 
 
 ## Example Case Study
 
