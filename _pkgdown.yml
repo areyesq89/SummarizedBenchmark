@@ -120,13 +120,13 @@ reference:
     and [working with SummarizedBenchmark](#section-summarizedbenchmark-methods), some slots and values of
     the classes can be directly modified using the following functions. 
   contents:
-  - '`BDData-setter`'
-  - '`BDMethod-setter`'
-  - '`BDMethodList-setter`'
-  - '`performanceMetrics-setter`'
-  - '`groundTruths-setter`'
-  - '`mcols-setter`'
-  - '`assayNames-setter`'
+  - '`BDData<-`'
+  - '`BDMethod<-`'
+  - '`BDMethodList<-`'
+  - '`performanceMetrics<-`'
+  - '`groundTruths<-`'
+  - '`mcols<-,SummarizedBenchmark-method`'
+  - '`assayNames<-,SummarizedBenchmark,character-method`'
 - title: Data Sets
   desc: >
     Example data sets are included to illustrate the functionality of the package in the
