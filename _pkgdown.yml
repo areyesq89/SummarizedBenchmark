@@ -13,14 +13,15 @@ navbar:
     left:
     - home
     - intro
-    right:
-    - news
     - reference
     - vignettes
+    right:
+    - news
+    - search
     - github
   components:
     intro: 
-      text: Introduction
+      text: Quick Start
       href: articles/SummarizedBenchmark-Introduction.html
     articles: ~
     vignettes:
