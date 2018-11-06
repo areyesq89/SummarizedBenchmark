@@ -95,7 +95,7 @@
 #' @importFrom sessioninfo session_info
 #' @import dplyr
 #' @importFrom tidyr spread unnest
-#' @import rlang
+#' @importFrom rlang quo eval_tidy !! !!!
 #' @importFrom utils packageName packageVersion
 #' @export
 #' @author Patrick Kimes

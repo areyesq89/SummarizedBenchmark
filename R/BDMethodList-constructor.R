@@ -38,7 +38,7 @@
 #'
 #' @seealso \code{\link{BDMethodList-class}}, \code{\link{BenchDesign}}, \code{\link{BDMethod}}
 #' @name BDMethodList
-#' @import rlang
+#' @importFrom rlang flatten
 #' @importFrom S4Vectors SimpleList
 #' @export
 #' @author Patrick Kimes

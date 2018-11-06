@@ -43,6 +43,6 @@
 #' @param object BDMethod object to show
 #' 
 #' @importFrom stringr str_pad str_trunc
-#' @import rlang
+#' @importFrom rlang quo_text 
 #' @rdname BDMethod-show
 setMethod("show", signature(object = "BDMethod"), .show.BDMethod)

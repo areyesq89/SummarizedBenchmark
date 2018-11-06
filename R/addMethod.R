@@ -83,7 +83,7 @@
 #'
 #' @seealso \code{\link{modifyMethod}}, \code{\link{expandMethod}}, \code{\link{dropMethod}}
 #' @md
-#' @import rlang
+#' @importFrom rlang is_quosures quos enquo
 #' @export
 #' @author Patrick Kimes
 addMethod <- function(bd, label, func, params = rlang::quos(),

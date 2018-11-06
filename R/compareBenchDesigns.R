@@ -100,7 +100,6 @@ compareBDData <- function(x, y) {
 #'
 #' @seealso \code{\link{compareBDMethod}}, \code{\link{compareBDData}}
 #' @name compareBenchDesigns
-#' @import rlang
 #' @author Patrick Kimes
 NULL
 

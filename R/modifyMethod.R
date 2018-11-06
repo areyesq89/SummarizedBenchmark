@@ -45,7 +45,7 @@
 #' 
 #' @seealso \code{\link{addMethod}}, \code{\link{expandMethod}}, \code{\link{dropMethod}}
 #' @md
-#' @import rlang
+#' @importFrom rlang is_quosures eval_tidy
 #' @export
 #' @author Patrick Kimes
 modifyMethod <- function(bd, label, params, .overwrite = FALSE) {

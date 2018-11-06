@@ -37,6 +37,6 @@
 #' @param object BenchDesign object to show
 #' 
 #' @importFrom stringr str_pad str_trunc
-#' @import rlang
+#' @importFrom rlang quo_text
 #' @rdname BenchDesign-show
 setMethod("show", signature(object = "BenchDesign"), .show.BenchDesign)
