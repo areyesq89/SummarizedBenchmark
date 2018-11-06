@@ -31,7 +31,41 @@ specified \code{\link{buildBench}} parameters still take precedence. (default = 
 SumamrizedBenchmark object.
 }
 \description{
-Update \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} results with new methods.
+Function to update or check status of \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+results.
+
+If only a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object is specified,
+the function will check whether `func`, `param`, `meta`, `post` or the `pkg_vers` of the
+methods in the \code{\link[=BenchDesign-class]{BenchDesign}} stored with the
+\code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} do not match values stored in the
+\code{colData}. By default, no methods will be executed to update results. To actually execute updates,
+set \code{dryrun = FALSE}.
+
+If a \code{\link[=BenchDesign-class]{BenchDesign}} object is specified in addition to a
+\code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object, the function will check which
+methods in the new \code{\link[=BenchDesign-class]{BenchDesign}} need to be executed to update the 
+\code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} results. Again, by default, no methods
+will be executed unless \code{dryrun = FLASE} is specified.
+
+Unless \code{reuseParams = FALSE} is specified, the parameters of the last execution session stored
+in the the \code{colData} of the \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object
+will be used.
+}
+\examples{
+## load example SummarizedBenchmark object
+data(allSB)
+sb <- allSB[[1]]
+
+## check if results are out of date
+updateBench(sb)
+
+## modify BenchDesign
+bd <- BenchDesign(sb)
+bd <- dropMethod(bd, "kallisto-default")
+
+## check if results need to be updated with new BenchDesign
+updateBench(sb, bd)
+
 }
 \seealso{
 \code{\link{buildBench}}
