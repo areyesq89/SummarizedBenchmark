@@ -10,6 +10,12 @@
 #' logical value indicating whether the two objects produced the same
 #' meta data.
 #'
+#' @examples
+#' bdm1 <- BDMethod(stats::rnorm, params = rlang::quos(n = 100))
+#' bdm2 <- BDMethod(stats::rt, params = rlang::quos(n = 100, df = 1))
+#'
+#' compareBDMethod(bdm1, bdm2)
+#' 
 #' @seealso \code{\link{compareBenchDesigns}}
 #' @export
 #' @importFrom tibble is_tibble
@@ -53,6 +59,21 @@ compareBDMethod <- function(x, y) {
 #' 
 #' @return
 #' list of two values giving agreement of "data" and "type".
+#'
+#' @examples
+#' ## compare data with same MD5 hash value
+#' bdd1 <- BDData(data.frame(x = 1:10))
+#' bdd1h <- hashBDData(bdd1)
+#' compareBDData(bdd1, bdd1h)
+#'
+#' ## compare different data, both same type
+#' bdd2 <- BDData(data.frame(x = 2:11))
+#' bdd2h <- hashBDData(bdd2)
+#' compareBDData(bdd1, bdd2)
+#' compareBDData(bdd1h, bdd2h)
+#'
+#' ## compare completely different data
+#' compareBDData(bdd1, bdd2h)
 #' 
 #' @seealso \code{\link{compareBenchDesigns}}
 #' @export
@@ -97,6 +118,21 @@ compareBDData <- function(x, y) {
 #' 
 #' @return
 #' list of comparison results
+#'
+#' @examples
+#' bd1 <- 
+#'     BenchDesign(norm_sd = BDMethod(stats::rnorm,
+#'                                    params = rlang::quos(n = n),
+#'                                    post = sd),
+#'                 t_sd = BDMethod(stats::rt,
+#'                                 params = rlang::quos(n = n, df = 1),
+#'                                 post = sd)
+#' bd2 <- addMethod(bd1,
+#'                  chi_sd = BDMethod(stats::rchisq,
+#'                                    params = rlang::quos(n = n, df = 1),
+#'                                    post = sd)
+#' 
+#' compareBenchDesigns(bd1, bd2)
 #'
 #' @seealso \code{\link{compareBDMethod}}, \code{\link{compareBDData}}
 #' @name compareBenchDesigns

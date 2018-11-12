@@ -49,6 +49,22 @@ To compare the \code{BenchDesign} slots of SummarizedBenchmark objects,
 the BenchDesigns should be extracted with \code{BenchDesign(sb)} and
 passed as inputs (see Examples).
 }
+\examples{
+bd1 <- 
+    BenchDesign(norm_sd = BDMethod(stats::rnorm,
+                                   params = rlang::quos(n = n),
+                                   post = sd),
+                t_sd = BDMethod(stats::rt,
+                                params = rlang::quos(n = n, df = 1),
+                                post = sd)
+bd2 <- addMethod(bd1,
+                 chi_sd = BDMethod(stats::rchisq,
+                                   params = rlang::quos(n = n, df = 1),
+                                   post = sd)
+
+compareBenchDesigns(bd1, bd2)
+
+}
 \seealso{
 \code{\link{compareBDMethod}}, \code{\link{compareBDData}}
 }
