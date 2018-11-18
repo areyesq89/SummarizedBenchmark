@@ -162,31 +162,31 @@ b <- BenchDesign() %>%
               func = runKallisto,
               params = rlang::quos(sample = sample,
                                    args = "-t 16"),
-              meta = list(version = rlang::quo(getKallistoVersion()))
+              meta = list(pkg_vers = rlang::quo(getKallistoVersion()))
               ) %>%
     addMethod(label = "kallisto-bias",
              func = runKallisto,
              params = rlang::quos(sample = sample,
                                   args = "--bias -t 16"),
-             meta = list(version = rlang::quo(getKallistoVersion()))
+             meta = list(pkg_vers = rlang::quo(getKallistoVersion()))
              ) %>%
    addMethod(label = "salmon-default",
              func = runSalmon,
              params = rlang::quos(sample = sample,
                                   args = "-l IU -p 16"),
-             meta = list(version = rlang::quo(getSalmonVersion()))
+             meta = list(pkg_vers = rlang::quo(getSalmonVersion()))
              ) %>%
    addMethod(label = "salmon-gcBias",
              func = runSalmon,
              params = rlang::quos(sample=sample,
                                   args="-l IU --gcBias -p 16"),
-             meta = list(version = rlang::quo(getSalmonVersion()))
+             meta = list(pkg_vers = rlang::quo(getSalmonVersion()))
              ) %>%
    addMethod(label = "sailfish-default",
              func = runSailfish,
              params = rlang::quos(sample=sample,
                                   args="-l IU -p 16"),
-             meta = list(version = rlang::quo(getSailfishVersion()))
+             meta = list(pkg_vers = rlang::quo(getSailfishVersion()))
              )
 
 printMethods(b)
@@ -271,7 +271,7 @@ tidyData %>%
 
 For a more exhaustive benchmark of isoform quantification results, we refer the reader to the paper by [@Teng_2016], which describes several metrics to evaluate the performance of isoform quantification pipelines. These metrics are implemented in `r BiocStyle::Biocpkg("rnaseqcomp")`. The code below follows the steps from the `r BiocStyle::Biocpkg("rnaseqcomp")` package to create an *rnaseqcomp* object. We recommend the readers to follow the vignette of the `r BiocStyle::Biocpkg("rnaseqcomp")` package for an exhaustive benchmark of isoform quantification methods.
 
-```{r rnaseqcomp, message=FALSE}
+```{r rnaseqcomp, message=FALSE, eval=FALSE}
 library(rnaseqcomp)
 library(biomaRt)
 data(simdata)
