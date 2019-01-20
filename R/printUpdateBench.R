@@ -92,11 +92,11 @@
         cat(crayon::bold(header2))
         for (i in seq_len(nrow(metres))) {
             if (metres$overlap[i] == "Both") {
-                istr <- metres[i, c("label", "rerun", "f", "params", "meta", "post", "version"), drop = TRUE]
+                istr <- unlist(metres[i, c("label", "rerun", "f", "params", "meta", "post", "version")])
                 istr <- .methodrow(istr)
                 cat(istr)
             } else {
-                istr <- c(metres[i, c("label", "rerun"), drop = TRUE], rep("-", 5))
+                istr <- c(unlist(metres[i, c("label", "rerun")]), rep("-", 5))
                 istr <- .methodrow(istr)
                 cat(istr)
             }
