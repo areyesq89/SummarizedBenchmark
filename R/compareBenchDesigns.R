@@ -126,11 +126,11 @@ compareBDData <- function(x, y) {
 #'                                    post = sd),
 #'                 t_sd = BDMethod(stats::rt,
 #'                                 params = rlang::quos(n = n, df = 1),
-#'                                 post = sd)
-#' bd2 <- addMethod(bd1,
-#'                  chi_sd = BDMethod(stats::rchisq,
-#'                                    params = rlang::quos(n = n, df = 1),
-#'                                    post = sd)
+#'                                 post = sd))
+#' bd2 <- addMethod(bd1, "chi_sd",
+#'                  func = stats::rchisq,
+#'                  params = rlang::quos(n = n, df = 1),
+#'                  post = sd)
 #' 
 #' compareBenchDesigns(bd1, bd2)
 #'
