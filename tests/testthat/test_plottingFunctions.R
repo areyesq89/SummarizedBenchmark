@@ -16,6 +16,6 @@ test_that( "test that 'plotROC' and 'plotOverlaps'  behave as expected", {
   expect_identical(
     plotROC( sb )$geom$objname,
     plotROC( sb2, assay="assay1" )$geom$objname )
-  expect_null( plotMethodsOverlap( sb ) )
-  expect_null( plotMethodsOverlap( sb2, assay="assay1" ) )
+  expect_is( plotMethodsOverlap( sb ), "upset" )
+  expect_is( plotMethodsOverlap( sb2, assay="assay1" ), "upset" )
 } )
