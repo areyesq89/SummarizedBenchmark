@@ -38,9 +38,11 @@
     }
 }
 
+#' Show BDMethod object
+#' 
 #' @param object BDMethod object to show
 #' 
 #' @importFrom stringr str_pad str_trunc
-#' @import rlang
-#' @rdname BDMethod-class
+#' @importFrom rlang quo_text 
+#' @rdname BDMethod-show
 setMethod("show", signature(object = "BDMethod"), .show.BDMethod)

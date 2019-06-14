@@ -24,8 +24,10 @@
         cat("  MD5 hash:", stringr::str_trunc(object@data, 50), "\n")
 }
 
+#' Show BDData object
+#' 
 #' @param object BDData object to show
 #' 
 #' @importFrom stringr str_pad
-#' @rdname BDData-class
+#' @rdname BDData-show
 setMethod("show", signature(object = "BDData"), .show.BDData)

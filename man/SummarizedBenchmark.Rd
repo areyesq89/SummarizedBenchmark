@@ -2,7 +2,7 @@
 % Please edit documentation in R/SummarizedBenckmark-constructor.R
 \name{SummarizedBenchmark}
 \alias{SummarizedBenchmark}
-\title{Constructor function for SummarizedBenchmark objects.}
+\title{Create a new SummarizedBenchmark object}
 \usage{
 SummarizedBenchmark(assays, colData, ftData = NULL, groundTruth = NULL,
   performanceMetrics = NULL, BenchDesign = NULL, ...)

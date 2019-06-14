@@ -1,23 +1,58 @@
-#' Update SummarizedBenchmark object
+#' Check/Update SummarizedBenchmark
 #'
-#' Update SummarizedBenchmark results with new methods.
+#' @description
+#' Function to update or check status of \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+#' results.
 #'
-#' @param sb a \code{SummarizedBenchmark} object
-#' @param bd a \code{BenchDesign} object
+#' If only a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object is specified,
+#' the function will check whether `func`, `param`, `meta`, `post` or the `pkg_vers` of the
+#' methods in the \code{\link[=BenchDesign-class]{BenchDesign}} stored with the
+#' \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} do not match values stored in the
+#' \code{colData}. By default, no methods will be executed to update results. To actually execute updates,
+#' set \code{dryrun = FALSE}.
+#'
+#' If a \code{\link[=BenchDesign-class]{BenchDesign}} object is specified in addition to a
+#' \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object, the function will check which
+#' methods in the new \code{\link[=BenchDesign-class]{BenchDesign}} need to be executed to update the 
+#' \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} results. Again, by default, no methods
+#' will be executed unless \code{dryrun = FLASE} is specified.
+#'
+#' Unless \code{reuseParams = FALSE} is specified, the parameters of the last execution session stored
+#' in the the \code{colData} of the \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object
+#' will be used.
+#' 
+#' @param sb a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object
+#' @param bd a \code{\link[=BenchDesign-class]{BenchDesign}} object
 #' @param dryrun logical whether to just print description of what would
 #'        be updated rather than actually running any methods. (default = TRUE)
 #' @param version logical whether to re-run methods with only package
 #'        version differences. (default = FALSE)
-#' @param keepAll logical whether to keep methods run in original SummarizedBenchmark
-#'        but not in new BenchDesign. Only used if \code{bd} is not NULL. (default = TRUE)
+#' @param keepAll logical whether to keep methods run in original \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}}
+#'        but not in new \code{\link[=BenchDesign-class]{BenchDesign}}. Only used if \code{bd} is not NULL. (default = TRUE)
 #' @param reuseParams logical whether to reuse parameters from \code{buildBench} call
-#'        used to create \code{SummarizedBenchmark} object (if available). Directly
-#'        specified \code{buildBench} parameters still take precedence. (default = TRUE)
+#'        used to create \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object (if available). Directly
+#'        specified \code{\link{buildBench}} parameters still take precedence. (default = TRUE)
 #' @param ... optional parameters to pass to \code{\link{buildBench}}.
 #'
 #' @return
 #' SumamrizedBenchmark object.
 #'
+#' @examples
+#' ## load example SummarizedBenchmark object
+#' data(allSB)
+#' sb <- allSB[[1]]
+#'
+#' ## check if results are out of date
+#' updateBench(sb)
+#'
+#' ## modify BenchDesign
+#' bd <- BenchDesign(sb)
+#' bd <- dropMethod(bd, "kallisto-default")
+#' 
+#' ## check if results need to be updated with new BenchDesign
+#' updateBench(sb, bd)
+#' 
+#' @seealso \code{\link{buildBench}}
 #' @import dplyr
 #' @importFrom SummarizedExperiment cbind
 #' @importFrom crayon red yellow green bold

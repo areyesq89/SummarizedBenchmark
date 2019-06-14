@@ -3,7 +3,7 @@
 \docType{class}
 \name{SummarizedBenchmark-class}
 \alias{SummarizedBenchmark-class}
-\title{SummarizedBenchmark class documentation}
+\title{SummarizedBenchmark class}
 \description{
 Extension of the \code{\link{RangedSummarizedExperiment}} to
 store the output of different methods intended for the same purpose
@@ -24,7 +24,6 @@ results in the object.}
 }}
 
 \examples{
-
 ## loading the example data from iCOBRA
 library(iCOBRA)
 data(cobradata_example)

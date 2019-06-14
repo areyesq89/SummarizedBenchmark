@@ -1,10 +1,10 @@
-#' @title Add a performance metric definition to a \code{\link{SummarizedBenchmark}} object.
+#' @title Add performance metric to SummarizedBenchmark object
 #' @aliases addPerformanceMetric
 #' @description
 #' This is a function to define performance metrics for benchmarking methods.
 #' The function is saved into the \code{performanceMetrics} slot.
 #'
-#' @param object A \code{\link{SummarizedBenchmark}} object.
+#' @param object A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #' @param evalMetric A string with the name of the evaluation metric.
 #' @param assay A string with an assay name. Indicates the assay that should be
 #' given as input to this performance metric.
@@ -17,7 +17,6 @@
 #' @author Alejandro Reyes
 #'
 #' @examples
-#'
 #' data( sb )
 #' sb <- addPerformanceMetric(
 #'    object=sb,
@@ -29,7 +28,8 @@
 #'    }
 #' )
 #'
-#' @return A \code{\link{SummarizedBenchmark}} object.
+#' @seealso \code{\link{availableMetrics}}, \code{\link{performanceMetrics}}
+#' @return A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #' @importFrom tidyr gather
 #' @export
 #'
@@ -68,14 +68,14 @@ is.scalar <- function(x){
 }
 
 #' @describeIn estimateMetrics Estimate performance metrics for a given assay
-#' @title Estimate performance metrics.
+#' @title Estimate performance metrics in SummarizedBenchmark object
 #' @aliases estimateMetricsForAssay
 #' @description
 #' These functions estimate the performance metrics, either passed as arguments or
 #' added previously with the \code{\link{addPerformanceMetric}} function. The function
 #' will estimate the performance metric for each method.
 #'
-#' @param object A \code{\link{SummarizedBenchmark}} object.
+#' @param object A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 #' @param assay A string with an assay name. Indicates the assay that should be
 #' given as input to this performance metric.
 #' @param evalMetric A string with the name of the evaluation metric.
@@ -115,6 +115,7 @@ is.scalar <- function(x){
 #' allMetrics <- estimatePerformanceMetrics( sb )
 #' allMetricsTidy <- estimatePerformanceMetrics( sb, tidy=TRUE )
 #'
+#' @seealso \code{\link{availableMetrics}}, \code{\link{performanceMetrics}}
 #' @return Either a \code{\link{SummarizedBenchmark}} object, a \code{\link{DataFrame}} or
 #' a \code{\link{data.frame}}.
 #' @importFrom S4Vectors elementMetadata
@@ -282,7 +283,7 @@ cleanPerformanceMetrics <- function( object ){
   object
 }
 
-#' @title Reformat performance metrics to a long format.
+#' @title Tidy up performance metrics in SummarizedBenchmark object
 #' @aliases tidyUpMetrics
 #' @description
 #' This function takes as input a \code{SummarizedBenchmark} object, extracts the
@@ -300,6 +301,7 @@ cleanPerformanceMetrics <- function( object ){
 #'
 #' @author Alejandro Reyes
 #'
+#' @seealso \code{\link{estimatePerformanceMetrics}}
 #' @return A tidy \code{data.frame}
 #' @importFrom tidyr gather
 #' @export

@@ -5,40 +5,32 @@
 \name{performanceMetrics}
 \alias{performanceMetrics}
 \alias{performanceMetrics,SummarizedBenchmark-method}
-\alias{performanceMetrics<-,SummarizedBenchmark,SimpleList-method}
-\alias{performanceMetrics<-}
-\title{Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.}
+\title{Get performance metrics in SummarizedBenchmark object}
 \usage{
 performanceMetrics(object, ...)
 
-performanceMetrics(object, ...) <- value
-
 \S4method{performanceMetrics}{SummarizedBenchmark}(object, assay = NULL)
-
-
-  \S4method{performanceMetrics}{SummarizedBenchmark,SimpleList}(object) <- value
 }
 \arguments{
-\item{object}{a \code{SummarizedBenchmark} object.}
+\item{object}{a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
-\item{...}{Futher arguments, perhaps used by methods}
+\item{...}{futher arguments, perhaps used by methods.}
 
-\item{value}{A SimpleList of the same length as the number of assays}
-
-\item{assay}{A character string indicating an assay name}
+\item{assay}{a character string indicating an assay name.}
 }
 \value{
-A SimpleList with one element for each assay. Each element of the list contains a list of performance functions.
+A SimpleList with one element for each assay. Each element of the list contains a list of performance metric functions.
 }
 \description{
-Accessor and replacement functions for the slot 'performanceMetrics' of a SummarizedBenchmark object.
+Given a \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object,
+returns a list of lists of performance metrics that have been defined for
+each assay. Optionally, if \code{assay =} is specified, performance metrics
+for only the specified subset of specified assays are returned.
 }
 \examples{
-
-data( sb )
-performanceMetrics( sb )
-performanceMetrics( sb, assay="qvalue" )
-performanceMetrics( sb ) <- SimpleList( qvalue=list(), logFC=list() )
+data(sb)
+performanceMetrics(sb)
+performanceMetrics(sb, assay = "qvalue")
 
 }
 \seealso{

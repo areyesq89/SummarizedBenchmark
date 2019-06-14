@@ -2,7 +2,7 @@
 % Please edit documentation in R/PerformanceMetrics.R
 \name{tidyUpMetrics}
 \alias{tidyUpMetrics}
-\title{Reformat performance metrics to a long format.}
+\title{Tidy up performance metrics in SummarizedBenchmark object}
 \usage{
 tidyUpMetrics(object)
 }
@@ -25,6 +25,9 @@ sb <- estimateMetricsForAssay( sb, assay="qvalue", evalMetric="rejections",
     addColData=TRUE )
 tidyUpMetrics( sb )
 
+}
+\seealso{
+\code{\link{estimatePerformanceMetrics}}
 }
 \author{
 Alejandro Reyes

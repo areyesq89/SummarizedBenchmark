@@ -2,12 +2,12 @@
 % Please edit documentation in R/PerformanceMetrics.R
 \name{addPerformanceMetric}
 \alias{addPerformanceMetric}
-\title{Add a performance metric definition to a \code{\link{SummarizedBenchmark}} object.}
+\title{Add performance metric to SummarizedBenchmark object}
 \usage{
 addPerformanceMetric(object, evalMetric, assay, evalFunction = NULL)
 }
 \arguments{
-\item{object}{A \code{\link{SummarizedBenchmark}} object.}
+\item{object}{A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
 \item{evalMetric}{A string with the name of the evaluation metric.}
 
@@ -21,14 +21,13 @@ are specified, they must contain default values. If NULL, the 'evalMetric' strin
 be the name of a predefined metric available through 'availableMetrics()$function'.}
 }
 \value{
-A \code{\link{SummarizedBenchmark}} object.
+A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.
 }
 \description{
 This is a function to define performance metrics for benchmarking methods.
 The function is saved into the \code{performanceMetrics} slot.
 }
 \examples{
-
 data( sb )
 sb <- addPerformanceMetric(
    object=sb,
@@ -40,6 +39,9 @@ sb <- addPerformanceMetric(
    }
 )
 
+}
+\seealso{
+\code{\link{availableMetrics}}, \code{\link{performanceMetrics}}
 }
 \author{
 Alejandro Reyes

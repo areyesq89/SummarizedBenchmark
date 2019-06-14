@@ -2,37 +2,37 @@
 % Please edit documentation in R/modifyMethod.R
 \name{modifyMethod}
 \alias{modifyMethod}
-\title{Modify definition of method in BenchDesign object}
+\title{Modify method in BenchDesign object}
 \usage{
 modifyMethod(bd, label, params, .overwrite = FALSE)
 }
 \arguments{
-\item{bd}{BenchDesign object.}
+\item{bd}{\code{\link[=BenchDesign-class]{BenchDesign}} object.}
 
 \item{label}{Character name of method to be modified.}
 
-\item{params}{Named quosure list created using \code{rlang::quos} of
+\item{params}{Named quosure list created using \code{\link[rlang]{quos}} of
 \code{parameter = value} paiars to replace in the method definition.
 The \code{post}, and \code{meta} parameters of the method can be
 modified using the special keywords, \code{bd.post}, and \code{bd.meta}
-(the prefix denoting that these values should modify BenchDesign
+(the prefix denoting that these values should modify \code{\link[=BenchDesign-class]{BenchDesign}}
 parameters). All other named parameters will be added to the list of
 parameters to be passed to \code{func}.}
 
 \item{.overwrite}{Logical whether to overwrite the complete existing list of
-parameters to be passed to \code{func} (TRUE), or to simply add
+parameters to be passed to \code{func} (\code{TRUE}), or to simply add
 the new parameters to the existing list and only replace overlapping
-parameters (FALSE). (default = FALSE)}
+parameters (\code{FALSE}). (default = \code{FALSE})}
 }
 \value{
-Modified BenchDesign object.
+Modified \code{\link[=BenchDesign-class]{BenchDesign}} object with single method
+parameters modified.
 }
 \description{
-This function takes a BenchDesign object and the name of a method
-already defined in the object, and returns a modified BenchDesign
-object with the specified changes made only to the named method.
-At a minimum, a string name for the method, \code{label}, must be
-specified in addition to the primary BenchDesign object.
+Takes a \code{\link[=BenchDesign-class]{BenchDesign}} object, the name of an
+existing method, and new parameter specifications,
+and returns a modified \code{\link[=BenchDesign-class]{BenchDesign}} object with
+the specified changes.
 }
 \examples{
 ## empty BenchDesign
@@ -53,6 +53,9 @@ bench <- modifyMethod(bench, label = "qv",
 ## verify that method has been updated
 printMethod(bench, "qv")
 
+}
+\seealso{
+\code{\link{addMethod}}, \code{\link{expandMethod}}, \code{\link{dropMethod}}
 }
 \author{
 Patrick Kimes

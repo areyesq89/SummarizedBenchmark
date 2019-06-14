@@ -3,7 +3,7 @@
 \name{estimateMetricsForAssay}
 \alias{estimateMetricsForAssay}
 \alias{estimatePerformanceMetrics}
-\title{Estimate performance metrics.}
+\title{Estimate performance metrics in SummarizedBenchmark object}
 \usage{
 estimateMetricsForAssay(object, assay, evalMetric = NULL,
   addColData = FALSE, evalFunction = NULL, tidy = FALSE, ...)
@@ -12,7 +12,7 @@ estimatePerformanceMetrics(object, addColData = FALSE, tidy = FALSE,
   rerun = TRUE, ...)
 }
 \arguments{
-\item{object}{A \code{\link{SummarizedBenchmark}} object.}
+\item{object}{A \code{\link[=SummarizedBenchmark-class]{SummarizedBenchmark}} object.}
 
 \item{assay}{A string with an assay name. Indicates the assay that should be
 given as input to this performance metric.}
@@ -73,6 +73,9 @@ qvalueMetrics <- estimateMetricsForAssay( sb, assay="qvalue" )
 allMetrics <- estimatePerformanceMetrics( sb )
 allMetricsTidy <- estimatePerformanceMetrics( sb, tidy=TRUE )
 
+}
+\seealso{
+\code{\link{availableMetrics}}, \code{\link{performanceMetrics}}
 }
 \author{
 Alejandro Reyes

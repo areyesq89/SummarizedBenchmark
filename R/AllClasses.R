@@ -2,15 +2,16 @@ setOldClass(c("quosure", "quosures"))
 setClassUnion("listOrNULL", c("list", "NULL"))
 setClassUnion("listOrCharacter", c("list", "character"))
 
-#' BDMethod class
+#' BDData class
 #'
-#' Container for individual methods to be compared as part of
-#' a BenchDesign object.
+#' @description
+#' Container for data in a BenchDesign object.
 #'
 #' @slot data a list or MD5 hash of the data.
 #' @slot type a character string indicating whether the data slot
 #'       contains the 'data' or a 'md5hash' of the data.
 #'
+#' @seealso \code{\link{BDData}}, \code{\link{BenchDesign-class}}, \code{\link{BDMethod-class}}, \code{\link{BDMethodList-class}}
 #' @exportClass BDData
 #' @name BDData-class
 #' @author Patrick Kimes
@@ -35,8 +36,14 @@ setClassUnion("BDDataOrNULL", c("BDData", "NULL"))
 
 #' BDMethod class
 #'
-#' Container for individual methods to be compared as part of
-#' a BenchDesign object.
+#' @description
+#' Container for individual methods to be compared as part of a benchmark
+#' experiment defined in a BenchDesign object. In the SummarizedBenchmark
+#' framework, methods are defined by a unique combination of functions,
+#' parameters, and any relevant meta data.
+#'  
+#' New BDMethod objects can be created using the \code{\link{BDMethod}}
+#' constructor. 
 #'
 #' @slot f a function to be benchmarked
 #' @slot fc a captured expression of the function \code{f}
@@ -44,6 +51,7 @@ setClassUnion("BDDataOrNULL", c("BDData", "NULL"))
 #' @slot post a list of functions to be applied to the output of \code{f}
 #' @slot meta a list of meta data
 #'
+#' @seealso \code{\link{BDMethod}}, \code{\link{BenchDesign-class}}, \code{\link{BDMethodList-class}}, \code{\link{BDData-class}}
 #' @exportClass BDMethod
 #' @name BDMethod-class
 #' @author Patrick Kimes
@@ -72,9 +80,15 @@ setValidity("BDMethod",
 
 #' BDMethodList class
 #'
+#' @description
 #' Extension of the SimpleList class to contain a list of BDMethod
-#' objects.
+#' objects. The class serves as the primary container for the set of
+#' methods in the BenchDesign class.
 #'
+#' New BDMethodList objects can be created using the
+#' \code{\link{BDMethodList}} constructor.
+#' 
+#' @seealso \code{\link{BDMethodList}}, \code{\link{BenchDesign-class}}, \code{\link{BDMethod-class}}, \code{\link{BDData-class}}
 #' @importClassesFrom S4Vectors SimpleList
 #' @exportClass BDMethodList
 #' @name BDMethodList-class
@@ -97,21 +111,35 @@ setValidity("BDMethodList",
 
 #' BenchDesign class
 #'
-#' Container for benchmark methods and data.
+#' @description
+#' Along with the SummarizedBenchmark class, one of the two main
+#' classses of the SummarizedBenchmark package. The BenchDesign class serves as
+#' a container for both the set of methods to be benchmarked and optionally the
+#' data to be used for benchmarking.
+#'
+#' Methods are organized as BDMethod objects and stored in as a list using the
+#' BDMethodList class. The BDData class is used to store benchmarking data, or
+#' in some cases, just the MD5 hash of the original data set. Any list object,
+#' including data.frame objects, can be specified for data. More details on the
+#' component classes are provided in the corresponding class documentation.
+#'
+#' For details on how to create new BenchDesign objects, see the
+#' documentation for the \code{\link{BenchDesign}} constructor.
 #'
 #' @slot data a list containing the data to be used in the benchmark.
-#' @slot methods a list of \code{BDMethods} to be compared in the benchmark.
+#' @slot methods a \code{BDMethodList} list of \code{BDMethod} objects to be
+#'       compared in the benchmark.
 #'
+#' @seealso \code{\link{BenchDesign}}, \code{\link{BDMethod-class}}, \code{\link{BDMethodList-class}}, \code{\link{BDData-class}}
 #' @exportClass BenchDesign
 #' @name BenchDesign-class
 #' @author Patrick Kimes
 setClass("BenchDesign", representation(data = "BDDataOrNULL", methods = "BDMethodList"))
 
-
 setClassUnion("BenchDesignOrNULL", c("BenchDesign", "NULL"))
 
 #' @name SummarizedBenchmark-class
-#' @title SummarizedBenchmark class documentation
+#' @title SummarizedBenchmark class
 #' @description
 #' Extension of the \code{\link{RangedSummarizedExperiment}} to
 #' store the output of different methods intended for the same purpose
@@ -133,7 +161,6 @@ setClassUnion("BenchDesignOrNULL", c("BenchDesign", "NULL"))
 #' @export
 #' 
 #' @examples
-#'
 #' ## loading the example data from iCOBRA
 #' library(iCOBRA)
 #' data(cobradata_example)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/PlottingFunctions.R
 \name{plotMethodsOverlap}
 \alias{plotMethodsOverlap}
-\title{Calls UpSetR for qvalues of a \code{\link{SummarizedBenchmark}} object.}
+\title{Plot UpSetR for SummarizedBenchmark object}
 \usage{
 plotMethodsOverlap(object, assay = "qvalue", alpha = 0.1, ...)
 }
@@ -26,12 +26,14 @@ The plot is only generated if at least 2 methods have observations that pass
 the alpha threshold.
 }
 \examples{
-
-data( sb )
+data(sb)
 \dontrun{
 plotMethodsOverlap(sb)
 }
 
+}
+\seealso{
+\code{\link{plotROC}}, \code{\link{estimatePerformanceMetrics}}
 }
 \author{
 Alejandro Reyes

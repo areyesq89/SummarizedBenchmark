@@ -18,6 +18,25 @@ list of two values giving agreement of "data" and "type".
 Simple comparison of two BDData objects based on
 comparing both type and data hash.
 }
+\examples{
+## compare data with same MD5 hash value
+bdd1 <- BDData(data.frame(x = 1:10))
+bdd1h <- hashBDData(bdd1)
+compareBDData(bdd1, bdd1h)
+
+## compare different data, both same type
+bdd2 <- BDData(data.frame(x = 2:11))
+bdd2h <- hashBDData(bdd2)
+compareBDData(bdd1, bdd2)
+compareBDData(bdd1h, bdd2h)
+
+## compare completely different data
+compareBDData(bdd1, bdd2h)
+
+}
+\seealso{
+\code{\link{compareBenchDesigns}}
+}
 \author{
 Patrick Kimes
 }

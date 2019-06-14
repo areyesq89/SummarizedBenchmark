@@ -1,24 +1,24 @@
-#' Modify definition of method in BenchDesign object
+#' Modify method in BenchDesign object
 #'
-#' This function takes a BenchDesign object and the name of a method
-#' already defined in the object, and returns a modified BenchDesign
-#' object with the specified changes made only to the named method.
-#' At a minimum, a string name for the method, `label`, must be
-#' specified in addition to the primary BenchDesign object.
-#' 
-#' @param bd BenchDesign object.
+#' @description
+#' Takes a \code{\link[=BenchDesign-class]{BenchDesign}} object, the name of an
+#' existing method, and new parameter specifications,
+#' and returns a modified \code{\link[=BenchDesign-class]{BenchDesign}} object with
+#' the specified changes.
+#'  
+#' @param bd \code{\link[=BenchDesign-class]{BenchDesign}} object.
 #' @param label Character name of method to be modified.
-#' @param params Named quosure list created using `rlang::quos` of 
+#' @param params Named quosure list created using \code{\link[rlang]{quos}} of 
 #'        `parameter = value` paiars to replace in the method definition.
 #'        The `post`, and `meta` parameters of the method can be
 #'        modified using the special keywords, `bd.post`, and `bd.meta`
-#'        (the prefix denoting that these values should modify BenchDesign
+#'        (the prefix denoting that these values should modify \code{\link[=BenchDesign-class]{BenchDesign}}
 #'        parameters). All other named parameters will be added to the list of
 #'        parameters to be passed to `func`.
 #' @param .overwrite Logical whether to overwrite the complete existing list of
-#'        parameters to be passed to `func` (TRUE), or to simply add
+#'        parameters to be passed to `func` (\code{TRUE}), or to simply add
 #'        the new parameters to the existing list and only replace overlapping
-#'        parameters (FALSE). (default = FALSE) 
+#'        parameters (\code{FALSE}). (default = \code{FALSE}) 
 #'        
 #' @examples
 #' ## empty BenchDesign
@@ -40,10 +40,12 @@
 #' printMethod(bench, "qv")
 #'
 #' @return
-#' Modified BenchDesign object.
+#' Modified \code{\link[=BenchDesign-class]{BenchDesign}} object with single method
+#' parameters modified.
 #' 
+#' @seealso \code{\link{addMethod}}, \code{\link{expandMethod}}, \code{\link{dropMethod}}
 #' @md
-#' @import rlang
+#' @importFrom rlang is_quosures eval_tidy
 #' @export
 #' @author Patrick Kimes
 modifyMethod <- function(bd, label, params, .overwrite = FALSE) {

@@ -1,0 +1,137 @@
+authors:
+  Alejandro Reyes:
+    href: http://alejandroreyes.org
+  Patrick Kimes:
+    href: https://www.pkimes.com
+
+development:
+  version_label: "info"
+  version_tooltip: "Bioc Devel"
+
+navbar:
+  structure:
+    left:
+    - home
+    - intro
+    - reference
+    - vignettes
+    right:
+    - news
+    - search
+    - github
+  components:
+    intro: 
+      text: Quick Start
+      href: articles/SummarizedBenchmark-Introduction.html
+    articles: ~
+    vignettes:
+      text: Articles
+      menu:
+      - text: General
+      - text: Introduction
+        href: articles/SummarizedBenchmark-Introduction.html
+      - text: Class Details
+        href: articles/SummarizedBenchmark-ClassDetails.html
+      - text: Full Case Study
+        href: articles/SummarizedBenchmark-FullCaseStudy.html
+      - text: --------
+      - text: Features
+      - text: Error Handling
+        href: articles/Feature-ErrorHandling.html
+      - text: Iterative Benchmarking
+        href: articles/Feature-Iterative.html
+      - text: Parallelization
+        href: articles/Feature-Parallel.html
+      - text: --------
+      - text: More Case Studies
+      - text: scRNA-seq Simulation
+        href: articles/CaseStudy-SingleCellSimulation.html
+      - text: RNA-seq Quantification
+        href: articles/CaseStudy-RNAseqQuantification.html
+
+toc:
+  depth: 1
+
+reference:
+- title: Creating Objects
+  desc: >
+    Several classes are defined in the package, most importantly, the [BenchDesign](BenchDesign-class.html) and
+    [SummarizedBenchmark](SummarizedBenchmark-class.html) classes for encapsulating the benchmark design and
+    benchmark results, repectively. The following set of functions can be used to create new instances of
+    each class. For more details, see [class definitions](#section-class-definitions) below.
+  contents:
+  - '`BenchDesign`'
+  - '`BDMethod`'
+  - '`BDMethodList`'
+  - '`BDData`'
+  - '`SummarizedBenchmark`'
+- title: Executing Benchmarks
+  desc: >
+    Benchmark experiments can be executed from either BenchDesign or SummarizedBenchmark objects using the following
+    set of functions.
+  contents:
+  - '`buildBench`'
+  - '`updateBench`'
+- title: BenchDesign Methods
+  desc: >
+    Methods and data for benchmark experiments are stored in [BenchDesign](BenchDesign-class.html) objects.
+    The following functions are available for working with these objects to add, remove, or modify methods
+    in the design, as well as to compare the methods and data contained in these objects.
+  contents:
+  - '`addMethod`'
+  - '`dropMethod`'
+  - '`expandMethod`'
+  - '`modifyMethod`'
+  - '`printMethod`'
+  - '`compareBenchDesigns`'
+  - '`compareBDMethod`'
+  - '`compareBDData`'
+  - '`hashBDData`'
+- title: SummarizedBenchmark Methods
+  desc: >
+    Results from benchmark experiments are stored in [SummarizedBenchmark](SummarizedBenchmark-class.html) objects.
+    The following functions are available for working with these objects to define benchmark metrics and
+    evaluate or plot the results of a benchmark experiment.
+  contents:
+  - '`groundTruths`'
+  - '`availableMetrics`'
+  - '`performanceMetrics`'
+  - '`addPerformanceMetric`'
+  - '`estimateMetricsForAssay`'
+  - '`tidyUpMetrics`'
+  - '`plotROC`'
+  - '`plotMethodsOverlap`'
+- title: Class Definitions
+  desc: >
+    Two core classes, [BenchDesign](BenchDesign-class.html) and
+    [SummarizedBenchmark](SummarizedBenchmark-class.html) are
+    defined in the package, along with several smaller classes which help encapsulate data
+    used in benchmarking ([BDData](BDData-class.html)) and definitions of methods benchmarked
+    ([BDMethod](BDMethod-class.html), [BDMethodList](BDMethodList-class.html)).
+  contents:
+  - '`BenchDesign-class`'
+  - '`BDData-class`'
+  - '`BDMethod-class`'
+  - '`BDMethodList-class`'
+  - '`SummarizedBenchmark-class`'
+- title: Class Setters
+  desc: >
+    In addition to using the methods defined above for [working with BenchDesign objects](#section-benchdesign-methods)
+    and [working with SummarizedBenchmark](#section-summarizedbenchmark-methods), some slots and values of
+    the classes can be directly modified using the following functions. 
+  contents:
+  - '`BDData<-`'
+  - '`BDMethod<-`'
+  - '`BDMethodList<-`'
+  - '`performanceMetrics<-`'
+  - '`groundTruths<-`'
+  - '`mcols<-,SummarizedBenchmark-method`'
+  - '`assayNames<-,SummarizedBenchmark,character-method`'
+- title: Data Sets
+  desc: >
+    Example data sets are included to illustrate the functionality of the package in the
+    various vignettes and case studies.
+  contents:
+  - '`allSB`'
+  - '`sb`'
+  - '`tdat`'

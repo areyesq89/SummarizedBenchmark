@@ -1,4 +1,4 @@
-#' @title Constructor function for SummarizedBenchmark objects.
+#' @title Create a new SummarizedBenchmark object
 #' @aliases SummarizedBenchmark
 #' @description
 #' Function to construct \code{SummarizedBenchmark} objects.

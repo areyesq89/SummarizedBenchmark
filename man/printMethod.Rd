@@ -3,7 +3,7 @@
 \name{printMethod}
 \alias{printMethod}
 \alias{printMethods}
-\title{Pretty print methods in a BenchDesign}
+\title{Pretty print methods in a BenchDesign object}
 \usage{
 printMethod(bd, n = NULL)
 
@@ -40,8 +40,9 @@ printMethod(bench, "method_a")
 printMethods(bench)
 
 }
+\seealso{
+\code{\link{BDMethod-class}}, \code{\link{BenchDesign-class}}
+}
 \author{
-Patrick Kimes
-
 Patrick Kimes
 }

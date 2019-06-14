@@ -19,6 +19,16 @@ meta data.
 Simple comparison of two BDMethod objects based on
 meta data.
 }
+\examples{
+bdm1 <- BDMethod(stats::rnorm, params = rlang::quos(n = 100))
+bdm2 <- BDMethod(stats::rt, params = rlang::quos(n = 100, df = 1))
+
+compareBDMethod(bdm1, bdm2)
+
+}
+\seealso{
+\code{\link{compareBenchDesigns}}
+}
 \author{
 Patrick Kimes
 }
