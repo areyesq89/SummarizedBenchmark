@@ -1,0 +1,15 @@
+citEntry(entry="article",
+         title = "Reproducible and replicable comparisons using SummarizedBenchmark.",
+         author = personList(
+             as.person("Patrick Kimes"),
+             as.person("Alejandro Reyes")),
+         year = 2019,
+         journal = "Bioinformatics",
+         volume = 35,
+         issue = 1,
+         pages = "137",
+         doi = "10.1093/bioinformatics/bty627",
+         textVersion = 
+         paste("Patrick Kimes and Alejandro Reyes (2019)", 
+               "Reproducible and replicable comparisons using SummarizedBenchmark.",
+               "Bioinformatics (2019) 35(1):137. doi:10.1093/bioinformatics/bty627" ) )
