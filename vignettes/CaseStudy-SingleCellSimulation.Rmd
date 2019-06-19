@@ -47,7 +47,7 @@ Parameters for the simulators implemented in `r BiocStyle::Biocpkg("splatter")` 
 library("splatter")
 library("scRNAseq")
 
-data("fluidigm")
+fluidigm <- ReprocessedFluidigmData()
 se <- fluidigm[, colData(fluidigm)[, "Coverage_Type"] == "High"]
 assays(se) <- assays(se)["rsem_counts"]
 assayNames(se) <- "counts"
