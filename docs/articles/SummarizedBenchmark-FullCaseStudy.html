@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SummarizedBenchmark</a>
-        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.3</span>
+        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.4</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@
       <h1>SummarizedBenchmark: Full Case Study</h1>
                         <h4 class="author">Patrick K. Kimes, Alejandro Reyes</h4>
             
-            <h4 class="date">14 June 2019</h4>
+            <h4 class="date">19 June 2019</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/areyesq89/SummarizedBenchmark/blob/master/vignettes/SummarizedBenchmark-FullCaseStudy.Rmd"><code>vignettes/SummarizedBenchmark-FullCaseStudy.Rmd</code></a></small>
       <div class="hidden name"><code>SummarizedBenchmark-FullCaseStudy.Rmd</code></div>
@@ -119,7 +119,7 @@
     
         <div class="abstract">
       <p class="abstract">Abstract</p>
-      “While the foundations of the <code>SummarizedBenchmark</code> framework are introduced in the <strong>SummarizedBenchmark: Introduction</strong> vignette, this vignette provides a more detailed case study of performing a benchmarking comparison using the package. A more complex example of comparing methods for differential gene expression testing with RNA-seq data is presented, and used to motivate and demonstrate several core features of the <code>SummarizedBenchmark</code> approach. SummarizedBenchmark package version: 2.2.0”
+      “While the foundations of the <code>SummarizedBenchmark</code> framework are introduced in the <strong>SummarizedBenchmark: Introduction</strong> vignette, this vignette provides a more detailed case study of performing a benchmarking comparison using the package. A more complex example of comparing methods for differential gene expression testing with RNA-seq data is presented, and used to motivate and demonstrate several core features of the <code>SummarizedBenchmark</code> approach. SummarizedBenchmark package version: 2.3.4”
     </div>
     
 <div id="introduction" class="section level1">
@@ -133,7 +133,7 @@
 <a class="sourceLine" id="cb1-5" data-line-number="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"edgeR"</span>)</a>
 <a class="sourceLine" id="cb1-6" data-line-number="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"DESeq2"</span>)</a>
 <a class="sourceLine" id="cb1-7" data-line-number="7"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"tximport"</span>)</a></code></pre></div>
-<p>We use a simulated data set from <span class="citation">(Soneson and Robinson 2016)</span> to demonstrate how the <code>SummarizedBenchmark</code> package can be used to benchmark methods for differential expression analysis. Namely, we compare the methods implemented in the <em><a href="https://bioconductor.org/packages/3.9/DESeq2">DESeq2</a></em>, <em><a href="https://bioconductor.org/packages/3.9/edgeR">edgeR</a></em>, and <em><a href="https://bioconductor.org/packages/3.9/limma">limma</a></em> packages. The simulated data set includes 6 samples of three replicates each from two conditions. For each sample, transcript-level expression is provided as transcripts per-million (TPM) values for 15,677 transcripts from human chromosome 1 (Ensembl GRCh37.71). A more complete description of the data, including code for how the data ws generated, is available in the Supplementary Materials of <span class="citation">(Soneson and Robinson 2016)</span> <a href="http://dx.doi.org/10.5256/f1000research.7563.d114722">here</a>. We provide precomputed objects containing these count and ground truth data. Details on how the objects were generated are included in the <a href="#appendix">Appendix</a> at the end of this vignette.</p>
+<p>We use a simulated data set from <span class="citation">(Soneson and Robinson 2016)</span> to demonstrate how the <code>SummarizedBenchmark</code> package can be used to benchmark methods for differential expression analysis. Namely, we compare the methods implemented in the <em><a href="https://bioconductor.org/packages/3.10/DESeq2">DESeq2</a></em>, <em><a href="https://bioconductor.org/packages/3.10/edgeR">edgeR</a></em>, and <em><a href="https://bioconductor.org/packages/3.10/limma">limma</a></em> packages. The simulated data set includes 6 samples of three replicates each from two conditions. For each sample, transcript-level expression is provided as transcripts per-million (TPM) values for 15,677 transcripts from human chromosome 1 (Ensembl GRCh37.71). A more complete description of the data, including code for how the data ws generated, is available in the Supplementary Materials of <span class="citation">(Soneson and Robinson 2016)</span> <a href="http://dx.doi.org/10.5256/f1000research.7563.d114722">here</a>. We provide precomputed objects containing these count and ground truth data. Details on how the objects were generated are included in the <a href="#appendix">Appendix</a> at the end of this vignette.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(<span class="st">"soneson2016"</span>)</a>
 <a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(txi<span class="op">$</span>counts)</a></code></pre></div>
 <pre><code>##                         A1          A2         A3         B1        B2
@@ -255,7 +255,7 @@
 <div id="benchmark-evaluation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#benchmark-evaluation" class="anchor"></a>Benchmark Evaluation</h1>
-<p>By running the code above, the results of three differential expression methods (<em><a href="https://bioconductor.org/packages/3.9/edgeR">edgeR</a></em>, <em><a href="https://bioconductor.org/packages/3.9/limma">limma</a></em>-voom and <em><a href="https://bioconductor.org/packages/3.9/DESeq2">DESeq2</a></em> will be stored in a <code>SummarizedBenchmark</code> container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function <code><a href="../reference/addPerformanceMetric.html">addPerformanceMetric()</a></code>, as described before in the <strong>Introduction</strong> vignette. In this package there are implementations for several ‘default’ metrics that are commonly used to evaluate methods. The function <code><a href="../reference/availableMetrics.html">availableMetrics()</a></code> returns a <em>data.frame</em> of these metrics.</p>
+<p>By running the code above, the results of three differential expression methods (<em><a href="https://bioconductor.org/packages/3.10/edgeR">edgeR</a></em>, <em><a href="https://bioconductor.org/packages/3.10/limma">limma</a></em>-voom and <em><a href="https://bioconductor.org/packages/3.10/DESeq2">DESeq2</a></em> will be stored in a <code>SummarizedBenchmark</code> container. The next step is to define metrics to evaluate the performance of these three methods. This can be done by using the function <code><a href="../reference/addPerformanceMetric.html">addPerformanceMetric()</a></code>, as described before in the <strong>Introduction</strong> vignette. In this package there are implementations for several ‘default’ metrics that are commonly used to evaluate methods. The function <code><a href="../reference/availableMetrics.html">availableMetrics()</a></code> returns a <em>data.frame</em> of these metrics.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw"><a href="../reference/availableMetrics.html">availableMetrics</a></span>()</a></code></pre></div>
 <pre><code>##            functions                                   description
 ## 1         rejections                          Number of rejections
@@ -422,7 +422,7 @@
 <h1 class="hasAnchor">
 <a href="#appendix" class="anchor"></a>Appendix</h1>
 <p>Here, we describe how the data using The data is available for download from ArrayExpress. Expression data for each sample is provided in the RSEM output format. Corresponding information for the ground truth underlying the simulated data is also available, including transcript differential expression status.</p>
-<p>First, we download and import the transcript-level TPM values using the tximport 1.12.0 package and store this data in an object called <code>txi</code>.</p>
+<p>First, we download and import the transcript-level TPM values using the tximport 1.13.3 package and store this data in an object called <code>txi</code>.</p>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(tximport)</a>
 <a class="sourceLine" id="cb36-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(readr)</a>
 <a class="sourceLine" id="cb36-3" data-line-number="3"></a>

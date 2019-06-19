@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SummarizedBenchmark</a>
-        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.3</span>
+        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.4</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@
       <h1>Features: Parallelization</h1>
                         <h4 class="author">Patrick K. Kimes, Alejandro Reyes</h4>
             
-            <h4 class="date">14 June 2019</h4>
+            <h4 class="date">19 June 2019</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/areyesq89/SummarizedBenchmark/blob/master/vignettes/Feature-Parallel.Rmd"><code>vignettes/Feature-Parallel.Rmd</code></a></small>
       <div class="hidden name"><code>Feature-Parallel.Rmd</code></div>
@@ -119,13 +119,13 @@
     
         <div class="abstract">
       <p class="abstract">Abstract</p>
-      “Running a large number of methods on several data sets, as in a benchmark comparisons can be computationaly expensive, possibly requiring hours to days to complete if each method is run in serial. Parallelization in the <code>SummarizedBenchmark</code>, both across methods and data sets can be accomplished using the <code>BiocParallel</code> package. Both forms of parallelization are demonstrated with an example case study. `SummarizedBenchmark package version: 2.2.0”
+      “Running a large number of methods on several data sets, as in a benchmark comparisons can be computationaly expensive, possibly requiring hours to days to complete if each method is run in serial. Parallelization in the <code>SummarizedBenchmark</code>, both across methods and data sets can be accomplished using the <code>BiocParallel</code> package. Both forms of parallelization are demonstrated with an example case study. `SummarizedBenchmark package version: 2.3.4”
     </div>
     
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h1>
-<p>The simple examples considered in most of these vignettes were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Similarly, when replicating benchmark experiments across multiple data sets, running each experiment in serial may be inefficent. In this section, we describe how to use the <code><a href="https://www.rdocumentation.org/packages/BiocStyle/topics/macros">BiocStyle::Biocpkg("BiocParallel")</a></code> package to parallelize benchmarking across methods and data sets. More details on how to specify the parallelization back-end can be found in the <em>Introduction to BiocParallel</em> vignette for the <em><a href="https://bioconductor.org/packages/3.9/BiocParallel">BiocParallel</a></em> package.</p>
+<p>The simple examples considered in most of these vignettes were constructed to be computational manageable with only one core. However, when working with larger data sets, running each method in serial with a single machine is often undesirable. Similarly, when replicating benchmark experiments across multiple data sets, running each experiment in serial may be inefficent. In this section, we describe how to use the <code><a href="https://www.rdocumentation.org/packages/BiocStyle/topics/macros">BiocStyle::Biocpkg("BiocParallel")</a></code> package to parallelize benchmarking across methods and data sets. More details on how to specify the parallelization back-end can be found in the <em>Introduction to BiocParallel</em> vignette for the <em><a href="https://bioconductor.org/packages/3.10/BiocParallel">BiocParallel</a></em> package.</p>
 <div id="example-case-study" class="section level2">
 <h2 class="hasAnchor">
 <a href="#example-case-study" class="anchor"></a>Example Case Study</h2>
@@ -146,7 +146,7 @@
 <a class="sourceLine" id="cb2-12" data-line-number="12">              <span class="dt">status =</span> truthdat<span class="op">$</span>status, <span class="dt">lfc =</span> truthdat<span class="op">$</span>logFC)</a>
 <a class="sourceLine" id="cb2-13" data-line-number="13"></a>
 <a class="sourceLine" id="cb2-14" data-line-number="14">bd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/BenchDesign.html">BenchDesign</a></span>(<span class="dt">data =</span> mydat)</a></code></pre></div>
-<p>Three methods for differential expression testing implemented in the <em><a href="https://bioconductor.org/packages/3.9/DESeq2">DESeq2</a></em>, <em><a href="https://bioconductor.org/packages/3.9/edgeR">edgeR</a></em>, and <em><a href="https://bioconductor.org/packages/3.9/limma">limma</a></em> packages are added to the benchmark. Only the p-values are stored for each method, as before.</p>
+<p>Three methods for differential expression testing implemented in the <em><a href="https://bioconductor.org/packages/3.10/DESeq2">DESeq2</a></em>, <em><a href="https://bioconductor.org/packages/3.10/edgeR">edgeR</a></em>, and <em><a href="https://bioconductor.org/packages/3.10/limma">limma</a></em> packages are added to the benchmark. Only the p-values are stored for each method, as before.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">deseq2_run &lt;-<span class="st"> </span><span class="cf">function</span>(countData, colData, design, contrast) {</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2">    dds &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/DESeq2/topics/DESeqDataSet">DESeqDataSetFromMatrix</a></span>(countData, <span class="dt">colData =</span> colData, <span class="dt">design =</span> design)</a>
 <a class="sourceLine" id="cb3-3" data-line-number="3">    dds &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/DESeq2/topics/DESeq">DESeq</a></span>(dds)</a>
@@ -192,7 +192,7 @@
 <div id="across-methods" class="section level1">
 <h1 class="hasAnchor">
 <a href="#across-methods" class="anchor"></a>Across Methods</h1>
-<p>Since constructing a <em>BenchDesign</em> object requires no computation, the bottleneck only appears at the <code><a href="../reference/buildBench.html">buildBench()</a></code> step of the process. Parallelization of this step is enabled using the <em><a href="https://bioconductor.org/packages/3.9/BiocParallel">BiocParallel</a></em> package. By default, parallel evaluation is disabled, but can easily be enabled by setting <code>parallel = TRUE</code> and optionally specifying the <code>BPPARAM =</code> parameter. If <code>BPPARAM =</code> is not specified, the default back-end will be used. The default back-end can be checked with <code>bpparam()</code>.</p>
+<p>Since constructing a <em>BenchDesign</em> object requires no computation, the bottleneck only appears at the <code><a href="../reference/buildBench.html">buildBench()</a></code> step of the process. Parallelization of this step is enabled using the <em><a href="https://bioconductor.org/packages/3.10/BiocParallel">BiocParallel</a></em> package. By default, parallel evaluation is disabled, but can easily be enabled by setting <code>parallel = TRUE</code> and optionally specifying the <code>BPPARAM =</code> parameter. If <code>BPPARAM =</code> is not specified, the default back-end will be used. The default back-end can be checked with <code>bpparam()</code>.</p>
 <p>Parallelization of <code><a href="../reference/buildBench.html">buildBench()</a></code> is carried out across the set of methods specified with <code><a href="../reference/addMethod.html">addMethod()</a></code>. Thus, there is no benefit to specifying more cores than the number of methods.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">bpparam</span>()</a></code></pre></div>
 <pre><code>## class: MulticoreParam
@@ -224,7 +224,7 @@
 <div id="across-datasets" class="section level1">
 <h1 class="hasAnchor">
 <a href="#across-datasets" class="anchor"></a>Across Datasets</h1>
-<p>Typically, benchmark studies have more than a single dataset. For this cases, users can create a <em>BenchDesign</em> object and execute this design on many datasets. Again, running the step of executing the benchmark design on every dataset using a single core might take to long. However, parallelization across datasets is possible using the <em><a href="https://bioconductor.org/packages/3.9/BiocParallel">BiocParallel</a></em> package.</p>
+<p>Typically, benchmark studies have more than a single dataset. For this cases, users can create a <em>BenchDesign</em> object and execute this design on many datasets. Again, running the step of executing the benchmark design on every dataset using a single core might take to long. However, parallelization across datasets is possible using the <em><a href="https://bioconductor.org/packages/3.10/BiocParallel">BiocParallel</a></em> package.</p>
 <p>To demonstrate this, we split the count data and ground truths of the <span class="citation">(Soneson and Robinson 2016)</span> dataset, as if they were three different datasets.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">ndat &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(mydat<span class="op">$</span>status)</a>
 <a class="sourceLine" id="cb11-2" data-line-number="2">spIndexes &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/split">split</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/seq">seq_len</a></span>(ndat), <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/rep">rep</a></span>( <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dt">length.out =</span> ndat))</a>

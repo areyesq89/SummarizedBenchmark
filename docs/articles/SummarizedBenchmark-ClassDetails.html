@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SummarizedBenchmark</a>
-        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.3</span>
+        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.4</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@
       <h1>SummarizedBenchmark: Class Details</h1>
                         <h4 class="author">Patrick K. Kimes, Alejandro Reyes</h4>
             
-            <h4 class="date">14 June 2019</h4>
+            <h4 class="date">19 June 2019</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/areyesq89/SummarizedBenchmark/blob/master/vignettes/SummarizedBenchmark-ClassDetails.Rmd"><code>vignettes/SummarizedBenchmark-ClassDetails.Rmd</code></a></small>
       <div class="hidden name"><code>SummarizedBenchmark-ClassDetails.Rmd</code></div>
@@ -119,7 +119,7 @@
     
         <div class="abstract">
       <p class="abstract">Abstract</p>
-      “The <code>SummarizedBenchmark</code> package is built on two primary classes, the <em>BenchDesign</em> class for organizing the design of a benchmark experiment, and the <em>SummarizedExperiment</em> class for organizing the benchmark results. This vignette first introduces the structure and features of these classes using the example benchmark of p-value correction methods described in the <strong>SummarizedBenchark: Introduction</strong> vignette. Then, some issues of reproduciblity are discussed, and finally, several features and non-standard uses of the classes are described. SummarizedBenchmark package version: 2.2.0”
+      “The <code>SummarizedBenchmark</code> package is built on two primary classes, the <em>BenchDesign</em> class for organizing the design of a benchmark experiment, and the <em>SummarizedExperiment</em> class for organizing the benchmark results. This vignette first introduces the structure and features of these classes using the example benchmark of p-value correction methods described in the <strong>SummarizedBenchark: Introduction</strong> vignette. Then, some issues of reproduciblity are discussed, and finally, several features and non-standard uses of the classes are described. SummarizedBenchmark package version: 2.3.4”
     </div>
     
 <div id="introduction" class="section level1">
@@ -384,17 +384,17 @@
 ##  collate  en_US.UTF-8                 
 ##  ctype    en_US.UTF-8                 
 ##  tz       America/New_York            
-##  date     2019-06-14                  
+##  date     2019-06-18                  
 ## 
 ## ─ Packages ──────────────────────────────────────────────────────────────
 ##  package              * version   date       lib source        
 ##  assertthat             0.2.1     2019-03-21 [1] CRAN (R 3.6.0)
 ##  backports              1.1.4     2019-04-10 [1] CRAN (R 3.6.0)
-##  Biobase              * 2.44.0    2019-05-02 [1] Bioconductor  
-##  BiocGenerics         * 0.30.0    2019-05-02 [1] Bioconductor  
+##  Biobase              * 2.45.0    2019-05-02 [1] Bioconductor  
+##  BiocGenerics         * 0.31.4    2019-06-10 [1] Bioconductor  
 ##  BiocManager            1.30.4    2018-11-13 [1] CRAN (R 3.6.0)
-##  BiocParallel         * 1.18.0    2019-05-02 [1] Bioconductor  
-##  BiocStyle            * 2.12.0    2019-05-02 [1] Bioconductor  
+##  BiocParallel         * 1.19.0    2019-05-02 [1] Bioconductor  
+##  BiocStyle            * 2.13.2    2019-06-12 [1] Bioconductor  
 ##  bitops                 1.0-6     2013-08-17 [1] CRAN (R 3.6.0)
 ##  bookdown               0.11      2019-05-28 [1] CRAN (R 3.6.0)
 ##  cli                    1.1.0     2019-03-19 [1] CRAN (R 3.6.0)
@@ -402,27 +402,27 @@
 ##  colorspace             1.4-1     2019-03-18 [1] CRAN (R 3.6.0)
 ##  commonmark             1.7       2018-12-01 [1] CRAN (R 3.6.0)
 ##  crayon               * 1.3.4     2017-09-16 [1] CRAN (R 3.6.0)
-##  DelayedArray         * 0.10.0    2019-05-02 [1] Bioconductor  
+##  DelayedArray         * 0.11.1    2019-06-16 [1] Bioconductor  
 ##  desc                   1.2.0     2018-05-01 [1] CRAN (R 3.6.0)
 ##  digest               * 0.6.19    2019-05-20 [1] CRAN (R 3.6.0)
 ##  dplyr                * 0.8.1     2019-05-14 [1] CRAN (R 3.6.0)
 ##  evaluate               0.14      2019-05-28 [1] CRAN (R 3.6.0)
 ##  fs                     1.3.1     2019-05-06 [1] CRAN (R 3.6.0)
-##  GenomeInfoDb         * 1.20.0    2019-05-02 [1] Bioconductor  
-##  GenomeInfoDbData       1.2.1     2019-05-31 [1] Bioconductor  
-##  GenomicRanges        * 1.36.0    2019-05-02 [1] Bioconductor  
-##  ggplot2              * 3.1.1     2019-04-07 [1] CRAN (R 3.6.0)
+##  GenomeInfoDb         * 1.21.1    2019-05-16 [1] Bioconductor  
+##  GenomeInfoDbData       1.2.1     2019-06-17 [1] Bioconductor  
+##  GenomicRanges        * 1.37.11   2019-06-11 [1] Bioconductor  
+##  ggplot2              * 3.2.0     2019-06-16 [1] CRAN (R 3.6.0)
 ##  glue                   1.3.1     2019-03-12 [1] CRAN (R 3.6.0)
 ##  gridExtra              2.3       2017-09-09 [1] CRAN (R 3.6.0)
 ##  gtable                 0.3.0     2019-03-25 [1] CRAN (R 3.6.0)
 ##  htmltools              0.3.6     2017-04-28 [1] CRAN (R 3.6.0)
-##  IRanges              * 2.18.0    2019-05-02 [1] Bioconductor  
+##  IRanges              * 2.19.10   2019-06-11 [1] Bioconductor  
 ##  knitr                  1.23      2019-05-18 [1] CRAN (R 3.6.0)
 ##  lattice                0.20-38   2018-11-04 [2] CRAN (R 3.6.0)
 ##  lazyeval               0.2.2     2019-03-15 [1] CRAN (R 3.6.0)
 ##  magrittr             * 1.5       2014-11-22 [1] CRAN (R 3.6.0)
 ##  MASS                   7.3-51.4  2019-03-31 [2] CRAN (R 3.6.0)
-##  Matrix                 1.2-17    2019-03-22 [1] CRAN (R 3.6.0)
+##  Matrix                 1.2-17    2019-03-22 [2] CRAN (R 3.6.0)
 ##  matrixStats          * 0.54.0    2018-07-23 [1] CRAN (R 3.6.0)
 ##  mclust               * 5.4.3     2019-03-14 [1] CRAN (R 3.6.0)
 ##  memoise                1.1.0     2017-04-21 [1] CRAN (R 3.6.0)
@@ -432,7 +432,7 @@
 ##  pkgdown                1.3.0     2018-12-07 [1] CRAN (R 3.6.0)
 ##  plyr                   1.8.4     2016-06-08 [1] CRAN (R 3.6.0)
 ##  purrr                  0.3.2     2019-03-15 [1] CRAN (R 3.6.0)
-##  qvalue                 2.16.0    2019-05-02 [1] Bioconductor  
+##  qvalue                 2.17.0    2019-05-02 [1] Bioconductor  
 ##  R6                     2.4.0     2019-02-14 [1] CRAN (R 3.6.0)
 ##  Rcpp                   1.0.1     2019-03-17 [1] CRAN (R 3.6.0)
 ##  RCurl                  1.95-4.12 2019-03-04 [1] CRAN (R 3.6.0)
@@ -441,25 +441,25 @@
 ##  rmarkdown              1.13      2019-05-22 [1] CRAN (R 3.6.0)
 ##  roxygen2               6.1.1     2018-11-07 [1] CRAN (R 3.6.0)
 ##  rprojroot              1.3-2     2018-01-03 [1] CRAN (R 3.6.0)
-##  S4Vectors            * 0.22.0    2019-05-02 [1] Bioconductor  
+##  S4Vectors            * 0.23.12   2019-06-11 [1] Bioconductor  
 ##  scales                 1.0.0     2018-08-09 [1] CRAN (R 3.6.0)
 ##  sessioninfo          * 1.1.1     2018-11-05 [1] CRAN (R 3.6.0)
 ##  stringi                1.4.3     2019-03-12 [1] CRAN (R 3.6.0)
 ##  stringr              * 1.4.0     2019-02-10 [1] CRAN (R 3.6.0)
-##  SummarizedBenchmark  * 2.2.0     2019-05-02 [1] Bioconductor  
-##  SummarizedExperiment * 1.14.0    2019-05-02 [1] Bioconductor  
-##  tibble               * 2.1.2     2019-05-29 [1] CRAN (R 3.6.0)
+##  SummarizedBenchmark  * 2.3.4     2019-06-18 [1] Bioconductor  
+##  SummarizedExperiment * 1.15.3    2019-06-16 [1] Bioconductor  
+##  tibble               * 2.1.3     2019-06-06 [1] CRAN (R 3.6.0)
 ##  tidyr                * 0.8.3     2019-03-01 [1] CRAN (R 3.6.0)
 ##  tidyselect             0.2.5     2018-10-11 [1] CRAN (R 3.6.0)
 ##  UpSetR               * 1.4.0     2019-05-22 [1] CRAN (R 3.6.0)
 ##  withr                  2.1.2     2018-03-15 [1] CRAN (R 3.6.0)
 ##  xfun                   0.7       2019-05-14 [1] CRAN (R 3.6.0)
 ##  xml2                   1.2.0     2018-01-24 [1] CRAN (R 3.6.0)
-##  XVector                0.24.0    2019-05-02 [1] Bioconductor  
+##  XVector                0.25.0    2019-05-02 [1] Bioconductor  
 ##  yaml                   2.2.0     2018-07-25 [1] CRAN (R 3.6.0)
-##  zlibbioc               1.30.0    2019-05-02 [1] Bioconductor  
+##  zlibbioc               1.31.0    2019-05-02 [1] Bioconductor  
 ## 
-## [1] /usr/local/RLib
+## [1] /usr/local/RLibDevel
 ## [2] /Library/Frameworks/R.framework/Versions/3.6/Resources/library</code></pre>
 </div>
 <div id="reproducibility-and-replicability" class="section level1">
@@ -582,7 +582,7 @@
 <pre><code>## DataFrame with 2 rows and 5 columns
 ##               func.pkg func.pkg.vers func.pkg.manual     param.p
 ##            &lt;character&gt;   &lt;character&gt;       &lt;logical&gt; &lt;character&gt;
-## qv              qvalue        2.16.0           FALSE        pval
+## qv              qvalue        2.17.0           FALSE        pval
 ## qv_wrapper          NA            NA           FALSE        pval
 ##            session.idx
 ##              &lt;numeric&gt;
@@ -604,10 +604,10 @@
 <pre><code>## DataFrame with 4 rows and 5 columns
 ##               func.pkg func.pkg.vers func.pkg.manual     param.p
 ##            &lt;character&gt;   &lt;character&gt;       &lt;logical&gt; &lt;character&gt;
-## qv              qvalue        2.16.0           FALSE        pval
+## qv              qvalue        2.17.0           FALSE        pval
 ## qv_wrapper          NA            NA           FALSE        pval
-## qv_pkgfunc      qvalue        2.16.0            TRUE        pval
-## qv_pkgname      qvalue        2.16.0            TRUE        pval
+## qv_pkgfunc      qvalue        2.17.0            TRUE        pval
+## qv_pkgname      qvalue        2.17.0            TRUE        pval
 ##            session.idx
 ##              &lt;numeric&gt;
 ## qv                   1
@@ -736,7 +736,7 @@
 <h2 class="hasAnchor">
 <a href="#manually-constructing" class="anchor"></a>Manually Constructing</h2>
 <p>Throughout our documentation, <em>SummarizedBenchmark</em> objects are constructed exclusively using our recommended workflow by running <code><a href="../reference/buildBench.html">buildBench()</a></code> with a <em>BenchDesign</em> object. This recommended approach enables users to perform benchmark comparisons while automatically keeping track of parameters and software metadata. However, it is also possible to skip this recommended approach and construct a <em>SummarizedBenchmark</em> object directly from standard <code>S3</code> data objects.</p>
-<p>Using data from the <em><a href="https://bioconductor.org/packages/3.9/iCOBRA">iCOBRA</a></em>package <span class="citation">(Soneson and Robinson 2016)</span>, this part of the vignette demonstrates how to build <em>SummarizedBenchmark</em> objects from <code>S3</code> objects. The dataset contains differential expression results of three different methods (<em><a href="https://bioconductor.org/packages/3.9/limma">limma</a></em>, <em><a href="https://bioconductor.org/packages/3.9/edgeR">edgeR</a></em> and <em><a href="https://bioconductor.org/packages/3.9/DESeq2">DESeq2</a></em>) applied to a simulated RNA-seq dataset.</p>
+<p>Using data from the <em><a href="https://bioconductor.org/packages/3.10/iCOBRA">iCOBRA</a></em>package <span class="citation">(Soneson and Robinson 2016)</span>, this part of the vignette demonstrates how to build <em>SummarizedBenchmark</em> objects from <code>S3</code> objects. The dataset contains differential expression results of three different methods (<em><a href="https://bioconductor.org/packages/3.10/limma">limma</a></em>, <em><a href="https://bioconductor.org/packages/3.10/edgeR">edgeR</a></em> and <em><a href="https://bioconductor.org/packages/3.10/DESeq2">DESeq2</a></em>) applied to a simulated RNA-seq dataset.</p>
 <div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(iCOBRA)</a>
 <a class="sourceLine" id="cb67-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(cobradata_example)</a></code></pre></div>
 <p>The process of building a <em>SummarizedBenchmark</em> object is similar to the process of constructing a <em>SummarizedExperiment</em> object. To build a <em>SummarizedBenchmark</em> object, three main objects are required: (1) a list where each element corresponds to a <em>data.frame</em>, (2) a <em>DataFrame</em> with annotations of the methods, and (3) when available, a <em>DataFrame</em> of ground truths.</p>

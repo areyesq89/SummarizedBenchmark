@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SummarizedBenchmark</a>
-        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.3</span>
+        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.4</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@
       <h1>Case Study: scRNA-Seq Simulation</h1>
                         <h4 class="author">Patrick K. Kimes, Alejandro Reyes</h4>
             
-            <h4 class="date">14 June 2019</h4>
+            <h4 class="date">19 June 2019</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/areyesq89/SummarizedBenchmark/blob/master/vignettes/CaseStudy-SingleCellSimulation.Rmd"><code>vignettes/CaseStudy-SingleCellSimulation.Rmd</code></a></small>
       <div class="hidden name"><code>CaseStudy-SingleCellSimulation.Rmd</code></div>
@@ -119,13 +119,13 @@
     
         <div class="abstract">
       <p class="abstract">Abstract</p>
-      “In this vignette, we illustrate a simple approach to using the <em>SummarizedBenchmark</em> framework for organizing benchmarks with complex outputs, i.e. when methods return non-vector-like objects. This approach is demonstrated with a comparison of simulators for single-cell RNA-seq data implemented in the <em><a href="https://bioconductor.org/packages/3.9/splatter">splatter</a></em> package. SummarizedBenchmark package version: 2.2.0”
+      “In this vignette, we illustrate a simple approach to using the <em>SummarizedBenchmark</em> framework for organizing benchmarks with complex outputs, i.e. when methods return non-vector-like objects. This approach is demonstrated with a comparison of simulators for single-cell RNA-seq data implemented in the <em><a href="https://bioconductor.org/packages/3.10/splatter">splatter</a></em> package. SummarizedBenchmark package version: 2.3.4”
     </div>
     
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h1>
-<p>Simulated data sets with known ground truths are often used for developing and comparing computational tools for genomic studies. However, the methods and approaches for simulating complex genomic data are rarely unified across studies. Recognizing this problem in the area of single-cell RNA-sequencing (scRNA-seq), the <em><a href="https://bioconductor.org/packages/3.9/splatter">splatter</a></em> package provides a uniform API for several “simulators” of scRNA-seq data, including the authors’ own “Splat” simulator <span class="citation">(Zappia, Phipson, and Oshlack 2017)</span>. In the <em><a href="https://bioconductor.org/packages/3.9/splatter">splatter</a></em> package, given a set of simulation parameters, each method returns a <em>SingleCellExperiment</em> object of simulated scRNA-seq counts.</p>
+<p>Simulated data sets with known ground truths are often used for developing and comparing computational tools for genomic studies. However, the methods and approaches for simulating complex genomic data are rarely unified across studies. Recognizing this problem in the area of single-cell RNA-sequencing (scRNA-seq), the <em><a href="https://bioconductor.org/packages/3.10/splatter">splatter</a></em> package provides a uniform API for several “simulators” of scRNA-seq data, including the authors’ own “Splat” simulator <span class="citation">(Zappia, Phipson, and Oshlack 2017)</span>. In the <em><a href="https://bioconductor.org/packages/3.10/splatter">splatter</a></em> package, given a set of simulation parameters, each method returns a <em>SingleCellExperiment</em> object of simulated scRNA-seq counts.</p>
 <p>Using comparisons presented in <span class="citation">(Zappia, Phipson, and Oshlack 2017)</span>, we illustrate how the <em>SummarizedBenchmark</em> framework can be used to perform comparisons when the output of each method is more complex than a vector of numbers (e.g. a <em>SingleCellExperiment</em>).</p>
 </div>
 <div id="building-the-benchdesign" class="section level1">
@@ -133,11 +133,11 @@
 <a href="#building-the-benchdesign" class="anchor"></a>Building the BenchDesign</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"SummarizedBenchmark"</span>)</a>
 <a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"magrittr"</span>)</a></code></pre></div>
-<p>Parameters for the simulators implemented in <em><a href="https://bioconductor.org/packages/3.9/splatter">splatter</a></em> can either be manually specified or estimated using existing data. Here, we use RSEM counts for a subset of high coverage samples in the <code>fluidigm</code> data set included in the <em><a href="https://bioconductor.org/packages/3.9/scRNAseq">scRNAseq</a></em> package. The data is made available as a <em>SummarizedExperiment</em> object.</p>
+<p>Parameters for the simulators implemented in <em><a href="https://bioconductor.org/packages/3.10/splatter">splatter</a></em> can either be manually specified or estimated using existing data. Here, we use RSEM counts for a subset of high coverage samples in the <code>fluidigm</code> data set included in the <em><a href="https://bioconductor.org/packages/3.10/scRNAseq">scRNAseq</a></em> package. The data is made available as a <em>SummarizedExperiment</em> object.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"splatter"</span>)</a>
 <a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"scRNAseq"</span>)</a>
 <a class="sourceLine" id="cb2-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(<span class="st">"fluidigm"</span>)</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">fluidigm &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/scRNAseq/topics/ReprocessedData">ReprocessedFluidigmData</a></span>()</a>
 <a class="sourceLine" id="cb2-5" data-line-number="5">se &lt;-<span class="st"> </span>fluidigm[, <span class="kw">colData</span>(fluidigm)[, <span class="st">"Coverage_Type"</span>] <span class="op">==</span><span class="st"> "High"</span>]</a>
 <a class="sourceLine" id="cb2-6" data-line-number="6"><span class="kw">assays</span>(se) &lt;-<span class="st"> </span><span class="kw">assays</span>(se)[<span class="st">"rsem_counts"</span>]</a>
 <a class="sourceLine" id="cb2-7" data-line-number="7"><span class="kw">assayNames</span>(se) &lt;-<span class="st"> "counts"</span></a></code></pre></div>
@@ -146,7 +146,7 @@
 <a class="sourceLine" id="cb3-2" data-line-number="2">se &lt;-<span class="st"> </span>se[<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sample">sample</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(se), <span class="fl">1e4</span>), <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sample">sample</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">ncol</a></span>(se), <span class="dv">20</span>)]</a></code></pre></div>
 <p>To make comparisons with the simulated data sets easier, we convert the <em>SummarizedExperiment</em> object to the <em>SingleCellExperiment</em> class.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">sce &lt;-<span class="st"> </span><span class="kw">as</span>(se, <span class="st">"SingleCellExperiment"</span>)</a></code></pre></div>
-<p>Each of the simulators in the <em><a href="https://bioconductor.org/packages/3.9/splatter">splatter</a></em> package follow the <code>[prefix]Simulate</code> naming convention, with the corresponding parameter estimation function, <code>[prefix]Estimate</code>. Here, we use three methods included in the comparisons of <span class="citation">(Zappia, Phipson, and Oshlack 2017)</span>.</p>
+<p>Each of the simulators in the <em><a href="https://bioconductor.org/packages/3.10/splatter">splatter</a></em> package follow the <code>[prefix]Simulate</code> naming convention, with the corresponding parameter estimation function, <code>[prefix]Estimate</code>. Here, we use three methods included in the comparisons of <span class="citation">(Zappia, Phipson, and Oshlack 2017)</span>.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">bd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/BenchDesign.html">BenchDesign</a></span>() <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="st">    </span><span class="kw"><a href="../reference/addMethod.html">addMethod</a></span>(<span class="dt">label =</span> <span class="st">"splat"</span>,</a>
 <a class="sourceLine" id="cb5-3" data-line-number="3">              <span class="dt">func =</span> splatSimulate,</a>
@@ -195,10 +195,10 @@
 <div id="comparing-the-results" class="section level1">
 <h1 class="hasAnchor">
 <a href="#comparing-the-results" class="anchor"></a>Comparing the Results</h1>
-<p>Now that we have our set of simulated data sets, we can compare the behavior of each simulator. Fortunately, the <em><a href="https://bioconductor.org/packages/3.9/splatter">splatter</a></em> package includes two useful functions for comparing <em>SingleCellExperiment</em> objects (<code>compareSCEs</code> and <code>diffSCEs</code>). The assay of the <em>SummarizedBenchmark</em> can be passed directly to these functions. We also concatenate the original <code>fluidigm</code> data set, <code>sce</code>, with the simulated data sets for comparison.</p>
+<p>Now that we have our set of simulated data sets, we can compare the behavior of each simulator. Fortunately, the <em><a href="https://bioconductor.org/packages/3.10/splatter">splatter</a></em> package includes two useful functions for comparing <em>SingleCellExperiment</em> objects (<code>compareSCEs</code> and <code>diffSCEs</code>). The assay of the <em>SummarizedBenchmark</em> can be passed directly to these functions. We also concatenate the original <code>fluidigm</code> data set, <code>sce</code>, with the simulated data sets for comparison.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1">res_compare &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/splatter/topics/compareSCEs">compareSCEs</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dt">ref =</span> sce, <span class="kw">assay</span>(sb)[<span class="dv">1</span>, ]))</a>
 <a class="sourceLine" id="cb14-2" data-line-number="2">res_diff &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/splatter/topics/diffSCEs">diffSCEs</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dt">ref =</span> sce, <span class="kw">assay</span>(sb)[<span class="dv">1</span>, ]), <span class="dt">ref =</span> <span class="st">"ref"</span>)</a></code></pre></div>
-<p>While these functions produce several metrics and plots, we only include two for illustration. More details on the output of these functions can be found in the documentation of the <em><a href="https://bioconductor.org/packages/3.9/splatter">splatter</a></em> package.</p>
+<p>While these functions produce several metrics and plots, we only include two for illustration. More details on the output of these functions can be found in the documentation of the <em><a href="https://bioconductor.org/packages/3.10/splatter">splatter</a></em> package.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1">res_compare<span class="op">$</span>Plots<span class="op">$</span>MeanVar</a></code></pre></div>
 <p><img src="CaseStudy-SingleCellSimulation_files/figure-html/plot-sim-result-comparison-1.png" width="700"></p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">res_diff<span class="op">$</span>Plots<span class="op">$</span>MeanVar</a></code></pre></div>
@@ -252,7 +252,7 @@
 <div id="new-data-sets" class="section level1">
 <h1 class="hasAnchor">
 <a href="#new-data-sets" class="anchor"></a>New Data Sets</h1>
-<p>An advantage of the <em>SummarizedBenchmark</em> framework is that rerunning the comparisons with a new data set is as simple as calling <code>buildBench</code> with the same BenchDesign object paired with new <code>data =</code> input. To illustrate this, we run the same simulators again, but with simulation parameters estimated using the example single-cell count data included with the <em><a href="https://bioconductor.org/packages/3.9/scater">scater</a></em> package.</p>
+<p>An advantage of the <em>SummarizedBenchmark</em> framework is that rerunning the comparisons with a new data set is as simple as calling <code>buildBench</code> with the same BenchDesign object paired with new <code>data =</code> input. To illustrate this, we run the same simulators again, but with simulation parameters estimated using the example single-cell count data included with the <em><a href="https://bioconductor.org/packages/3.10/scater">scater</a></em> package.</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(sc_example_counts, <span class="dt">package =</span> <span class="st">"scater"</span>)</a>
 <a class="sourceLine" id="cb23-2" data-line-number="2">scec &lt;-<span class="st"> </span><span class="kw">SingleCellExperiment</span>(<span class="dt">assays =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">counts =</span> sc_example_counts))</a>
 <a class="sourceLine" id="cb23-3" data-line-number="3"></a>

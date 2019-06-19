@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SummarizedBenchmark</a>
-        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.3</span>
+        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.4</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@
       <h1>Feature: Iterative Benchmarking</h1>
                         <h4 class="author">Patrick K. Kimes, Alejandro Reyes</h4>
             
-            <h4 class="date">14 June 2019</h4>
+            <h4 class="date">19 June 2019</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/areyesq89/SummarizedBenchmark/blob/master/vignettes/Feature-Iterative.Rmd"><code>vignettes/Feature-Iterative.Rmd</code></a></small>
       <div class="hidden name"><code>Feature-Iterative.Rmd</code></div>
@@ -119,7 +119,7 @@
     
         <div class="abstract">
       <p class="abstract">Abstract</p>
-      “Benchmark comparisons are often performed iteratively, with new methods added to the comparison or existing methods updated with new versions or features. Here, we describe the features currently available in the <code>SummarizedBenchmark</code> package for handling iterative benchmarking using an example case study. SummarizedBenchmark package version: 2.2.0”
+      “Benchmark comparisons are often performed iteratively, with new methods added to the comparison or existing methods updated with new versions or features. Here, we describe the features currently available in the <code>SummarizedBenchmark</code> package for handling iterative benchmarking using an example case study. SummarizedBenchmark package version: 2.3.4”
     </div>
     
 <div id="introduction" class="section level1">
@@ -147,7 +147,7 @@
 <a class="sourceLine" id="cb2-12" data-line-number="12">              <span class="dt">status =</span> truthdat<span class="op">$</span>status, <span class="dt">lfc =</span> truthdat<span class="op">$</span>logFC)</a>
 <a class="sourceLine" id="cb2-13" data-line-number="13"></a>
 <a class="sourceLine" id="cb2-14" data-line-number="14">bd &lt;-<span class="st"> </span><span class="kw"><a href="../reference/BenchDesign.html">BenchDesign</a></span>(<span class="dt">data =</span> mydat)</a></code></pre></div>
-<p>Three methods for differential expression testing implemented in the <em><a href="https://bioconductor.org/packages/3.9/DESeq2">DESeq2</a></em>, <em><a href="https://bioconductor.org/packages/3.9/edgeR">edgeR</a></em>, and <em><a href="https://bioconductor.org/packages/3.9/limma">limma</a></em> packages are added to the benchmark. The p-values and log-fold change (LFC) values are stored for each method, as before.</p>
+<p>Three methods for differential expression testing implemented in the <em><a href="https://bioconductor.org/packages/3.10/DESeq2">DESeq2</a></em>, <em><a href="https://bioconductor.org/packages/3.10/edgeR">edgeR</a></em>, and <em><a href="https://bioconductor.org/packages/3.10/limma">limma</a></em> packages are added to the benchmark. The p-values and log-fold change (LFC) values are stored for each method, as before.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">deseq2_run &lt;-<span class="st"> </span><span class="cf">function</span>(countData, colData, design, contrast) {</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2">    dds &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/DESeq2/topics/DESeqDataSet">DESeqDataSetFromMatrix</a></span>(countData, <span class="dt">colData =</span> colData, <span class="dt">design =</span> design)</a>
 <a class="sourceLine" id="cb3-3" data-line-number="3">    dds &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/DESeq2/topics/DESeq">DESeq</a></span>(dds)</a>
@@ -289,12 +289,12 @@
 <p>We can check the output to see that the results of the <code>deseq2_ashr</code> method have been added along with the updated <code>deseq2</code> results.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(<span class="kw">assay</span>(sb2, <span class="st">"lfc"</span>))</a></code></pre></div>
 <pre><code>##            edgeR       voom deseq2_ashr     deseq2
-## [1,]   3.6767779  3.5232524  3.40956554  3.7329019
-## [2,]  -5.3773940 -5.5543949 -5.32293234 -5.3905346
-## [3,] -10.2467488 -8.2533275 -9.20816381 -9.7125453
-## [4,]  -0.4547095 -1.0510456 -0.08956306 -0.4706410
-## [5,]   3.7024426  3.9084940  3.61844604  3.7048724
-## [6,]  -0.1504299 -0.7607029 -0.02921225 -0.1554938</code></pre>
+## [1,]   3.6767779  3.5232524          NA  3.7329019
+## [2,]  -5.3773940 -5.5543949          NA -5.3905346
+## [3,] -10.2467488 -8.2533275          NA -9.7125453
+## [4,]  -0.4547095 -1.0510456          NA -0.4706410
+## [5,]   3.7024426  3.9084940          NA  3.7048724
+## [6,]  -0.1504299 -0.7607029          NA -0.1554938</code></pre>
 <div id="benchmark-sessions" class="section level2">
 <h2 class="hasAnchor">
 <a href="#benchmark-sessions" class="anchor"></a>Benchmark Sessions</h2>

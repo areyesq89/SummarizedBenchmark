@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SummarizedBenchmark</a>
-        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.3</span>
+        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.4</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@
       <h1>Case Study: Benchmarking non-R Methods</h1>
                         <h4 class="author">Alejandro Reyes, Patrick K. Kimes</h4>
             
-            <h4 class="date">14 June 2019</h4>
+            <h4 class="date">19 June 2019</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/areyesq89/SummarizedBenchmark/blob/master/vignettes/CaseStudy-RNAseqQuantification.Rmd"><code>vignettes/CaseStudy-RNAseqQuantification.Rmd</code></a></small>
       <div class="hidden name"><code>CaseStudy-RNAseqQuantification.Rmd</code></div>
@@ -191,7 +191,7 @@
 <a class="sourceLine" id="cb4-17" data-line-number="17"><span class="st">        </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/warning">suppressWarnings</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system">system</a></span>(<span class="st">"sailfish --version 2&gt;&amp;1"</span>, <span class="dt">intern =</span> <span class="ot">TRUE</span>)[<span class="dv">1</span>])</a>
 <a class="sourceLine" id="cb4-18" data-line-number="18">    <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/strsplit">strsplit</a></span>(vers, <span class="st">" "</span>)[[<span class="dv">1</span>]][<span class="dv">3</span>]</a>
 <a class="sourceLine" id="cb4-19" data-line-number="19">}</a></code></pre></div>
-<p>Similarly, we can define <em>R</em> wrapper functions to run the different methods. Note that the functions below have three important characteristics. (1) They receive as input the arguments to the different methods such that <em>buildBench</em> can keep track of these, (2) they contain system calls that run the different methods and (3) they import the output of the different methods into <em>R</em> (in this case, using the <em><a href="https://bioconductor.org/packages/3.9/tximport">tximport</a></em> package).</p>
+<p>Similarly, we can define <em>R</em> wrapper functions to run the different methods. Note that the functions below have three important characteristics. (1) They receive as input the arguments to the different methods such that <em>buildBench</em> can keep track of these, (2) they contain system calls that run the different methods and (3) they import the output of the different methods into <em>R</em> (in this case, using the <em><a href="https://bioconductor.org/packages/3.10/tximport">tximport</a></em> package).</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/files2">dir.create</a></span>(<span class="st">"out/kallisto"</span>, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/files2">dir.create</a></span>(<span class="st">"out/salmon"</span>, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/files2">dir.create</a></span>(<span class="st">"out/sailfish"</span>, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>)</a>
@@ -353,7 +353,7 @@
 <div id="building-an-rnaseqcomp-object" class="section level1">
 <h1 class="hasAnchor">
 <a href="#building-an-rnaseqcomp-object" class="anchor"></a>Building an <em>rnaseqcomp</em> object</h1>
-<p>For a more exhaustive benchmark of isoform quantification results, we refer the reader to the paper by <span class="citation">(Teng et al. 2016)</span>, which describes several metrics to evaluate the performance of isoform quantification pipelines. These metrics are implemented in <em><a href="https://bioconductor.org/packages/3.9/rnaseqcomp">rnaseqcomp</a></em>. The code below follows the steps from the <em><a href="https://bioconductor.org/packages/3.9/rnaseqcomp">rnaseqcomp</a></em> package to create an <em>rnaseqcomp</em> object. We recommend the readers to follow the vignette of the <em><a href="https://bioconductor.org/packages/3.9/rnaseqcomp">rnaseqcomp</a></em> package for an exhaustive benchmark of isoform quantification methods.</p>
+<p>For a more exhaustive benchmark of isoform quantification results, we refer the reader to the paper by <span class="citation">(Teng et al. 2016)</span>, which describes several metrics to evaluate the performance of isoform quantification pipelines. These metrics are implemented in <em><a href="https://bioconductor.org/packages/3.10/rnaseqcomp">rnaseqcomp</a></em>. The code below follows the steps from the <em><a href="https://bioconductor.org/packages/3.10/rnaseqcomp">rnaseqcomp</a></em> package to create an <em>rnaseqcomp</em> object. We recommend the readers to follow the vignette of the <em><a href="https://bioconductor.org/packages/3.10/rnaseqcomp">rnaseqcomp</a></em> package for an exhaustive benchmark of isoform quantification methods.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(rnaseqcomp)</a>
 <a class="sourceLine" id="cb13-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(biomaRt)</a>
 <a class="sourceLine" id="cb13-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(simdata)</a>

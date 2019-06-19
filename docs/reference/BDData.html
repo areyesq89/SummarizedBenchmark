@@ -74,7 +74,7 @@ BDData, as shown in the examples below." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SummarizedBenchmark</a>
-        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.3</span>
+        <span class="version label label-info" data-toggle="tooltip" data-placement="bottom" title="Bioc Devel">2.3.4</span>
       </span>
     </div>
 
@@ -212,17 +212,17 @@ BDData, as shown in the examples below.</p>
 <span class='no'>bdd_df</span></div><div class='output co'>#&gt; BenchDesign Data (BDData) ---------------------------------- 
 #&gt;   type: data 
 #&gt;   data:
-#&gt;   x           y
-#&gt; 1 1 0.080750138
-#&gt; 2 2 0.834333037
-#&gt; 3 3 0.600760886
-#&gt; 4 4 0.157208442
-#&gt; 5 5 0.007399441</div><div class='input'>
+#&gt;   x         y
+#&gt; 1 1 0.4663935
+#&gt; 2 2 0.4977774
+#&gt; 3 3 0.2897672
+#&gt; 4 4 0.7328820
+#&gt; 5 5 0.7725215</div><div class='input'>
 <span class='co'>## construct from MD5 hash of data.frame</span>
 <span class='no'>bdd_md5</span> <span class='kw'>&lt;-</span> <span class='fu'>BDData</span>(<span class='kw pkg'>digest</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/digest/topics/digest'>digest</a></span>(<span class='no'>datadf</span>))
 <span class='no'>bdd_md5</span></div><div class='output co'>#&gt; BenchDesign Data (BDData) ---------------------------------- 
 #&gt;   type: md5hash 
-#&gt;   MD5 hash: 2dda92391e865765186c40cb16b2b453 </div><div class='input'>
+#&gt;   MD5 hash: 13694a3b6b722e78f6abf214c5764168 </div><div class='input'>
 <span class='co'>## compare two BDData objects </span>
 <span class='fu'><a href='compareBDData.html'>compareBDData</a></span>(<span class='no'>bdd_df</span>, <span class='no'>bdd_md5</span>)</div><div class='output co'>#&gt; $data
 #&gt; [1] TRUE
