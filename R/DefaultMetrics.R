@@ -44,10 +44,12 @@ sb.rejections <- function( query, truth, alpha=0.1 ){
   sum( query <= alpha, na.rm = TRUE )
 }
 
+#' @importFrom S4Vectors cor
 sb.correlation <- function( query, truth, method="pearson" ){
   cor( query, truth, method=method )
 }
 
+#' @importFrom BiocGenerics sd
 sb.sdad <- function( query, truth ){
   sd( abs( query - truth ) )
 }

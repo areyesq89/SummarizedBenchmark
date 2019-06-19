@@ -23,6 +23,12 @@ Replaces the \code{\link[=BDMethodList-class]{BDMethodList}} list of methods
 in a \code{\link[=BenchDesign-class]{BenchDesign}} object with a specified
 \code{\link[=BDMethodList-class]{BDMethodList}} object.
 }
+\examples{
+bd <- BenchDesign()
+BDMethodList(bd) <- BDMethodList(avg = BDMethod(x = base::mean))
+bd
+
+}
 \seealso{
 \code{\link{BDMethod}}, \code{\link{BDMethodList}}
 }

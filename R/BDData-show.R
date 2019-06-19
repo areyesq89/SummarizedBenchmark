@@ -8,7 +8,7 @@
             if (is(object@data, "tibble")) {
                 print(object@data)
             } else {
-                print(head(object@data, n = 10))
+                print(utils::head(object@data, n = 10))
                 if (nrow(object@data) > 20) 
                     cat(" ... with", nrow(object@data) - 20, "more rows.\n")
             }
@@ -27,7 +27,11 @@
 #' Show BDData object
 #' 
 #' @param object BDData object to show
+#'
+#' @return 
+#' Print description of BDData object to console
 #' 
 #' @importFrom stringr str_pad
+#' @importFrom utils head
 #' @rdname BDData-show
 setMethod("show", signature(object = "BDData"), .show.BDData)

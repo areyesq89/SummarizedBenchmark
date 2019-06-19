@@ -39,6 +39,12 @@ in a \code{\link[=BDMethodList-class]{BDMethodList}} or
 
 An existing method can be removed by setting the value to \code{NULL}.
 }
+\examples{
+bd <- BenchDesign()
+BDMethod(bd, "avg") <- BDMethod(x = base::mean)
+bd
+
+}
 \seealso{
 \code{\link{BDMethod}}
 }

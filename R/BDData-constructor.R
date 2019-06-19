@@ -39,6 +39,7 @@
 #' 
 #' @seealso \code{\link{BDData-class}}, \code{\link{BenchDesign}}
 #' @name BDData
+#' @importFrom methods .valueClassTest
 #' @export
 #' @author Patrick Kimes
 NULL

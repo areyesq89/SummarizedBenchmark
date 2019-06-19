@@ -16,11 +16,11 @@
         cat("    none\n")
     } else {
         max_c <- 20
-        m1 <- max(nchar(names(head(object@methods))))
+        m1 <- max(nchar(names(utils::head(object@methods))))
         m1 <- min(m1, max_c)
-        m2 <- max(nchar(sapply(head(object@methods), function(x) { rlang::quo_text(x@fc) })))
+        m2 <- max(nchar(sapply(utils::head(object@methods), function(x) { rlang::quo_text(x@fc) })))
         m2 <- min(m2, max_c)
-        for (n in names(head(object@methods, 5))) {
+        for (n in names(utils::head(object@methods, 5))) {
             p1 <- stringr::str_pad(stringr::str_trunc(n, max_c), m1 + 1, "left", " ")
             p2 <- stringr::str_pad(stringr::str_trunc(gsub("\n", ";", rlang::quo_text(object@methods[[n]]@fc)), max_c),
                           m2 + 1, "right", " ")
@@ -36,7 +36,11 @@
 #' 
 #' @param object BenchDesign object to show
 #' 
+#' @return 
+#' Print description of BenchDesign object to console
+#' 
 #' @importFrom stringr str_pad str_trunc
 #' @importFrom rlang quo_text
+#' @importFrom utils head
 #' @rdname BenchDesign-show
 setMethod("show", signature(object = "BenchDesign"), .show.BenchDesign)

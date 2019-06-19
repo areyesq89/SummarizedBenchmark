@@ -40,6 +40,7 @@
 #' @name BDMethodList
 #' @importFrom rlang flatten
 #' @importFrom S4Vectors SimpleList
+#' @importFrom methods .valueClassTest
 #' @export
 #' @author Patrick Kimes
 NULL

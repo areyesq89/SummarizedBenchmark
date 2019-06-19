@@ -51,7 +51,7 @@
 #'
 #' @seealso \code{\link{modifyMethod}}, \code{\link{addMethod}}, \code{\link{dropMethod}}
 #' @md
-#' @importFrom rlang is_quosures quos
+#' @importFrom rlang is_quosures quos :=
 #' @export
 #' @author Patrick Kimes
 expandMethod <- function(bd, label, params, onlyone = NULL,

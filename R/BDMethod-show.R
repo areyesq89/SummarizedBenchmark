@@ -41,6 +41,9 @@
 #' Show BDMethod object
 #' 
 #' @param object BDMethod object to show
+#'
+#' @return 
+#' Print description of BDMethod object to console
 #' 
 #' @importFrom stringr str_pad str_trunc
 #' @importFrom rlang quo_text 

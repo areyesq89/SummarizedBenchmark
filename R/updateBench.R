@@ -57,7 +57,7 @@
 #' @importFrom SummarizedExperiment cbind
 #' @importFrom crayon red yellow green bold
 #' @importFrom stringr str_pad str_trunc
-#' @importFrom S4Vectors elementMetadata
+#' @importFrom S4Vectors elementMetadata metadata params
 #' @export
 #' @author Patrick Kimes
 updateBench <- function(sb, bd = NULL, dryrun = TRUE, version = FALSE, keepAll = TRUE,

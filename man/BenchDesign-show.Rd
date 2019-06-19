@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{BenchDesign object to show}
 }
+\value{
+Print description of BenchDesign object to console
+}
 \description{
 Show BenchDesign object
 }

@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{BDMethod object to show}
 }
+\value{
+Print description of BDMethod object to console
+}
 \description{
 Show BDMethod object
 }

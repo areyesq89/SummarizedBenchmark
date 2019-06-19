@@ -48,6 +48,7 @@
 #' @seealso \code{\link{BDMethod-class}}, \code{\link{BenchDesign}}, \code{\link{BDMethodList}}
 #' @name BDMethod
 #' @importFrom rlang get_expr eval_tidy quos !! !!!
+#' @importFrom methods .valueClassTest
 #' @export
 #' @author Patrick Kimes
 NULL

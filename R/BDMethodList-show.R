@@ -5,9 +5,9 @@
         cat("  none\n")
     } else {
         max_c <- 20
-        m1 <- max(nchar(names(head(object))))
+        m1 <- max(nchar(names(utils::head(object))))
         m1 <- min(m1, max_c)
-        m2 <- max(nchar(sapply(head(object), function(x) { rlang::quo_text(x@fc) })))
+        m2 <- max(nchar(sapply(utils::head(object), function(x) { rlang::quo_text(x@fc) })))
         m2 <- min(m2, max_c)
         for (n in names(object)) {
             p1 <- stringr::str_pad(stringr::str_trunc(n, max_c), m1 + 1, "left", " ")
@@ -22,7 +22,11 @@
 #' 
 #' @param object BDMethodList object to show
 #' 
+#' @return 
+#' Print description of BDMethodList object to console
+#' 
 #' @importFrom stringr str_pad str_trunc
 #' @importFrom rlang quo_text
+#' @importFrom utils head
 #' @rdname BDMethodList-show
 setMethod("show", signature(object = "BDMethodList"), .show.BDMethodList)

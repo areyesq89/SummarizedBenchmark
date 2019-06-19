@@ -44,6 +44,7 @@
 #' 
 #' @seealso \code{\link{BenchDesign-class}}, \code{\link{BDMethod}}, \code{\link{BDMethodList}}
 #' @name BenchDesign
+#' @importFrom methods .valueClassTest
 #' @export
 #' @author Patrick Kimes
 NULL

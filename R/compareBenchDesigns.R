@@ -21,6 +21,7 @@
 #' @importFrom tibble is_tibble
 #' @import dplyr
 #' @importFrom tidyr gather spread
+#' @importFrom methods slot
 #' @author Patrick Kimes
 compareBDMethod <- function(x, y) {
     if(!is(y, "BDMethod") || !is(y, "BDMethod"))

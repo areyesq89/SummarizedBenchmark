@@ -10,6 +10,9 @@
 \arguments{
 \item{object}{BDData object to show}
 }
+\value{
+Print description of BDData object to console
+}
 \description{
 Show BDData object
 }

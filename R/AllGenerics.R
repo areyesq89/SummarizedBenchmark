@@ -46,6 +46,11 @@ setGeneric("compareBenchDesigns",
 #' @return
 #' modified BenchDesign object
 #'
+#' @examples
+#' bd <- BenchDesign()
+#' BDData(bd) <- BDData(data.frame(x1 = runif(5)))
+#' bd
+#'
 #' @seealso \code{\link{BDData}}
 #' @rdname BDData-setter
 #' @author Patrick Kimes
@@ -71,6 +76,11 @@ setGeneric("BDData<-",
 #' @return
 #' modified BenchDesign object
 #'
+#' @examples
+#' bd <- BenchDesign()
+#' BDMethod(bd, "avg") <- BDMethod(x = base::mean)
+#' bd
+#'
 #' @seealso \code{\link{BDMethod}}
 #' @rdname BDMethod-setter
 #' @author Patrick Kimes
@@ -90,6 +100,11 @@ setGeneric("BDMethod<-",
 #' 
 #' @return
 #' modified BenchDesign object
+#'
+#' @examples
+#' bd <- BenchDesign()
+#' BDMethodList(bd) <- BDMethodList(avg = BDMethod(x = base::mean))
+#' bd
 #'
 #' @seealso \code{\link{BDMethod}}, \code{\link{BDMethodList}}
 #' @rdname BDMethodList-setter

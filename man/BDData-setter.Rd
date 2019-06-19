@@ -23,6 +23,12 @@ Adds, removes or replaces \code{\link[=BDData-class]{BDData}} in
 \code{\link[=BenchDesign-class]{BenchDesign}} object.
 Data can be removed by setting the value to \code{NULL}.
 }
+\examples{
+bd <- BenchDesign()
+BDData(bd) <- BDData(data.frame(x1 = runif(5)))
+bd
+
+}
 \seealso{
 \code{\link{BDData}}
 }
