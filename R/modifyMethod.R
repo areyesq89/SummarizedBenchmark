@@ -8,7 +8,7 @@
 #'  
 #' @param bd \code{\link[=BenchDesign-class]{BenchDesign}} object.
 #' @param label Character name of method to be modified.
-#' @param params Named quosure list created using \code{\link[rlang]{quos}} of 
+#' @param params Named quosure list created using \code{\link[rlang:quotation]{quos}} of 
 #'        `parameter = value` paiars to replace in the method definition.
 #'        The `post`, and `meta` parameters of the method can be
 #'        modified using the special keywords, `bd.post`, and `bd.meta`

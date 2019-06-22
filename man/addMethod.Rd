@@ -14,7 +14,7 @@ addMethod(bd, label, func, params = rlang::quos(), post = NULL,
 
 \item{func}{Primary function to be benchmarked.}
 
-\item{params}{Named quosure list created using \code{\link[rlang]{quos}} of
+\item{params}{Named quosure list created using \code{\link[rlang:quotation]{quos}} of
 \code{parameter = value} pairs to be passed to \code{func}.}
 
 \item{post}{Optional post-processing function that takes
@@ -44,7 +44,7 @@ workhorse function for the method (\code{func =}) must be specified
 for the new method.
 
 Parameters for the method must be specified as a
-\code{\link[rlang]{quos}} named list of \code{parameter = value} pairs
+\code{\link[rlang:quotation]{quos}} named list of \code{parameter = value} pairs
 mapping entries in the benchmarking data to the function parameters.
 For users familiar with the \pkg{ggplot2} package, this can be
 viewed similar to the \code{aes =} mapping of data to geometry
@@ -73,7 +73,7 @@ appropriate package and version information can't be directly pulled from
 and \code{"pkg_vers"} values to \code{meta} as a list, or specify a separate function
 that should be used to determine the package name and version. If a separate
 function should be used, it should be passed to \code{meta} as a list entry
-with the name \code{pkg_func} and first quoted using \code{\link[rlang]{quo}}, e.g.
+with the name \code{pkg_func} and first quoted using \code{\link[rlang:quotation]{quo}}, e.g.
 \code{list(pkg_func = quo(p.adjust))}.
 }
 \examples{

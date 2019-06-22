@@ -11,7 +11,7 @@
 #' for the new method. 
 #'
 #' Parameters for the method must be specified as a 
-#' \code{\link[rlang]{quos}} named list of `parameter = value` pairs
+#' \code{\link[rlang:quotation]{quos}} named list of `parameter = value` pairs
 #' mapping entries in the benchmarking data to the function parameters.
 #' For users familiar with the \pkg{ggplot2} package, this can be
 #' viewed similar to the \code{aes =} mapping of data to geometry
@@ -26,7 +26,7 @@
 #' @param bd \code{\link[=BenchDesign-class]{BenchDesign}} object.
 #' @param label Character name for the method.
 #' @param func Primary function to be benchmarked.
-#' @param params Named quosure list created using \code{\link[rlang]{quos}} of
+#' @param params Named quosure list created using \code{\link[rlang:quotation]{quos}} of
 #'        `parameter = value` pairs to be passed to `func`.
 #' @param post Optional post-processing function that takes
 #'        results of `func` as input. Ignored if \code{NULL}.
@@ -60,7 +60,7 @@
 #' and `"pkg_vers"` values to `meta` as a list, or specify a separate function
 #' that should be used to determine the package name and version. If a separate
 #' function should be used, it should be passed to `meta` as a list entry
-#' with the name `pkg_func` and first quoted using \code{\link[rlang]{quo}}, e.g.
+#' with the name `pkg_func` and first quoted using \code{\link[rlang:quotation]{quo}}, e.g.
 #' `list(pkg_func = quo(p.adjust))`.
 #' 
 #' @examples

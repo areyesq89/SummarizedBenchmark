@@ -11,7 +11,7 @@ modifyMethod(bd, label, params, .overwrite = FALSE)
 
 \item{label}{Character name of method to be modified.}
 
-\item{params}{Named quosure list created using \code{\link[rlang]{quos}} of
+\item{params}{Named quosure list created using \code{\link[rlang:quotation]{quos}} of
 \code{parameter = value} paiars to replace in the method definition.
 The \code{post}, and \code{meta} parameters of the method can be
 modified using the special keywords, \code{bd.post}, and \code{bd.meta}
