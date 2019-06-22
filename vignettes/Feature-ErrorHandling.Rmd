@@ -12,7 +12,7 @@ output:
     fig_width: 5
 bibliography: library.bib
 vignette: >
-  %\VignetteIndexEntry{Benchmarking with SummarizedBenchmark}
+  %\VignetteIndexEntry{Feature: Error Handling}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
