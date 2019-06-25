@@ -5,21 +5,19 @@
     if (dtype == "data") {
         if (is(object@data, "data.frame")) {
             cat("  data:\n")
-            if (is(object@data, "tibble")) {
-                print(object@data)
-            } else {
-                print(utils::head(object@data, n = 10))
-                if (nrow(object@data) > 20) 
-                    cat(" ... with", nrow(object@data) - 20, "more rows.\n")
-            }
+            desc <- as.data.frame(object@data)
         } else {
             cat("  data summary:\n")
-            desc <- dplyr::tibble(names = unlist(sapply(object@data, names)),
-                                  class = unlist(sapply(object@data, class)),
-                                  length = unlist(sapply(object@data, length)))
-            print(desc)
+            desc <- data.frame(name = seq_len(length(object@data)),
+                               class = unlist(sapply(object@data, class)),
+                               length = unlist(sapply(object@data, length)))
+            desc$name <- names(object@data)
+            row.names(desc) <- NULL
         }
-    }
+        print(utils::head(desc, n = 10))
+        if (nrow(desc) > 10) 
+            cat(" ... with", nrow(desc) - 10, "more rows.\n")
+     }   
     if (dtype == "md5hash")
         cat("  MD5 hash:", stringr::str_trunc(object@data, 50), "\n")
 }
