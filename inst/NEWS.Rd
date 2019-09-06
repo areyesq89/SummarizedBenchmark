@@ -2,6 +2,14 @@
 \title{SummarizedBenchmark News}
 \encoding{UTF-8}
 
+\section{Changes in version 2.3.6 (2019-09-06)}{
+  \itemize{
+    \item Replace `sc_example_counts` dataset from `scater` with call to
+    `scater::mockSCE`
+    \item Fix error thrown by `show.BDData` when dataset is a list
+  }
+}
+
 \section{Changes in version 2.3.5 (2019-06-22)}{
   \itemize{
     \item Fix index title for "Feature: Error Handling" vignette
