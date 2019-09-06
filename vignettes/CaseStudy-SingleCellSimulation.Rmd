@@ -173,11 +173,11 @@ ggplot(sbmets, aes(x = label, y = value,
 
 # New Data Sets
 
-An advantage of the _SummarizedBenchmark_ framework is that rerunning the comparisons with a new data set is as simple as calling `buildBench` with the same BenchDesign object paired with new `data =` input. To illustrate this, we run the same simulators again, but with simulation parameters estimated using the example single-cell count data included with the `r BiocStyle::Biocpkg("scater")` package.
+An advantage of the _SummarizedBenchmark_ framework is that rerunning the comparisons with a new data set is as simple as calling `buildBench` with the same BenchDesign object paired with new `data =` input. To illustrate this, we run the same simulators again, but with simulation parameters estimated using an example single-cell count data generated using the `mockSCE` from the `r BiocStyle::Biocpkg("scater")` package.
 
 ```{r analyze-new-data}
-data(sc_example_counts, package = "scater")
-scec <- SingleCellExperiment(assays = list(counts = sc_example_counts))
+library(scater)
+scec <- mockSCE()
 
 scater_dat <- list(in_data = scec,
                    in_verbose = FALSE,
