@@ -2,6 +2,13 @@
 \title{SummarizedBenchmark News}
 \encoding{UTF-8}
 
+\section{Changes in version 2.3.7 (2019-09-18)}{
+  \itemize{
+    \item Bug fix: update call on `tidyr::gather` in `tidyUpMetrics`
+    to work after bump in `tidyr` version to 1.0.0 on CRAN
+  }
+}
+
 \section{Changes in version 2.3.6 (2019-09-06)}{
   \itemize{
     \item Replace `sc_example_counts` dataset from `scater` with call to
