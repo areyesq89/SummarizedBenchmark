@@ -302,27 +302,30 @@ cleanPerformanceMetrics <- function( object ){
 #'
 #' @return A tidy \code{data.frame}
 #' @importFrom tidyr gather
+#' @importFrom dplyr as_tibble left_join
 #' @export
 #'
 tidyUpMetrics <- function( object ){
   stopifnot(is( object, "SummarizedBenchmark" ) )
   validObject( object )
   res <- colData( object )
+
   isPerformanceMetric <- elementMetadata( res )$colType == "performanceMetric" &
     !is.na( elementMetadata( colData( object ) )$colType )
   if( !sum(isPerformanceMetric) > 0 ){
     stop("No performance metrics were found. Check ?estimatePerformanceMetrics for further information")
   }
   valueCols <- colnames(res)[isPerformanceMetric]
+
   tidyRes <- data.frame(res, label = rownames(res), check.names = TRUE)
-  tidyRes <- gather( tidyRes, keys=valueCols )
+  tidyRes <- tidyr::gather(tidyRes, key, value, valueCols)
+  
   mData <- as.data.frame( elementMetadata(res)[isPerformanceMetric,] )
-  rownames(mData) <- valueCols
   mData[["colType"]] <- NULL
-  for( i in colnames(mData) ){
-    varAdd <- mData[[i]]
-    names(varAdd) <- rownames(mData)
-    tidyRes[[i]] <- varAdd[tidyRes$key]
-  }
+  rownames(mData) <- valueCols
+  mData <- dplyr::as_tibble(mData, rownames = "key")
+
+  tidyRes <- dplyr::left_join(tidyRes, mData, by = "key")
+  tidyRes$key <- NULL
   tidyRes
 }
