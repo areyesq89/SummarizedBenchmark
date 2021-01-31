@@ -77,7 +77,7 @@
 
     metres <- dplyr::mutate_if(metres, is.logical, `!`)
     metres <- dplyr::mutate(metres, rerun = !rerun)
-    metres <- dplyr::mutate_if(metres, is.logical, dplyr::funs(ifelse(., "Y", "N")))
+    metres <- dplyr::mutate_if(metres, is.logical, ~ ifelse(., "Y", "N"))
     if (!keepAll)
         metres$rerun[metres$overlap == "xOnly"] <- "Drop"
     else
