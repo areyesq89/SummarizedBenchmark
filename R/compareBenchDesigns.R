@@ -191,8 +191,8 @@ NULL
     xym <- lapply(mxy, function(l) {
         xna <- dplyr::select(dplyr::filter(xj, label == l), starts_with("meta."))
         yna <- dplyr::select(dplyr::filter(yj, label == l), starts_with("meta."))
-        isTRUE(dplyr::all_equal(dplyr::select_if(xna, funs(!any(is.na(.)))),
-                                dplyr::select_if(yna, funs(!any(is.na(.))))))
+        isTRUE(dplyr::all_equal(dplyr::select_if(xna, ~ !any(is.na(.))),
+                                dplyr::select_if(yna, ~ !any(is.na(.)))))
     })
     names(xym) <- mxy
 
