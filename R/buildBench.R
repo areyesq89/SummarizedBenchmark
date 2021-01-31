@@ -313,7 +313,7 @@ buildBench <- function(bd, data = NULL, truthCols = NULL, ftCols = NULL, sortIDs
     z <- dplyr::tibble(.method = names(z),
                        .id = lapply(z, names),
                        .val = z)
-    z <- tidyr::unnest(z)
+    z <- tidyr::unnest(z, cols = c(.id, .val))
     z <- tidyr::spread(z, .method, .val)
     z <- data.frame(dplyr::select(z, -.id),
                     row.names = z$.id, check.names=FALSE)
