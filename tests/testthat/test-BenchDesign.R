@@ -163,7 +163,8 @@ test_that("methods can be expanded", {
     expect_equal(names(bd_spec@methods), c("bonf_alt1", "bonf_alt2"))
     expect_equal(bd_spec@methods$bonf_alt1@post, list(default = p.adjust))
     expect_equal(bd_spec@methods$bonf_alt1@meta, list(new_purpose = "test special values"))
-    expect_equal(bd_spec@methods$bonf_alt2@post, list(default = function(x) { x * 2 }))
+    expect_equal(bd_spec@methods$bonf_alt2@post, list(default = function(x) { x * 2 }),
+                 ignore_function_env = TRUE)
     expect_equal(bd_spec@methods$bonf_alt2@meta, list(new_purpose = "test special values again"))
     ## check defined methods are valid and don't break buildBench call
     expect_is(buildBench(bd_spec), "SummarizedBenchmark")
