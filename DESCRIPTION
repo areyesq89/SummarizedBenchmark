@@ -1,7 +1,7 @@
 Package: SummarizedBenchmark
 Type: Package
 Title: Classes and methods for performing benchmark comparisons
-Version: 2.9.1
+Version: 2.10.0
 Authors@R: c(person("Alejandro", "Reyes", role = "aut",
                     email = "alejandro.reyes.ds@gmail.com",
                     comment = c(ORCID = "0000-0001-8717-6612")),
