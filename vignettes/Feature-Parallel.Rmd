@@ -148,7 +148,7 @@ Then, using a call to `bplapply()` function, we can execute the *BenchDesign* ob
 
 ```{r}
 sbL <- bplapply(datasetList, function(x) { buildBench(bd, data = x) },
-                BPPARAM = MulticoreParam(3))
+                BPPARAM = BiocParallel::MulticoreParam(3))
 sbL
 ```
 
